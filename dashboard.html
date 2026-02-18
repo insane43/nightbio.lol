@@ -41,7 +41,7 @@
   <div class="bg-grid"></div>
 
   <header class="editor-header">
-    <a href="/" class="editor-logo">
+    <a href="index.html" class="editor-logo">
       <span class="logo-text">nightbio</span>
     </a>
     <div class="editor-url-strip" id="bioUrlStrip" style="display: none;">
@@ -110,8 +110,14 @@
               <span class="char-count"><span id="bioCharCount">0</span>/500</span>
             </div>
             <div class="form-group">
-              <label for="songURL">Featured song (optional)</label>
-              <input type="text" id="songURL" placeholder="Spotify, SoundCloud or any music URL" maxlength="500">
+              <label>Profile song (optional)</label>
+              <p class="panel-desc" style="margin-bottom: 0.5rem;">Upload an MP3 to play on your profile when someone visits. Max 10MB.</p>
+              <input type="file" id="songFileInput" accept="audio/mpeg,audio/mp3,.mp3" style="display: none;">
+              <div class="song-upload-row">
+                <button type="button" class="btn btn-ghost" id="songUploadBtn">Upload MP3</button>
+                <span id="songFileName" class="song-filename"></span>
+                <button type="button" class="btn btn-ghost song-remove-btn" id="songRemoveBtn" style="display: none;">Remove</button>
+              </div>
             </div>
           </div>
         </section>
@@ -298,22 +304,36 @@
   <script src="badge-icons.js"></script>
   <script src="link-platforms.js"></script>
   <script src="bio.js"></script>
+  <script src="maintenance.js"></script>
   <script src="dashboard-editor.js"></script>
   <script>
     (function() {
       initFirebase();
       var auth = getAuth();
       document.getElementById('logoutBtn').addEventListener('click', function() {
-        auth.signOut().then(function() { window.location.href = '/'; });
+        auth.signOut().then(function() { window.location.href = 'index.html'; });
       });
       auth.onAuthStateChanged(function(user) {
-        if (user && user.emailVerified) {
-          window.dashboardEditor && window.dashboardEditor.init(user.uid);
-        } else if (user && !user.emailVerified) {
+        if (!user) {
+          window.location.href = 'login.html';
+          return;
+        }
+        if (!user.emailVerified) {
           auth.signOut();
-          window.location.href = '/login?verified=0';
+          window.location.href = 'login.html?verified=0';
+          return;
+        }
+        if (typeof isUserBanned === 'function') {
+          isUserBanned(user.uid).then(function(banned) {
+            if (banned) {
+              auth.signOut();
+              window.location.href = 'index.html?banned=1';
+              return;
+            }
+            window.dashboardEditor && window.dashboardEditor.init(user.uid);
+          });
         } else {
-          window.location.href = '/login';
+          window.dashboardEditor && window.dashboardEditor.init(user.uid);
         }
       });
     })();

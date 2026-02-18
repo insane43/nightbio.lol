@@ -8,6 +8,15 @@ function getDb() {
   return window.firebaseDb || null;
 }
 
+// Check if user is banned (only readable by that user when signed in)
+function isUserBanned(uid) {
+  var db = getDb();
+  if (!db || !uid) return Promise.resolve(false);
+  return db.ref('bannedUids/' + uid).once('value').then(function(snap) {
+    return snap.val() === true;
+  });
+}
+
 // Check if username is already taken (Realtime Database)
 function isUsernameTaken(username) {
   const db = getDb();

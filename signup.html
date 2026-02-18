@@ -45,7 +45,7 @@
 
   <main class="page">
     <div class="brand">
-      <a href="/">
+      <a href="index.html">
         <div class="logo-text">nightbio</div>
         <div class="tagline">Your link in one place</div>
       </a>
@@ -90,7 +90,7 @@
       </form>
 
       <div class="card-footer">
-        Already have an account? <a href="/login">Log in</a>
+        Already have an account? <a href="login.html">Log in</a>
       </div>
     </div>
   </main>
@@ -100,6 +100,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
+  <script src="maintenance.js"></script>
   <script src="admin-entry.js"></script>
   <script>
     (function() {
@@ -185,7 +186,7 @@
             var user = result.user;
             return ensureOAuthUserProfile(user).then(function() {
               showMsg('Account created. Redirecting…', 'success');
-              setTimeout(function() { window.location.href = '/dashboard'; }, 600);
+              setTimeout(function() { window.location.href = 'dashboard.html'; }, 600);
             });
           }).catch(function(err) {
             var code = err.code || '';

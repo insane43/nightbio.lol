@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting — nightbio</title>
+  <script>
+    (function() {
+      var path = window.location.pathname || '/';
+      var parts = path.replace(/^\/+|\/+$/g, '').split('/');
+      var segment = parts[parts.length - 1];
+      var known = ['index', 'login', 'signup', 'dashboard', 'admin', 'bio', ''];
+      if (segment && known.indexOf(segment) === -1 && segment.indexOf('.') === -1 && segment.length >= 2) {
+        var base = path.substring(0, path.lastIndexOf('/') + 1);
+        window.location.replace(base + 'bio.html?u=' + encodeURIComponent(segment));
+        return;
+      }
+      window.location.replace((path.substring(0, path.lastIndexOf('/') + 1) || '/') + 'index.html');
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirecting…</p>
+</body>
+</html>

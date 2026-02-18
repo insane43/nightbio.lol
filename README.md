@@ -39,6 +39,12 @@ Bio-link site (similar to guns.lol / fakecrime.bio) with a dark purple & black t
 
 7. **Admin dashboard** — Use the **Admin dashboard** button (top left on the home page). On click, your IP is checked; if it matches **172.56.25.44**, you are signed in with the admin account and redirected to **/admin**. Create the admin user in Firebase Auth: email **admin@nightbio.lol**, password **9916202374Aa**, then add that user’s UID to **adminUids/{uid}: true** in the Realtime Database so badge writes are allowed. If the IP is not allowed, a message is shown and no sign-in occurs.
 
+8. **Create `adminUids` in Realtime Database (required for admin panel)**  
+   You must have an **adminUids** node. If you only see `users` and `usernames` in the Data tab:
+   - In **Realtime Database** → **Data**, at the root click **+** (Add child) → Name: **adminUids** → confirm.
+   - Click **+** next to **adminUids** → Name: your admin account's **UID** (from **Authentication** → **Users** → **admin@nightbio.lol** → copy **User UID**).
+   - Value: **true** (boolean). Save. Then run: `firebase deploy --only database`.
+
 ## Run locally
 
 Open the project folder and serve the files (e.g. with Live Server, or any static server). Go to `/` or `index.html`. Sign up → check email for verification link → verify → log in. **Note:** Clean URLs (`/login`, `/dashboard`, etc.) work when deployed with Firebase Hosting; locally you may need to open `login.html` etc. directly unless your server has the same rewrites.

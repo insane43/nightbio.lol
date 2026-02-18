@@ -180,3 +180,29 @@ function uploadBioImage(uid, file, field) {
     return ref.getDownloadURL();
   });
 }
+
+// Upload MP3 to Storage and return download URL. Used for profile song.
+// onProgress(percent) is optional; called with 0-100.
+function uploadBioSong(uid, file, onProgress) {
+  var storage = getStorage();
+  if (!storage) return Promise.reject(new Error('Storage not loaded. Refresh the page.'));
+  if (!uid || !file) return Promise.reject(new Error('Invalid upload'));
+  var path = 'bios/' + uid + '/song_' + Date.now() + '.mp3';
+  var ref = storage.ref(path);
+  var contentType = (file.type && file.type.indexOf('audio') === 0) ? file.type : 'audio/mpeg';
+  var task = ref.put(file, { contentType: contentType });
+  return new Promise(function(resolve, reject) {
+    task.on('state_changed',
+      function(snapshot) {
+        if (onProgress && snapshot.totalBytes > 0) {
+          var pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          onProgress(pct);
+        }
+      },
+      reject,
+      function() {
+        ref.getDownloadURL().then(resolve).catch(reject);
+      }
+    );
+  });
+}

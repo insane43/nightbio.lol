@@ -8,7 +8,19 @@
       ".read": "auth != null",
       ".write": false
     },
+    "siteConfig": {
+      ".read": true,
+      ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true"
+    },
+    "bannedUids": {
+      ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true"
+      }
+    },
     "users": {
+      ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
       "$uid": {
         ".read": true,
         ".write": "auth != null && (auth.uid == $uid || root.child('adminUids').child(auth.uid).val() === true)",

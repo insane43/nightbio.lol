@@ -38,12 +38,12 @@
     <div id="bio404" class="bio-404" style="display: none;">
       <h1>Bio not found</h1>
       <p>This user doesn't exist or hasn't set up their bio yet.</p>
-      <a href="/">Back to nightbio</a>
+      <a href="index.html">Back to nightbio</a>
     </div>
   </main>
 
   <footer class="bio-footer">
-    <a href="/">nightbio.lol</a>
+    <a href="index.html">nightbio.lol</a>
   </footer>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -51,6 +51,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
+  <script src="maintenance.js"></script>
   <script src="badge-icons.js"></script>
   <script src="bio.js"></script>
   <script>
@@ -215,43 +216,17 @@
           songWrap.style.display = 'block';
           songWrap.innerHTML = '';
           var url = data.songURL.trim();
-          if (url.indexOf('spotify.com') !== -1) {
-            var parts = url.split('/').filter(Boolean);
-            var type = 'track';
-            var id = '';
-            for (var i = 0; i < parts.length; i++) {
-              if (parts[i] === 'track' || parts[i] === 'album' || parts[i] === 'playlist') {
-                type = parts[i];
-                if (parts[i + 1]) id = parts[i + 1].split('?')[0];
-                break;
-              }
-            }
-            if (!id && parts.length) id = parts[parts.length - 1].split('?')[0];
-            var iframe = document.createElement('iframe');
-            iframe.src = 'https://open.spotify.com/embed/' + type + '/' + id;
-            iframe.width = '100%';
-            iframe.height = '152';
-            iframe.style.maxWidth = '400px';
-            songWrap.appendChild(iframe);
-          } else if (url.indexOf('soundcloud.com') !== -1) {
-            var sc = document.createElement('iframe');
-            sc.width = '100%';
-            sc.height = '166';
-            sc.scrolling = 'no';
-            sc.frameBorder = 'no';
-            sc.allow = 'autoplay';
-            sc.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&color=%237c6bb8';
-            sc.style.maxWidth = '400px';
-            songWrap.appendChild(sc);
-          } else {
-            var link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            link.rel = 'noopener';
-            link.className = 'bio-link-btn';
-            link.textContent = 'Listen';
-            songWrap.appendChild(link);
-          }
+          var audio = document.createElement('audio');
+          audio.controls = true;
+          audio.preload = 'metadata';
+          audio.style.width = '100%';
+          audio.style.maxWidth = '400px';
+          audio.style.height = '40px';
+          var src = document.createElement('source');
+          src.src = url;
+          src.type = 'audio/mpeg';
+          audio.appendChild(src);
+          songWrap.appendChild(audio);
         } else {
           songWrap.style.display = 'none';
         }

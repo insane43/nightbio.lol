@@ -231,17 +231,24 @@
     var displayName = document.getElementById('displayName');
     var bioText = document.getElementById('bioText');
     var bioCharCount = document.getElementById('bioCharCount');
-    var songURL = document.getElementById('songURL');
+    var songFileInput = document.getElementById('songFileInput');
+    var songUploadBtn = document.getElementById('songUploadBtn');
+    var songFileName = document.getElementById('songFileName');
+    var songRemoveBtn = document.getElementById('songRemoveBtn');
     var accentColor = document.getElementById('accentColor');
     var accentColorHex = document.getElementById('accentColorHex');
     var linkList = document.getElementById('linkList');
 
     function setBioUrl(username) {
       if (username) {
-        var url = BASE_URL + '/' + encodeURIComponent(username);
-        if (bioUrlInput) bioUrlInput.value = url;
+        var base = (typeof window !== 'undefined' && window.location && window.location.origin)
+          ? (window.location.origin + (window.location.pathname || '/').replace(/\/[^/]*$/, '/'))
+          : BASE_URL + '/';
+        var fullUrl = base + 'bio.html?u=' + encodeURIComponent(username);
+        var viewHref = 'bio.html?u=' + encodeURIComponent(username);
+        if (bioUrlInput) bioUrlInput.value = fullUrl;
         if (bioUrlStrip) bioUrlStrip.style.display = 'flex';
-        if (viewBioBtn) viewBioBtn.href = url;
+        if (viewBioBtn) viewBioBtn.href = viewHref;
       }
     }
 
@@ -314,7 +321,8 @@
         bioText.value = d.bio || '';
         if (bioCharCount) bioCharCount.textContent = (d.bio || '').length;
       }
-      if (songURL) songURL.value = d.songURL || '';
+      if (songFileName) songFileName.textContent = (d.songURL && d.songURL.trim()) ? 'Song uploaded' : '';
+      if (songRemoveBtn) songRemoveBtn.style.display = (d.songURL && d.songURL.trim()) ? '' : 'none';
       if (accentColor) accentColor.value = d.accentColor || '#7c6bb8';
       if (accentColorHex) accentColorHex.value = d.accentColor || '#7c6bb8';
 
@@ -420,6 +428,62 @@
       });
     }
 
+    if (songUploadBtn && songFileInput) {
+      songUploadBtn.addEventListener('click', function() { songFileInput.click(); });
+    }
+    if (songFileInput) {
+      songFileInput.addEventListener('change', function() {
+        var file = songFileInput.files && songFileInput.files[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+          showMsg(msgEl, 'File too large. Max 10MB.', 'error');
+          return;
+        }
+        var btn = songUploadBtn;
+        if (btn) btn.disabled = true;
+        var timedOut = false;
+        var hasProgress = false;
+        var timeout = setTimeout(function() {
+          if (hasProgress) return;
+          timedOut = true;
+          showMsg(msgEl, 'Upload timed out. If your file is large, try a smaller MP3. Or check if firebasestorage.googleapis.com is blocked.', 'error');
+          if (btn) btn.disabled = false;
+        }, 90000);
+        function onProgress(pct) {
+          hasProgress = true;
+          showMsg(msgEl, 'Uploading song… ' + pct + '%', 'info');
+        }
+        uploadBioSong(uid, file, onProgress).then(function(url) {
+          clearTimeout(timeout);
+          if (timedOut) return;
+          window._editorCurrentData.songURL = url;
+          if (songFileName) songFileName.textContent = file.name || 'Song uploaded';
+          if (songRemoveBtn) songRemoveBtn.style.display = '';
+          clearMsg(msgEl);
+          showMsg(msgEl, 'Song uploaded. Save your profile to apply.', 'success');
+          updatePreview();
+        }).catch(function(err) {
+          clearTimeout(timeout);
+          if (timedOut) return;
+          var msg = (err && err.message) ? err.message : 'Upload failed. Use MP3, max 10MB. Deploy storage rules: firebase deploy --only storage';
+          showMsg(msgEl, msg, 'error');
+        }).then(function() {
+          if (!timedOut && btn) btn.disabled = false;
+        });
+        showMsg(msgEl, 'Uploading song… 0%', 'info');
+        songFileInput.value = '';
+      });
+    }
+    if (songRemoveBtn) {
+      songRemoveBtn.addEventListener('click', function() {
+        window._editorCurrentData.songURL = '';
+        if (songFileName) songFileName.textContent = '';
+        songRemoveBtn.style.display = 'none';
+        if (songFileInput) songFileInput.value = '';
+        updatePreview();
+      });
+    }
+
     if (displayName) {
       displayName.addEventListener('input', function() { updatePreview(); });
       displayName.addEventListener('change', function() { updatePreview(); });
@@ -470,7 +534,7 @@
         var data = {
           displayName: displayName ? displayName.value.trim() : '',
           bio: bioText ? bioText.value.trim() : '',
-          songURL: songURL ? songURL.value.trim() : '',
+          songURL: (window._editorCurrentData && window._editorCurrentData.songURL) ? window._editorCurrentData.songURL.trim() : '',
           avatarURL: window._editorCurrentData.avatarURL || '',
           bannerURL: window._editorCurrentData.bannerURL || '',
           accentColor: accentColor ? accentColor.value : '#7c6bb8',
