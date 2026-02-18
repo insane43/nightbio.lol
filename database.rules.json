@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "usernames": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "adminUids": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    "users": {
+      "$uid": {
+        ".read": true,
+        ".write": "auth != null && (auth.uid == $uid || root.child('adminUids').child(auth.uid).val() === true)",
+        "stats": {
+          "views": {
+            ".read": "auth != null && auth.uid == $uid",
+            ".write": "newData.isNumber() && newData.val() >= 0"
+          }
+        }
+      }
+    }
+  }
+}

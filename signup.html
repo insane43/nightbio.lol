@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create account — nightbio.lol</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="admin-entry-wrap">
+    <button type="button" class="admin-entry-btn" id="adminDashboardBtn">Admin dashboard</button>
+  </div>
+  <div class="translate-wrapper" aria-label="Translate page">
+    <span class="translate-label">Language</span>
+    <select class="lang-select" id="customLangSelect" aria-label="Select language">
+      <option value="">Select language</option>
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+      <option value="pt">Portuguese</option>
+      <option value="ru">Russian</option>
+      <option value="ja">Japanese</option>
+      <option value="ko">Korean</option>
+      <option value="zh-CN">Chinese (Simplified)</option>
+      <option value="zh-TW">Chinese (Traditional)</option>
+      <option value="ar">Arabic</option>
+      <option value="hi">Hindi</option>
+      <option value="nl">Dutch</option>
+      <option value="pl">Polish</option>
+      <option value="tr">Turkish</option>
+      <option value="vi">Vietnamese</option>
+      <option value="th">Thai</option>
+      <option value="id">Indonesian</option>
+      <option value="sv">Swedish</option>
+      <option value="no">Norwegian</option>
+      <option value="da">Danish</option>
+      <option value="fi">Finnish</option>
+    </select>
+    <div id="google_translate_element"></div>
+  </div>
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <main class="page">
+    <div class="brand">
+      <a href="/">
+        <div class="logo-text">nightbio</div>
+        <div class="tagline">Your link in one place</div>
+      </a>
+    </div>
+
+    <div class="card">
+      <h1>Create account</h1>
+      <p class="subtitle">Join nightbio and get your bio link.</p>
+
+      <div id="msg" class="message msg-placeholder empty" role="alert" aria-live="polite"></div>
+
+      <form id="signupForm" novalidate>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" autocomplete="username" placeholder="e.g. nightbio" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="nightbio@gmail.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" autocomplete="new-password" placeholder="Min. 6 characters" required minlength="6">
+            <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password" title="Show password">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="password-strength" id="passwordStrength" aria-live="polite">
+            <div class="password-strength-bar"><div class="password-strength-fill" id="passwordStrengthFill"></div></div>
+            <span class="password-strength-text" id="passwordStrengthText"></span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          Create account
+        </button>
+        <div class="auth-divider">or</div>
+        <button type="button" class="btn-google" id="googleSignInBtn" aria-label="Continue with Google">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+      </form>
+
+      <div class="card-footer">
+        Already have an account? <a href="/login">Log in</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin-entry.js"></script>
+  <script>
+    (function() {
+      initFirebase();
+      const form = document.getElementById('signupForm');
+      const msgEl = document.getElementById('msg');
+      const submitBtn = document.getElementById('submitBtn');
+      const usernameInput = document.getElementById('username');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      var togglePasswordBtn = document.getElementById('togglePassword');
+      var strengthFill = document.getElementById('passwordStrengthFill');
+      var strengthText = document.getElementById('passwordStrengthText');
+
+      var eyeOpenSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+      var eyeClosedSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+      function getPasswordStrength(pwd) {
+        if (!pwd) return { level: 0, label: '' };
+        var score = 0;
+        if (pwd.length >= 6) score++;
+        if (pwd.length >= 10) score++;
+        if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+        if (/\d/.test(pwd)) score++;
+        if (/[^a-zA-Z0-9]/.test(pwd)) score++;
+        var level = score <= 1 ? 1 : score <= 2 ? 2 : score <= 3 ? 3 : 4;
+        var labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+        return { level: level, label: labels[level] };
+      }
+
+      function updateStrength() {
+        var pwd = passwordInput.value;
+        var s = getPasswordStrength(pwd);
+        strengthFill.className = 'password-strength-fill ' + (s.label ? s.label.toLowerCase() : '');
+        strengthText.textContent = s.label ? s.label : '';
+      }
+
+      passwordInput.addEventListener('input', updateStrength);
+      passwordInput.addEventListener('focus', updateStrength);
+
+      if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', function() {
+          var type = passwordInput.getAttribute('type');
+          var isPassword = type === 'password';
+          passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+          togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+          togglePasswordBtn.setAttribute('title', isPassword ? 'Hide password' : 'Show password');
+          togglePasswordBtn.innerHTML = isPassword ? eyeClosedSvg : eyeOpenSvg;
+        });
+      }
+      function showMsg(text, type) {
+        msgEl.textContent = text;
+        msgEl.className = 'message ' + (type === 'error' ? 'error' : type === 'success' ? 'success' : 'info');
+        msgEl.classList.remove('empty');
+      }
+
+      function clearMsg() {
+        msgEl.textContent = '';
+        msgEl.className = 'message msg-placeholder empty';
+      }
+
+      function setLoading(loading) {
+        submitBtn.disabled = loading;
+        submitBtn.innerHTML = loading ? '<span class="spinner"></span> Creating account…' : 'Create account';
+      }
+
+      function setInputError(input, hasError) {
+        input.classList.toggle('error', !!hasError);
+      }
+
+      var googleSignInBtn = document.getElementById('googleSignInBtn');
+      if (googleSignInBtn) {
+        googleSignInBtn.addEventListener('click', function() {
+          clearMsg();
+          var auth = getAuth();
+          if (!auth) {
+            showMsg('Something went wrong. Please refresh and try again.', 'error');
+            return;
+          }
+          googleSignInBtn.disabled = true;
+          googleSignInBtn.textContent = 'Signing up…';
+          auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(result) {
+            var user = result.user;
+            return ensureOAuthUserProfile(user).then(function() {
+              showMsg('Account created. Redirecting…', 'success');
+              setTimeout(function() { window.location.href = '/dashboard'; }, 600);
+            });
+          }).catch(function(err) {
+            var code = err.code || '';
+            if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+              showMsg('Sign-up cancelled.', 'error');
+            } else if (code === 'auth/popup-blocked') {
+              showMsg('Popup was blocked. Allow popups and try again.', 'error');
+            } else {
+              showMsg(err.message || 'Google sign-up failed. Try again.', 'error');
+            }
+            googleSignInBtn.disabled = false;
+            googleSignInBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continue with Google';
+          });
+        });
+      }
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        clearMsg();
+        setInputError(usernameInput, false);
+        setInputError(emailInput, false);
+        setInputError(passwordInput, false);
+        var username = usernameInput.value.trim();
+        var email = emailInput.value.trim();
+        var password = passwordInput.value;
+
+        if (!username) {
+          setInputError(usernameInput, true);
+          showMsg('Please enter a username.', 'error');
+          return;
+        }
+        if (!isValidUsername(username)) {
+          setInputError(usernameInput, true);
+          showMsg('Username: 3–20 characters, letters, numbers and underscores only.', 'error');
+          return;
+        }
+        if (!email) {
+          setInputError(emailInput, true);
+          showMsg('Please enter your email.', 'error');
+          return;
+        }
+        if (password.length < 6) {
+          setInputError(passwordInput, true);
+          showMsg('Password must be at least 6 characters.', 'error');
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          var taken = await isUsernameTaken(username);
+          if (taken) {
+            setInputError(usernameInput, true);
+            showMsg('This username is already taken. Choose another.', 'error');
+            setLoading(false);
+            return;
+          }
+
+          var auth = getAuth();
+          if (!auth) {
+            showMsg('Something went wrong. Please refresh and try again.', 'error');
+            setLoading(false);
+            return;
+          }
+
+          var cred = await auth.createUserWithEmailAndPassword(email, password);
+          var user = cred.user;
+
+          await user.sendEmailVerification();
+          await saveUserProfile(user.uid, username, email);
+
+          showMsg('Account created. We sent a verification link to ' + email + '. Check your inbox (and spam) and click the link before logging in.', 'success');
+          form.reset();
+        } catch (err) {
+          var code = err.code || '';
+          if (code === 'auth/email-already-in-use') {
+            setInputError(emailInput, true);
+            showMsg('This email is already registered. Try logging in.', 'error');
+          } else if (code === 'auth/weak-password') {
+            setInputError(passwordInput, true);
+            showMsg('Password is too weak. Use at least 6 characters.', 'error');
+          } else if (code === 'auth/invalid-email') {
+            setInputError(emailInput, true);
+            showMsg('Please enter a valid email address.', 'error');
+          } else {
+            showMsg(err.message || 'Sign up failed. Please try again.', 'error');
+          }
+        }
+
+        setLoading(false);
+      });
+    })();
+  </script>
+  <script src="js/translate.js"></script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit your bio — nightbio.lol</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-page">
+  <div class="translate-wrapper" aria-label="Translate page">
+    <span class="translate-label">Language</span>
+    <select class="lang-select" id="customLangSelect" aria-label="Select language">
+      <option value="">Select language</option>
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+      <option value="pt">Portuguese</option>
+      <option value="ru">Russian</option>
+      <option value="ja">Japanese</option>
+      <option value="ko">Korean</option>
+      <option value="zh-CN">Chinese (Simplified)</option>
+      <option value="zh-TW">Chinese (Traditional)</option>
+      <option value="ar">Arabic</option>
+      <option value="hi">Hindi</option>
+      <option value="nl">Dutch</option>
+      <option value="pl">Polish</option>
+      <option value="tr">Turkish</option>
+      <option value="vi">Vietnamese</option>
+      <option value="th">Thai</option>
+      <option value="id">Indonesian</option>
+      <option value="sv">Swedish</option>
+      <option value="no">Norwegian</option>
+      <option value="da">Danish</option>
+      <option value="fi">Finnish</option>
+    </select>
+    <div id="google_translate_element"></div>
+  </div>
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <header class="editor-header">
+    <a href="/" class="editor-logo">
+      <span class="logo-text">nightbio</span>
+    </a>
+    <div class="editor-url-strip" id="bioUrlStrip" style="display: none;">
+      <span class="editor-url-label">Your link</span>
+      <input type="text" class="editor-url-input" id="bioUrlInput" readonly value="" aria-label="Your bio URL">
+      <button type="button" class="editor-copy-btn" id="copyBioUrlBtn">Copy</button>
+      <a href="#" class="editor-view-btn" id="viewBioBtn" target="_blank" rel="noopener">View profile</a>
+    </div>
+    <div class="editor-actions">
+      <span id="editorMessage" class="editor-msg empty"></span>
+      <button type="button" class="btn btn-primary editor-save-btn" id="saveBioBtn">Save changes</button>
+      <button type="button" class="btn btn-ghost editor-logout-btn" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <main class="editor-main">
+    <div class="editor-side">
+      <nav class="editor-tabs" role="tablist">
+        <button type="button" class="editor-tab active" role="tab" id="tabProfile" aria-selected="true" data-tab="profile">Profile</button>
+        <button type="button" class="editor-tab" role="tab" id="tabLinks" aria-selected="false" data-tab="links">Links</button>
+        <button type="button" class="editor-tab" role="tab" id="tabAppearance" aria-selected="false" data-tab="appearance">Appearance</button>
+        <button type="button" class="editor-tab" role="tab" id="tabAnalytics" aria-selected="false" data-tab="analytics">Analytics</button>
+        <button type="button" class="editor-tab" role="tab" id="tabSeo" aria-selected="false" data-tab="seo">SEO</button>
+        <button type="button" class="editor-tab" role="tab" id="tabBadges" aria-selected="false" data-tab="badges">Badges</button>
+      </nav>
+
+      <div class="editor-panels">
+        <!-- Profile tab -->
+        <section class="editor-panel active" id="panelProfile" role="tabpanel" aria-labelledby="tabProfile">
+          <div class="panel-card">
+            <h2 class="panel-title">Profile picture &amp; banner</h2>
+            <div class="media-upload-grid">
+              <div class="media-upload-box avatar-upload-box">
+                <div class="media-preview-wrap">
+                  <img id="avatarPreview" class="media-preview avatar-preview-img" src="" alt="" style="display: none;">
+                  <div class="media-placeholder" id="avatarPlaceholder">
+                    <span class="media-placeholder-icon">👤</span>
+                    <span>Profile photo</span>
+                  </div>
+                </div>
+                <input type="file" id="avatarFile" accept="image/*" class="media-file-input">
+                <button type="button" class="btn btn-ghost media-upload-trigger" id="avatarUploadBtn">Change photo</button>
+              </div>
+              <div class="media-upload-box banner-upload-box">
+                <div class="media-preview-wrap banner-preview-wrap">
+                  <img id="bannerPreview" class="media-preview banner-preview-img" src="" alt="" style="display: none;">
+                  <div class="media-placeholder banner-placeholder" id="bannerPlaceholder">
+                    <span class="media-placeholder-icon">🖼</span>
+                    <span>Cover image</span>
+                  </div>
+                </div>
+                <input type="file" id="bannerFile" accept="image/*" class="media-file-input">
+                <button type="button" class="btn btn-ghost media-upload-trigger" id="bannerUploadBtn">Change cover</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Display info</h2>
+            <div class="form-group">
+              <label for="displayName">Display name</label>
+              <input type="text" id="displayName" placeholder="How you want to be known" maxlength="80">
+            </div>
+            <div class="form-group">
+              <label for="bioText">Bio</label>
+              <textarea id="bioText" placeholder="Short bio — introduce yourself (max 500 characters)" maxlength="500" rows="4"></textarea>
+              <span class="char-count"><span id="bioCharCount">0</span>/500</span>
+            </div>
+            <div class="form-group">
+              <label for="songURL">Featured song (optional)</label>
+              <input type="text" id="songURL" placeholder="Spotify, SoundCloud or any music URL" maxlength="500">
+            </div>
+          </div>
+        </section>
+
+        <!-- Links tab -->
+        <section class="editor-panel" id="panelLinks" role="tabpanel" aria-labelledby="tabLinks" hidden>
+          <div class="panel-card">
+            <div class="panel-title-row">
+              <h2 class="panel-title">Your links</h2>
+              <span class="link-count-badge" id="linkCountBadge">0 / 20</span>
+            </div>
+            <p class="panel-desc">Add buttons that link to your socials, store, or anything else. Drag to reorder.</p>
+            <ul class="link-list" id="linkList"></ul>
+            <button type="button" class="btn btn-ghost add-link-btn" id="addLinkBtn">
+              <span class="btn-icon-left">+</span> Add link
+            </button>
+          </div>
+        </section>
+
+        <!-- Appearance tab -->
+        <section class="editor-panel" id="panelAppearance" role="tabpanel" aria-labelledby="tabAppearance" hidden>
+          <div class="panel-card">
+            <h2 class="panel-title">Template</h2>
+            <p class="panel-desc">Apply a preset look (layout, color, font) in one click.</p>
+            <div class="form-group">
+              <label for="templateSelect">Preset</label>
+              <select id="templateSelect" class="form-select">
+                <option value="">Custom (no preset)</option>
+                <option value="minimal">Minimal</option>
+                <option value="classic">Classic</option>
+                <option value="neon">Neon</option>
+                <option value="warm">Warm</option>
+              </select>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Layout</h2>
+            <p class="panel-desc">How your profile is arranged on the page.</p>
+            <div class="form-group">
+              <label for="layoutSelect">Layout style</label>
+              <select id="layoutSelect" class="form-select">
+                <option value="classic">Classic (banner + avatar + links)</option>
+                <option value="minimal">Minimal (avatar only, no banner)</option>
+                <option value="wide">Wide (full-width banner)</option>
+              </select>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Theme</h2>
+            <div class="form-group">
+              <label for="accentColor">Accent color</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="accentColor" value="#7c6bb8" aria-label="Accent color">
+                <input type="text" id="accentColorHex" class="color-hex-input" value="#7c6bb8" maxlength="7" placeholder="#7c6bb8">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="buttonStyle">Button style</label>
+              <select id="buttonStyle" class="form-select">
+                <option value="filled">Filled</option>
+                <option value="outline">Outline</option>
+              </select>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Typography</h2>
+            <div class="form-group">
+              <label for="fontFamily">Font</label>
+              <select id="fontFamily" class="form-select">
+                <option value="Outfit">Outfit</option>
+                <option value="Inter">Inter</option>
+                <option value="Space Mono">Space Mono</option>
+                <option value="Poppins">Poppins</option>
+                <option value="DM Sans">DM Sans</option>
+                <option value="Playfair Display">Playfair Display</option>
+              </select>
+            </div>
+            <div class="form-group form-row">
+              <div>
+                <label for="fontSize">Font size</label>
+                <input type="number" id="fontSize" min="12" max="24" value="16" class="form-input-num">
+              </div>
+              <div>
+                <label for="letterSpacing">Letter spacing</label>
+                <input type="number" id="letterSpacing" min="-1" max="2" step="0.1" value="0" class="form-input-num">
+              </div>
+            </div>
+            <div class="form-group form-check">
+              <input type="checkbox" id="typewriterBio" class="form-checkbox">
+              <label for="typewriterBio">Typewriter effect on bio</label>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Background</h2>
+            <div class="form-group">
+              <label for="backgroundEffect">Effect</label>
+              <select id="backgroundEffect" class="form-select">
+                <option value="none">None</option>
+                <option value="gradient">Gradient</option>
+                <option value="pattern">Subtle pattern</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Analytics tab -->
+        <section class="editor-panel" id="panelAnalytics" role="tabpanel" aria-labelledby="tabAnalytics" hidden>
+          <div class="panel-card">
+            <h2 class="panel-title">Profile analytics</h2>
+            <p class="panel-desc">See how many times your bio page has been viewed.</p>
+            <div class="analytics-stats">
+              <div class="analytics-stat">
+                <span class="analytics-value" id="profileViewsCount">—</span>
+                <span class="analytics-label">Profile views</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SEO tab -->
+        <section class="editor-panel" id="panelSeo" role="tabpanel" aria-labelledby="tabSeo" hidden>
+          <div class="panel-card">
+            <h2 class="panel-title">Metadata &amp; SEO</h2>
+            <p class="panel-desc">Custom title and description when your link is shared on socials or search.</p>
+            <div class="form-group">
+              <label for="metaTitle">Page title</label>
+              <input type="text" id="metaTitle" placeholder="Your name — nightbio" maxlength="80">
+            </div>
+            <div class="form-group">
+              <label for="metaDescription">Description</label>
+              <textarea id="metaDescription" placeholder="Short description for search and social previews" maxlength="200" rows="3"></textarea>
+              <span class="char-count"><span id="metaDescCount">0</span>/200</span>
+            </div>
+            <div class="form-group">
+              <label for="metaImageURL">Preview image URL (optional)</label>
+              <input type="text" id="metaImageURL" placeholder="https://... (OG image for shares)" maxlength="500">
+            </div>
+          </div>
+        </section>
+
+        <!-- Badges tab -->
+        <section class="editor-panel" id="panelBadges" role="tabpanel" aria-labelledby="tabBadges" hidden>
+          <div class="panel-card badges-panel">
+            <div class="badges-header">
+              <h2 class="panel-title">All Badges</h2>
+              <select id="badgesFilter" class="badges-filter-select" aria-label="Filter badges">
+                <option value="all">All Badges</option>
+                <option value="owned">On my profile</option>
+                <option value="available">Available</option>
+              </select>
+            </div>
+            <p class="panel-desc">Choose which badges appear on your profile. Community is yours to toggle; other badges are granted by staff.</p>
+            <div class="badges-grid" id="badgesList"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <aside class="editor-preview">
+      <div class="preview-phone">
+        <div class="preview-phone-notch"></div>
+        <div class="preview-screen" id="previewScreen">
+          <div class="preview-banner" id="previewBanner"></div>
+          <div class="preview-profile">
+            <div class="preview-avatar-wrap" id="previewAvatarWrap">
+              <img id="previewAvatar" class="preview-avatar" src="" alt="" style="display: none;">
+              <div class="preview-avatar-placeholder" id="previewAvatarPlaceholder">?</div>
+            </div>
+            <div class="preview-name" id="previewName">Your name</div>
+            <div class="preview-bio" id="previewBio">Your bio appears here.</div>
+            <div class="preview-links" id="previewLinks"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/badge-icons.js"></script>
+  <script src="js/link-platforms.js"></script>
+  <script src="js/bio.js"></script>
+  <script src="js/dashboard-editor.js"></script>
+  <script>
+    (function() {
+      initFirebase();
+      var auth = getAuth();
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        auth.signOut().then(function() { window.location.href = '/'; });
+      });
+      auth.onAuthStateChanged(function(user) {
+        if (user && user.emailVerified) {
+          window.dashboardEditor && window.dashboardEditor.init(user.uid);
+        } else if (user && !user.emailVerified) {
+          auth.signOut();
+          window.location.href = '/login?verified=0';
+        } else {
+          window.location.href = '/login';
+        }
+      });
+    })();
+  </script>
+  <script src="js/translate.js"></script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

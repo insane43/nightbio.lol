@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — nightbio.lol</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .admin-wrap { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+    .admin-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: var(--radius); overflow: hidden; }
+    .admin-table th, .admin-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-subtle); }
+    .admin-table th { background: var(--bg-elevated); font-weight: 600; }
+    .admin-table tr:hover td { background: rgba(124,107,184,0.05); }
+    .admin-badge-btn { padding: 0.25rem 0.5rem; font-size: 0.75rem; margin: 0 0.15rem; cursor: pointer; border-radius: 4px; border: 1px solid var(--border-subtle); background: var(--bg-elevated); color: var(--text-primary); }
+    .admin-badge-btn.on { background: var(--purple-mid); color: #fff; border-color: var(--purple-accent); }
+    .admin-badge-btn:hover { border-color: var(--purple-accent); }
+    .admin-denied { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .admin-loading { padding: 2rem; text-align: center; }
+    .admin-stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .admin-stat { background: var(--bg-card); padding: 1rem 1.5rem; border-radius: var(--radius); border: 1px solid var(--border-subtle); }
+    .admin-stat strong { display: block; font-size: 1.5rem; color: var(--purple-accent); }
+  </style>
+</head>
+<body class="dashboard-page">
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <div id="adminDenied" class="admin-denied" style="display: none;">
+    <h1>Access denied</h1>
+    <p>Admin dashboard is restricted by IP and admin privileges.</p>
+    <a href="/">Back to nightbio</a>
+  </div>
+
+  <div id="adminLoading" class="admin-loading">
+    <p>Checking access…</p>
+  </div>
+
+  <div id="adminContent" class="admin-wrap" style="display: none;">
+    <header class="admin-header">
+      <h1>Admin dashboard</h1>
+      <div>
+        <a href="/dashboard" class="btn btn-ghost" style="width: auto; margin-right: 0.5rem;">Dashboard</a>
+        <button type="button" class="btn btn-ghost" id="adminLogout">Log out</button>
+      </div>
+    </header>
+    <div class="admin-stats">
+      <div class="admin-stat"><strong id="adminUserCount">0</strong> Users</div>
+      <div class="admin-stat"><strong id="adminTotalViews">0</strong> Total profile views</div>
+    </div>
+    <div style="overflow-x: auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Display name</th>
+            <th>Views</th>
+            <th>Community</th>
+            <th>OG</th>
+            <th>Owner</th>
+            <th>Staff</th>
+            <th>Verified</th>
+            <th>Premium</th>
+          </tr>
+        </thead>
+        <tbody id="adminUserList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/bio.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    (function() {
+      var ALLOWED_ADMIN_IP = '172.56.25.44';
+      var denied = document.getElementById('adminDenied');
+      var loading = document.getElementById('adminLoading');
+      var content = document.getElementById('adminContent');
+
+      function showDenied() {
+        loading.style.display = 'none';
+        content.style.display = 'none';
+        denied.style.display = 'block';
+      }
+      function showContent() {
+        loading.style.display = 'none';
+        denied.style.display = 'none';
+        content.style.display = 'block';
+      }
+
+      function checkIp() {
+        return fetch('https://api.ipify.org?format=json').then(function(r) { return r.json(); }).then(function(d) { return d.ip; }).catch(function() { return ''; });
+      }
+
+      function checkAdminAccess(user) {
+        isAdmin(user.uid).then(function(admin) {
+          if (admin) {
+            showContent();
+            loadAdminData();
+          } else {
+            showDenied();
+          }
+        }).catch(function() { showDenied(); });
+      }
+
+      initFirebase();
+      var auth = getAuth();
+
+      document.getElementById('adminLogout').addEventListener('click', function() {
+        auth.signOut().then(function() { window.location.href = '/'; });
+      });
+
+      checkIp().then(function(ip) {
+        if (ip !== ALLOWED_ADMIN_IP) {
+          showDenied();
+          return;
+        }
+        auth.onAuthStateChanged(function(user) {
+          if (!user) {
+            window.location.href = '/login?redirect=/admin';
+            return;
+          }
+          checkAdminAccess(user);
+        });
+      }).catch(function() { showDenied(); });
+
+      function loadAdminData() {
+        getAllUsers().then(function(users) {
+          document.getElementById('adminUserCount').textContent = users.length;
+          var totalViews = 0;
+          users.forEach(function(u) { totalViews += (u.stats && u.stats.views) || 0; });
+          document.getElementById('adminTotalViews').textContent = totalViews.toLocaleString();
+
+          var tbody = document.getElementById('adminUserList');
+          tbody.innerHTML = '';
+          users.forEach(function(u) {
+            var tr = document.createElement('tr');
+            var badges = u.badges || {};
+            tr.innerHTML =
+              '<td>' + (u.username || '—') + '</td>' +
+              '<td>' + (u.displayName || '—') + '</td>' +
+              '<td>' + ((u.stats && u.stats.views) || 0).toLocaleString() + '</td>' +
+              '<td>' + (badges.community ? '✓' : '—') + '</td>' +
+              '<td><button type="button" class="admin-badge-btn ' + (badges.og ? 'on' : '') + '" data-uid="' + u.uid + '" data-badge="og">' + (badges.og ? 'ON' : 'OFF') + '</button></td>' +
+              '<td><button type="button" class="admin-badge-btn ' + (badges.owner ? 'on' : '') + '" data-uid="' + u.uid + '" data-badge="owner">' + (badges.owner ? 'ON' : 'OFF') + '</button></td>' +
+              '<td><button type="button" class="admin-badge-btn ' + (badges.staff ? 'on' : '') + '" data-uid="' + u.uid + '" data-badge="staff">' + (badges.staff ? 'ON' : 'OFF') + '</button></td>' +
+              '<td><button type="button" class="admin-badge-btn ' + (badges.verified ? 'on' : '') + '" data-uid="' + u.uid + '" data-badge="verified">' + (badges.verified ? 'ON' : 'OFF') + '</button></td>' +
+              '<td><button type="button" class="admin-badge-btn ' + (badges.premium ? 'on' : '') + '" data-uid="' + u.uid + '" data-badge="premium">' + (badges.premium ? 'ON' : 'OFF') + '</button></td>';
+            tbody.appendChild(tr);
+          });
+
+          tbody.querySelectorAll('.admin-badge-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              var uid = btn.dataset.uid;
+              var badge = btn.dataset.badge;
+              var isOn = btn.classList.contains('on');
+              var newVal = !isOn;
+              setUserBadge(uid, badge, newVal).then(function() {
+                btn.classList.toggle('on', newVal);
+                btn.textContent = newVal ? 'ON' : 'OFF';
+              }).catch(function() { alert('Failed to update'); });
+            });
+          });
+        }).catch(function() {
+          document.getElementById('adminUserCount').textContent = '—';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

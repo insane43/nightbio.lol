@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log in — nightbio.lol</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="admin-entry-wrap">
+    <button type="button" class="admin-entry-btn" id="adminDashboardBtn">Admin dashboard</button>
+  </div>
+  <div class="translate-wrapper" aria-label="Translate page">
+    <span class="translate-label">Language</span>
+    <select class="lang-select" id="customLangSelect" aria-label="Select language">
+      <option value="">Select language</option>
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+      <option value="pt">Portuguese</option>
+      <option value="ru">Russian</option>
+      <option value="ja">Japanese</option>
+      <option value="ko">Korean</option>
+      <option value="zh-CN">Chinese (Simplified)</option>
+      <option value="zh-TW">Chinese (Traditional)</option>
+      <option value="ar">Arabic</option>
+      <option value="hi">Hindi</option>
+      <option value="nl">Dutch</option>
+      <option value="pl">Polish</option>
+      <option value="tr">Turkish</option>
+      <option value="vi">Vietnamese</option>
+      <option value="th">Thai</option>
+      <option value="id">Indonesian</option>
+      <option value="sv">Swedish</option>
+      <option value="no">Norwegian</option>
+      <option value="da">Danish</option>
+      <option value="fi">Finnish</option>
+    </select>
+    <div id="google_translate_element"></div>
+  </div>
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <main class="page">
+    <div class="brand">
+      <a href="/">
+        <div class="logo-text">nightbio</div>
+        <div class="tagline">Your link in one place</div>
+      </a>
+    </div>
+
+    <div class="card">
+      <h1>Log in</h1>
+      <p class="subtitle">Welcome back to nightbio.</p>
+
+      <div id="msg" class="message msg-placeholder empty" role="alert" aria-live="polite"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Your password" required>
+            <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password" title="Show password">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <a href="#" id="forgotPasswordLink" class="forgot-link">Forgot password?</a>
+        </div>
+        <div id="rateLimitMsg" class="rate-limit-msg" hidden></div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          Log in
+        </button>
+        <div class="auth-divider">or</div>
+        <button type="button" class="btn-google" id="googleSignInBtn" aria-label="Continue with Google">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+      </form>
+
+      <div id="forgotPasswordPanel" class="forgot-panel" hidden>
+        <p class="forgot-title">Reset password</p>
+        <p class="subtitle">Enter your email and we’ll send a link to set a new password.</p>
+        <div class="form-group">
+          <label for="resetEmail">Email</label>
+          <input type="email" id="resetEmail" autocomplete="email" placeholder="you@example.com">
+        </div>
+        <button type="button" class="btn btn-primary" id="sendResetBtn">Send reset link</button>
+        <button type="button" class="btn btn-ghost forgot-back" id="backToLoginBtn">Back to login</button>
+      </div>
+
+      <div class="card-footer">
+        Don’t have an account? <a href="/signup">Sign up</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin-entry.js"></script>
+  <script>
+    (function() {
+      initFirebase();
+      const form = document.getElementById('loginForm');
+      const msgEl = document.getElementById('msg');
+      const submitBtn = document.getElementById('submitBtn');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+
+      function showMsg(text, type) {
+        msgEl.textContent = text;
+        msgEl.className = 'message ' + (type === 'error' ? 'error' : type === 'success' ? 'success' : 'info');
+        msgEl.classList.remove('empty');
+      }
+
+      function clearMsg() {
+        msgEl.textContent = '';
+        msgEl.className = 'message msg-placeholder empty';
+      }
+
+      function setLoading(loading) {
+        submitBtn.disabled = loading;
+        submitBtn.innerHTML = loading ? '<span class="spinner"></span> Logging in…' : 'Log in';
+      }
+
+      function setInputError(input, hasError) {
+        input.classList.toggle('error', !!hasError);
+      }
+
+      var forgotLink = document.getElementById('forgotPasswordLink');
+      var forgotPanel = document.getElementById('forgotPasswordPanel');
+      var loginFormEl = document.getElementById('loginForm');
+      var resetEmailInput = document.getElementById('resetEmail');
+      var sendResetBtn = document.getElementById('sendResetBtn');
+      var backToLoginBtn = document.getElementById('backToLoginBtn');
+      var togglePasswordBtn = document.getElementById('togglePassword');
+      var rateLimitMsg = document.getElementById('rateLimitMsg');
+
+      var RATE_LIMIT_KEY = 'nightbio_login_fail_count';
+      var RATE_LIMIT_LOCKOUT_KEY = 'nightbio_login_lockout_until';
+      var MAX_ATTEMPTS = 5;
+      var LOCKOUT_MINUTES = 5;
+
+      function checkRateLimit() {
+        var lockoutUntil = sessionStorage.getItem(RATE_LIMIT_LOCKOUT_KEY);
+        if (lockoutUntil && Date.now() < parseInt(lockoutUntil, 10)) {
+          var mins = Math.ceil((parseInt(lockoutUntil, 10) - Date.now()) / 60000);
+          rateLimitMsg.textContent = 'Too many failed attempts. Please try again in ' + mins + ' minute' + (mins !== 1 ? 's' : '') + '.';
+          rateLimitMsg.hidden = false;
+          submitBtn.disabled = true;
+          emailInput.disabled = true;
+          passwordInput.disabled = true;
+          return true;
+        }
+        if (lockoutUntil) {
+          sessionStorage.removeItem(RATE_LIMIT_LOCKOUT_KEY);
+          sessionStorage.removeItem(RATE_LIMIT_KEY);
+        }
+        rateLimitMsg.hidden = true;
+        submitBtn.disabled = false;
+        emailInput.disabled = false;
+        passwordInput.disabled = false;
+        return false;
+      }
+
+      function recordFailedLogin() {
+        var count = parseInt(sessionStorage.getItem(RATE_LIMIT_KEY) || '0', 10) + 1;
+        sessionStorage.setItem(RATE_LIMIT_KEY, String(count));
+        if (count >= MAX_ATTEMPTS) {
+          var until = Date.now() + LOCKOUT_MINUTES * 60 * 1000;
+          sessionStorage.setItem(RATE_LIMIT_LOCKOUT_KEY, String(until));
+          rateLimitMsg.textContent = 'Too many failed attempts. Please try again in ' + LOCKOUT_MINUTES + ' minutes.';
+          rateLimitMsg.hidden = false;
+          submitBtn.disabled = true;
+          emailInput.disabled = true;
+          passwordInput.disabled = true;
+        }
+      }
+
+      checkRateLimit();
+
+      if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', function() {
+          var type = passwordInput.getAttribute('type');
+          var isPassword = type === 'password';
+          passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+          togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+          togglePasswordBtn.setAttribute('title', isPassword ? 'Hide password' : 'Show password');
+          togglePasswordBtn.innerHTML = isPassword
+            ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        });
+      }
+
+      forgotLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        clearMsg();
+        resetEmailInput.value = emailInput.value.trim();
+        loginFormEl.style.display = 'none';
+        forgotPanel.hidden = false;
+      });
+
+      backToLoginBtn.addEventListener('click', function() {
+        forgotPanel.hidden = true;
+        loginFormEl.style.display = '';
+        clearMsg();
+      });
+
+      sendResetBtn.addEventListener('click', async function() {
+        var email = resetEmailInput.value.trim();
+        if (!email) {
+          showMsg('Please enter your email.', 'error');
+          return;
+        }
+        sendResetBtn.disabled = true;
+        sendResetBtn.innerHTML = '<span class="spinner"></span> Sending…';
+        clearMsg();
+        try {
+          var auth = getAuth();
+          if (!auth) {
+            showMsg('Something went wrong. Please refresh and try again.', 'error');
+            sendResetBtn.disabled = false;
+            sendResetBtn.textContent = 'Send reset link';
+            return;
+          }
+          await auth.sendPasswordResetEmail(email);
+          showMsg('Check your inbox. We sent a link to ' + email + '. Click it to set a new password, then log in.', 'success');
+          sendResetBtn.textContent = 'Send reset link';
+        } catch (err) {
+          if (err.code === 'auth/user-not-found') {
+            showMsg('No account found with that email.', 'error');
+          } else if (err.code === 'auth/invalid-email') {
+            showMsg('Please enter a valid email address.', 'error');
+          } else {
+            showMsg(err.message || 'Could not send reset link. Try again.', 'error');
+          }
+          sendResetBtn.textContent = 'Send reset link';
+        }
+        sendResetBtn.disabled = false;
+      });
+
+      var googleSignInBtn = document.getElementById('googleSignInBtn');
+      if (googleSignInBtn) {
+        googleSignInBtn.addEventListener('click', function() {
+          if (checkRateLimit()) return;
+          clearMsg();
+          var auth = getAuth();
+          if (!auth) {
+            showMsg('Something went wrong. Please refresh and try again.', 'error');
+            return;
+          }
+          googleSignInBtn.disabled = true;
+          googleSignInBtn.textContent = 'Signing in…';
+          auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(result) {
+            var user = result.user;
+            return ensureOAuthUserProfile(user).then(function() {
+              sessionStorage.removeItem(RATE_LIMIT_KEY);
+              sessionStorage.removeItem(RATE_LIMIT_LOCKOUT_KEY);
+              showMsg('You’re in! Redirecting…', 'success');
+              var r = (new URLSearchParams(window.location.search)).get('redirect');
+              var url = (r === '/admin' || r === 'admin.html') ? '/admin' : '/dashboard';
+              window.location.href = url;
+            });
+          }).catch(function(err) {
+            var code = err.code || '';
+            if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+              showMsg('Sign-in cancelled.', 'error');
+            } else if (code === 'auth/popup-blocked') {
+              showMsg('Popup was blocked. Allow popups and try again.', 'error');
+            } else {
+              showMsg(err.message || 'Google sign-in failed. Try again.', 'error');
+            }
+            googleSignInBtn.disabled = false;
+            googleSignInBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continue with Google';
+          });
+        });
+      }
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (checkRateLimit()) return;
+        clearMsg();
+        setInputError(emailInput, false);
+        setInputError(passwordInput, false);
+
+        var email = emailInput.value.trim();
+        var password = passwordInput.value;
+
+        if (!email) {
+          setInputError(emailInput, true);
+          showMsg('Please enter your email.', 'error');
+          return;
+        }
+        if (!password) {
+          setInputError(passwordInput, true);
+          showMsg('Please enter your password.', 'error');
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          var auth = getAuth();
+          if (!auth) {
+            showMsg('Something went wrong. Please refresh and try again.', 'error');
+            setLoading(false);
+            return;
+          }
+
+          var cred = await auth.signInWithEmailAndPassword(email, password);
+          var user = cred.user;
+
+          if (!user.emailVerified) {
+            await auth.signOut();
+            showMsg('Please verify your email first. We sent a link to ' + user.email + '. Check your inbox and spam, then try again.', 'error');
+            setLoading(false);
+            return;
+          }
+          sessionStorage.removeItem(RATE_LIMIT_KEY);
+          sessionStorage.removeItem(RATE_LIMIT_LOCKOUT_KEY);
+          showMsg('You’re in! Redirecting…', 'success');
+          var redirect = (new URLSearchParams(window.location.search)).get('redirect');
+          var url = (redirect === '/admin' || redirect === 'admin.html') ? '/admin' : '/dashboard';
+          setTimeout(function() { window.location.href = url; }, 800);
+        } catch (err) {
+          var code = err.code || '';
+          if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+            recordFailedLogin();
+            showMsg('Invalid email or password.', 'error');
+          } else if (code === 'auth/too-many-requests') {
+            recordFailedLogin();
+            showMsg('Too many attempts. Please try again later.', 'error');
+          } else if (code === 'auth/invalid-email') {
+            setInputError(emailInput, true);
+            showMsg('Please enter a valid email address.', 'error');
+          } else {
+            showMsg(err.message || 'Login failed. Please try again.', 'error');
+          }
+          setLoading(false);
+        }
+      });
+    })();
+  </script>
+  <script src="js/translate.js"></script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

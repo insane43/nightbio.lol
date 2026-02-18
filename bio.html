@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bio — nightbio.lol</title>
+  <meta name="description" content="">
+  <meta property="og:title" content="">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body class="bio-page">
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <main class="page" id="bioMain">
+    <div id="bioContent" style="display: none;">
+      <img id="bioBanner" class="bio-banner" src="" alt="">
+      <div class="bio-profile">
+        <img id="bioAvatar" class="bio-avatar" src="" alt="" style="display: none;">
+        <h1 id="bioName" class="bio-name"></h1>
+        <div id="bioBadges" class="bio-badges"></div>
+        <p id="bioBio" class="bio-bio-text"></p>
+        <div id="bioSongWrap" class="bio-song-wrap" style="display: none;"></div>
+        <div id="bioLinks" class="bio-links"></div>
+      </div>
+    </div>
+    <div id="bioLoading" class="bio-404">
+      <p>Loading…</p>
+    </div>
+    <div id="bio404" class="bio-404" style="display: none;">
+      <h1>Bio not found</h1>
+      <p>This user doesn't exist or hasn't set up their bio yet.</p>
+      <a href="/">Back to nightbio</a>
+    </div>
+  </main>
+
+  <footer class="bio-footer">
+    <a href="/">nightbio.lol</a>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/badge-icons.js"></script>
+  <script src="js/bio.js"></script>
+  <script>
+    (function() {
+      var LINK_ICONS = { instagram: '📷', youtube: '▶', tiktok: '♪', twitter: '𝕏', discord: '💬', spotify: '♫', github: '⌘', twitch: '▶', linkedin: 'in', paypal: '$', snapchat: '👻', telegram: '✈', reddit: '🔴', link: '🔗' };
+
+      function setMetaTags(data) {
+        var title = (data.metaTitle && data.metaTitle.trim()) ? data.metaTitle.trim() : ((data.displayName || data.username) + ' — nightbio.lol');
+        var desc = (data.metaDescription && data.metaDescription.trim()) ? data.metaDescription.trim() : (data.bio || '');
+        var img = (data.metaImageURL && data.metaImageURL.trim()) ? data.metaImageURL.trim() : (data.avatarURL || data.bannerURL || '');
+        document.title = title;
+        var metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.content = desc;
+        var ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.content = title;
+        var ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc) ogDesc.content = desc;
+        var ogImg = document.querySelector('meta[property="og:image"]');
+        if (ogImg) ogImg.content = img;
+        var twTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twTitle) twTitle.content = title;
+        var twDesc = document.querySelector('meta[name="twitter:description"]');
+        if (twDesc) twDesc.content = desc;
+        var twImg = document.querySelector('meta[name="twitter:image"]');
+        if (twImg) twImg.content = img;
+      }
+
+      function loadFont(fontFamily) {
+        if (!fontFamily || fontFamily === 'Outfit') return;
+        var familyParam = fontFamily.replace(/\s+/g, '+');
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css2?family=' + familyParam + ':wght@400;500;600;700&display=swap';
+        document.head.appendChild(link);
+      }
+
+      function typewriterEffect(el, text, speed) {
+        if (!el || text === '') return;
+        el.textContent = '';
+        el.style.display = 'block';
+        var i = 0;
+        function type() {
+          if (i < text.length) {
+            el.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+          }
+        }
+        type();
+      }
+
+      initFirebase();
+
+      var params = new URLSearchParams(window.location.search);
+      var username = params.get('u');
+      var content = document.getElementById('bioContent');
+      var loading = document.getElementById('bioLoading');
+      var notFound = document.getElementById('bio404');
+
+      function hideAll() {
+        content.style.display = 'none';
+        loading.style.display = 'none';
+        notFound.style.display = 'none';
+      }
+      function showLoading() {
+        hideAll();
+        loading.style.display = 'block';
+      }
+      function showNotFound() {
+        hideAll();
+        notFound.style.display = 'block';
+      }
+      function showBio(data) {
+        hideAll();
+        content.style.display = 'block';
+
+        setMetaTags(data);
+        if (data.uid) recordProfileView(data.uid);
+
+        var layout = data.layout || 'classic';
+        var fontFamily = data.fontFamily || 'Outfit';
+        var fontSize = data.fontSize != null ? data.fontSize : 16;
+        var letterSpacing = data.letterSpacing != null ? data.letterSpacing : 0;
+        var buttonStyle = data.buttonStyle || 'filled';
+        var bgEffect = data.backgroundEffect || 'none';
+
+        content.className = 'bio-content-wrap bio-layout-' + layout + ' bio-btn-' + buttonStyle;
+        document.body.classList.remove('bio-bg-none', 'bio-bg-gradient', 'bio-bg-pattern');
+        document.body.classList.add('bio-bg-' + (bgEffect === 'none' ? 'none' : bgEffect));
+
+        loadFont(fontFamily);
+        document.body.style.setProperty('--bio-font', fontFamily);
+        document.body.style.setProperty('--bio-font-size', fontSize + 'px');
+        document.body.style.setProperty('--bio-letter-spacing', letterSpacing + 'px');
+        if (data.accentColor) document.body.style.setProperty('--purple-accent', data.accentColor);
+
+        var banner = document.getElementById('bioBanner');
+        var avatar = document.getElementById('bioAvatar');
+        var nameEl = document.getElementById('bioName');
+        var bioEl = document.getElementById('bioBio');
+        var songWrap = document.getElementById('bioSongWrap');
+        var linksEl = document.getElementById('bioLinks');
+
+        if (layout === 'minimal') {
+          banner.style.display = 'none';
+        } else if (data.bannerURL) {
+          banner.src = data.bannerURL;
+          banner.style.display = 'block';
+        } else {
+          banner.style.display = 'none';
+        }
+
+        if (data.avatarURL) {
+          avatar.src = data.avatarURL;
+          avatar.alt = data.displayName || data.username;
+          avatar.style.display = 'block';
+        } else {
+          avatar.style.display = 'none';
+          avatar.removeAttribute('src');
+        }
+
+        nameEl.textContent = data.displayName || data.username || '';
+
+        var badgesRow = document.getElementById('bioBadges');
+        if (badgesRow) {
+          badgesRow.innerHTML = '';
+          var badges = data.badges || {};
+          var icons = window.BADGE_ICONS || {};
+          var labels = { community: 'Community', og: 'OG', owner: 'Owner', staff: 'Staff', verified: 'Verified', premium: 'Premium' };
+          var order = ['community', 'verified', 'staff', 'owner', 'og', 'premium'];
+          order.forEach(function(key) {
+            if (!badges[key]) return;
+            var span = document.createElement('span');
+            span.className = 'bio-badge bio-badge-' + key;
+            span.setAttribute('title', labels[key] || key);
+            if (icons[key]) {
+              var iconWrap = document.createElement('span');
+              iconWrap.className = 'bio-badge-icon';
+              iconWrap.innerHTML = icons[key];
+              span.appendChild(iconWrap);
+            }
+            var labelSpan = document.createElement('span');
+            labelSpan.className = 'bio-badge-label';
+            labelSpan.textContent = labels[key] || key;
+            span.appendChild(labelSpan);
+            badgesRow.appendChild(span);
+          });
+        }
+
+        if (data.bio) {
+          if (data.typewriterBio) {
+            typewriterEffect(bioEl, data.bio, 35);
+          } else {
+            bioEl.textContent = data.bio;
+            bioEl.style.display = 'block';
+          }
+        } else {
+          bioEl.style.display = 'none';
+        }
+
+        if (data.songURL && data.songURL.trim()) {
+          songWrap.style.display = 'block';
+          songWrap.innerHTML = '';
+          var url = data.songURL.trim();
+          if (url.indexOf('spotify.com') !== -1) {
+            var parts = url.split('/').filter(Boolean);
+            var type = 'track';
+            var id = '';
+            for (var i = 0; i < parts.length; i++) {
+              if (parts[i] === 'track' || parts[i] === 'album' || parts[i] === 'playlist') {
+                type = parts[i];
+                if (parts[i + 1]) id = parts[i + 1].split('?')[0];
+                break;
+              }
+            }
+            if (!id && parts.length) id = parts[parts.length - 1].split('?')[0];
+            var iframe = document.createElement('iframe');
+            iframe.src = 'https://open.spotify.com/embed/' + type + '/' + id;
+            iframe.width = '100%';
+            iframe.height = '152';
+            iframe.style.maxWidth = '400px';
+            songWrap.appendChild(iframe);
+          } else if (url.indexOf('soundcloud.com') !== -1) {
+            var sc = document.createElement('iframe');
+            sc.width = '100%';
+            sc.height = '166';
+            sc.scrolling = 'no';
+            sc.frameBorder = 'no';
+            sc.allow = 'autoplay';
+            sc.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&color=%237c6bb8';
+            sc.style.maxWidth = '400px';
+            songWrap.appendChild(sc);
+          } else {
+            var link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.className = 'bio-link-btn';
+            link.textContent = 'Listen';
+            songWrap.appendChild(link);
+          }
+        } else {
+          songWrap.style.display = 'none';
+        }
+
+        linksEl.innerHTML = '';
+        var links = Array.isArray(data.links) ? data.links : [];
+        links.forEach(function(l) {
+          if (!l.url) return;
+          var a = document.createElement('a');
+          a.href = l.url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.className = 'bio-link-btn';
+          var iconKey = (l.icon && l.icon.trim()) ? l.icon.trim() : 'link';
+          var iconChar = LINK_ICONS[iconKey] || LINK_ICONS.link;
+          var iconSpan = document.createElement('span');
+          iconSpan.className = 'bio-link-icon';
+          iconSpan.setAttribute('aria-hidden', 'true');
+          iconSpan.textContent = iconChar;
+          a.appendChild(iconSpan);
+          a.appendChild(document.createTextNode(l.label || l.url));
+          linksEl.appendChild(a);
+        });
+      }
+
+      if (!username || !username.trim()) {
+        showNotFound();
+        return;
+      }
+
+      showLoading();
+      getBioByUsername(username.trim()).then(function(data) {
+        if (data) {
+          showBio(data);
+        } else {
+          showNotFound();
+        }
+      }).catch(function() {
+        showNotFound();
+      });
+    })();
+  </script>
+</body>
+</html>
