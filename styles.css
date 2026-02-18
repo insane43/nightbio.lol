@@ -1212,6 +1212,25 @@ textarea.form-input {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
 }
+.custom-badge-notice {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: rgba(124, 107, 184, 0.08);
+  border: 1px solid rgba(124, 107, 184, 0.25);
+  border-radius: var(--radius);
+}
+.custom-badge-notice strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--purple-accent);
+  margin-bottom: 0.35rem;
+}
+.custom-badge-notice p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
 .badge-card {
   display: flex;
   align-items: flex-start;
