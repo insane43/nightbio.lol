@@ -1786,6 +1786,38 @@ html { scrollbar-gutter: stable; }
 .bio-404 h1 { font-size: 1.25rem; margin-bottom: 0.5rem; }
 .bio-404 p { color: var(--text-muted); }
 
+/* Click to enter overlay (guns.lol style) */
+.bio-click-to-enter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(12, 12, 18, 0.92);
+  cursor: pointer;
+  transition: opacity 0.4s ease;
+}
+.bio-click-to-enter-overlay.bio-click-to-enter-dismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+.bio-click-to-enter-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--purple-accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1rem 2rem;
+  border: 2px solid var(--purple-accent);
+  border-radius: var(--radius);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.bio-click-to-enter-overlay:hover .bio-click-to-enter-text {
+  background: var(--purple-accent);
+  color: var(--bg-deep);
+}
+
 /* Maintenance mode overlay */
 .maintenance-overlay {
   position: fixed;

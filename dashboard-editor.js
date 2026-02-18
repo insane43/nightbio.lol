@@ -277,12 +277,12 @@
         var title = '<div class="badge-card-title">' + escapeHtml(info.label) + '</div>';
         var desc = '<div class="badge-card-desc">' + escapeHtml(info.desc) + '</div>';
         var action = '';
-        if (info.userCanToggle) {
+        if (info.userCanToggle || hasBadge) {
           action = '<label class="badge-card-action badge-card-action-toggle">' +
             '<input type="checkbox" class="badge-toggle" id="badge' + key.charAt(0).toUpperCase() + key.slice(1) + '" ' + (hasBadge ? 'checked' : '') + '> ' +
             '<span class="badge-action-label">' + (hasBadge ? 'On profile' : 'Show on profile') + '</span></label>';
         } else {
-          action = '<span class="badge-card-action badge-card-action-status ' + (hasBadge ? 'badge-status-on' : '') + '">' + (hasBadge ? 'On profile' : 'Granted by admin') + '</span>';
+          action = '<span class="badge-card-action badge-card-action-status">Granted by admin</span>';
         }
         card.innerHTML = iconHtml + '<div class="badge-card-body">' + title + desc + '</div><div class="badge-card-action-wrap">' + action + '</div>';
         grid.appendChild(card);
@@ -374,6 +374,8 @@
 
       var showViewsCb = document.getElementById('showViewsOnBio');
       if (showViewsCb) showViewsCb.checked = !!d.showViewsOnBio;
+      var clickToEnterCb = document.getElementById('clickToEnter');
+      if (clickToEnterCb) clickToEnterCb.checked = !!d.clickToEnter;
       refreshProfileViews();
 
       if (avatarURLInput) avatarURLInput.value = d.avatarURL || '';
@@ -549,7 +551,8 @@
         metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
         metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
         showViewsOnBio: showViewsCb ? showViewsCb.checked : false,
-        badges: { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
+        clickToEnter: (function() { var el = document.getElementById('clickToEnter'); return el ? el.checked : false; })(),
+        badges: window._editorCurrentData.badges || { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
         links: getLinksFromList()
       };
       if (window._editorCurrentData && window._editorCurrentData.badges && window._editorCurrentData.badges.premium) {

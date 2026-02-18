@@ -70,6 +70,7 @@ function getBioByUsername(username) {
         modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
         modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
         modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
+        clickToEnter: !!d.clickToEnter,
         metaTitle: d.metaTitle || '',
         metaDescription: d.metaDescription || '',
         metaImageURL: d.metaImageURL || '',
@@ -161,6 +162,7 @@ function getCurrentUserBio(uid) {
       modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
       modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
       modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
+      clickToEnter: !!d.clickToEnter,
       metaTitle: d.metaTitle || '',
       metaDescription: d.metaDescription || '',
       metaImageURL: d.metaImageURL || '',
@@ -210,14 +212,19 @@ function saveBio(uid, data) {
     modalBlur: data.modalBlur != null ? Math.min(24, Math.max(0, parseInt(data.modalBlur, 10) || 0)) : 0,
     modalBorderOpacity: data.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(data.modalBorderOpacity, 10) || 20)) : 20,
     modalRadius: data.modalRadius != null ? Math.min(32, Math.max(8, parseInt(data.modalRadius, 10) || 24)) : 24,
+    clickToEnter: !!data.clickToEnter,
     metaTitle: (data.metaTitle || '').trim().slice(0, 80),
     metaDescription: (data.metaDescription || '').trim().slice(0, 200),
     metaImageURL: (data.metaImageURL || '').trim().slice(0, 500),
     showViewsOnBio: !!data.showViewsOnBio,
     updatedAt: firebase.database.ServerValue.TIMESTAMP
   };
-  if (data.badges && typeof data.badges.community !== 'undefined') {
-    updates['badges/community'] = !!data.badges.community;
+  if (data.badges && typeof data.badges === 'object') {
+    var badgeKeys = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
+    for (var i = 0; i < badgeKeys.length; i++) {
+      var bk = badgeKeys[i];
+      if (data.badges[bk] !== undefined) updates['badges/' + bk] = !!data.badges[bk];
+    }
   }
   if (Array.isArray(data.links)) {
     updates.links = data.links.slice(0, 20).map(function(l) {

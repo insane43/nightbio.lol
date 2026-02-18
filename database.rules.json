@@ -37,6 +37,11 @@
       "$uid": {
         ".read": true,
         ".write": "auth != null && (auth.uid == $uid || root.child('adminUids').child(auth.uid).exists())",
+        "badges": {
+          "$badgeKey": {
+            ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || (auth.uid == $uid && ($badgeKey === 'community' || newData.val() === false || data.val() === true)))"
+          }
+        },
         "stats": {
           "views": {
             ".read": "auth != null && auth.uid == $uid",

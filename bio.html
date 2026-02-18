@@ -208,7 +208,41 @@
         content.style.display = 'block';
 
         setMetaTags(data);
-        if (data.uid) recordProfileView(data.uid);
+        if (data.clickToEnter) {
+          var overlay = document.getElementById('bioClickToEnterOverlay');
+          if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'bioClickToEnterOverlay';
+            overlay.className = 'bio-click-to-enter-overlay';
+            overlay.setAttribute('role', 'button');
+            overlay.tabIndex = 0;
+            overlay.innerHTML = '<span class="bio-click-to-enter-text">Click to enter</span>';
+            overlay.addEventListener('click', function enter() {
+              overlay.removeEventListener('click', enter);
+              overlay.removeEventListener('keydown', onKey);
+              if (data.uid) recordProfileView(data.uid);
+              overlay.classList.add('bio-click-to-enter-dismissed');
+              overlay.style.pointerEvents = 'none';
+              setTimeout(function() {
+                if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+              }, 400);
+            });
+            function onKey(e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                overlay.click();
+              }
+            }
+            overlay.addEventListener('keydown', onKey);
+          }
+          overlay.classList.remove('bio-click-to-enter-dismissed');
+          overlay.style.pointerEvents = '';
+          document.body.appendChild(overlay);
+        } else {
+          var existingOverlay = document.getElementById('bioClickToEnterOverlay');
+          if (existingOverlay && existingOverlay.parentNode) existingOverlay.parentNode.removeChild(existingOverlay);
+          if (data.uid) recordProfileView(data.uid);
+        }
 
         var layout = data.layout || 'classic';
         var fontFamily = data.fontFamily || 'Outfit';

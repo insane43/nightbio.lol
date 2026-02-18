@@ -202,6 +202,11 @@
                 <input type="number" id="modalRadius" min="8" max="32" value="24" class="form-input-num">
               </div>
             </div>
+            <div class="form-group form-check">
+              <input type="checkbox" id="clickToEnter" class="form-checkbox" aria-describedby="clickToEnterDesc">
+              <label for="clickToEnter">Click to enter</label>
+              <p id="clickToEnterDesc" class="panel-desc">Visitors must click to see your bio (like guns.lol). Shows a full-screen “Enter” screen until they click.</p>
+            </div>
           </div>
           <div class="panel-card">
             <h2 class="panel-title">Theme</h2>
@@ -310,7 +315,7 @@
                 <option value="available">Available</option>
               </select>
             </div>
-            <p class="panel-desc">Choose which badges appear on your profile. Community is yours to toggle; other badges are granted by staff.</p>
+            <p class="panel-desc">Choose which badges appear on your profile. You can turn any badge on or off; admin-granted badges (OG, Staff, etc.) can be hidden or shown.</p>
             <div class="badges-grid" id="badgesList"></div>
           </div>
         </section>
