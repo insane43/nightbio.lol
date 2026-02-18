@@ -1,6 +1,6 @@
 // Admin dashboard entry: IP check + auto sign-in — nightbio.lol
 (function() {
-  var ALLOWED_ADMIN_IP = '172.56.25.44';
+  var ALLOWED_ADMIN_IP = '172.56.60.194';
   var ADMIN_EMAIL = 'admin@nightbio.lol';
   var ADMIN_PASSWORD = '9916202374Aa';
 
