@@ -6,8 +6,8 @@ window.BIO_BADGES = {
   og: { id: 'og', label: 'OG', desc: 'Be an early supporter of nightbio.lol. Granted by admin.', userCanToggle: false },
   owner: { id: 'owner', label: 'Owner', desc: 'Site owner. Granted by admin.', userCanToggle: false },
   staff: { id: 'staff', label: 'Staff', desc: 'Be a part of the nightbio.lol team. Granted by admin.', userCanToggle: false },
-  verified: { id: 'verified', label: 'Verified', desc: 'Verified profile. Granted by admin.', userCanToggle: false },
-  premium: { id: 'premium', label: 'Premium', desc: 'Premium supporter. Granted by admin.', userCanToggle: false }
+  verified: { id: 'verified', label: 'Verified', desc: 'Requires a certain following on a social media platform. Granted by admin.', userCanToggle: false },
+  premium: { id: 'premium', label: 'Premium', desc: 'Purchase from our server to unlock premium features and support nightbio.', userCanToggle: false }
 };
 
 function getDefaultBadges() {
