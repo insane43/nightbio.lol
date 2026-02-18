@@ -326,36 +326,174 @@
           </div>
         </section>
 
-        <!-- Admin panel (only visible with staff badge) -->
+        <!-- Admin panel (only visible with staff badge) — full staff dashboard -->
         <section class="editor-panel" id="panelAdminPanel" role="tabpanel" aria-labelledby="tabAdminPanel" hidden>
-          <div class="panel-card">
-            <h2 class="panel-title">Staff — User management</h2>
-            <p class="panel-desc">Search, edit profiles, grant badges, and ban or unban users. Only visible with the Staff badge.</p>
-            <p class="panel-desc admin-meta" id="dashboardAdminUsersCountLine">Load users below.</p>
-            <div class="admin-toolbar" style="margin-bottom: 1rem;">
-              <input type="text" id="dashboardAdminUserSearch" class="admin-search-input form-input" placeholder="Search username, name, or email…" style="max-width: 280px;" />
-              <select id="dashboardAdminUserFilter" class="admin-filter-select form-select" style="max-width: 140px;">
-                <option value="all">All users</option>
-                <option value="banned">Banned only</option>
-                <option value="active">Active only</option>
-              </select>
-              <button type="button" class="btn btn-ghost" id="dashboardAdminRefresh">Refresh</button>
-            </div>
-            <div class="admin-table-wrap">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Views</th>
-                    <th>Badges</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="dashboardAdminUserList"></tbody>
-              </table>
+          <div class="da-wrap">
+            <header class="da-header">
+              <h2 class="da-title">Staff panel</h2>
+              <button type="button" class="btn btn-ghost da-refresh" id="dashboardAdminRefresh" title="Refresh all">↻ Refresh</button>
+            </header>
+            <nav class="da-nav" role="tablist">
+              <button type="button" class="da-nav-item active" data-section="overview" role="tab">Overview</button>
+              <button type="button" class="da-nav-item" data-section="analytics" role="tab">Analytics</button>
+              <button type="button" class="da-nav-item" data-section="activity" role="tab">Activity</button>
+              <button type="button" class="da-nav-item" data-section="settings" role="tab">Settings</button>
+              <button type="button" class="da-nav-item" data-section="maintenance" role="tab">Maintenance</button>
+              <button type="button" class="da-nav-item" data-section="users" role="tab">Users</button>
+              <button type="button" class="da-nav-item" data-section="banned" role="tab">Banned</button>
+              <button type="button" class="da-nav-item" data-section="export" role="tab">Export</button>
+              <button type="button" class="da-nav-item" data-section="security" role="tab">Security</button>
+            </nav>
+            <div class="da-body">
+              <section id="daSectionOverview" class="da-section on">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Overview</h3>
+                  <p class="admin-meta" id="daOverviewLastUpdated">Click Refresh to load.</p>
+                </div>
+                <div class="admin-stats-grid">
+                  <div class="admin-stat-card stat-accent"><div class="stat-value" id="daUserCount">0</div><div class="stat-label">Total users</div><div class="stat-detail">Registered accounts</div></div>
+                  <div class="admin-stat-card"><div class="stat-value" id="daTotalViews">0</div><div class="stat-label">Profile views</div><div class="stat-detail">All-time</div></div>
+                  <div class="admin-stat-card stat-error"><div class="stat-value" id="daBannedCount">0</div><div class="stat-label">Banned</div><div class="stat-detail">Blocked from sign-in</div></div>
+                  <div class="admin-stat-card stat-success"><div class="stat-value" id="daActiveCount">0</div><div class="stat-label">Active</div><div class="stat-detail">Not banned</div></div>
+                </div>
+                <div class="admin-quick-actions">
+                  <button type="button" class="btn btn-ghost da-quick" data-section="maintenance">Maintenance</button>
+                  <button type="button" class="btn btn-ghost da-quick" data-section="users">Manage users</button>
+                  <button type="button" class="btn btn-ghost da-quick" data-section="banned">View banned</button>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-header">Top 5 profiles by views</div>
+                  <div class="admin-card-body">
+                    <ul class="admin-top-list" id="daOverviewTopUsers"><li class="admin-empty">Loading…</li></ul>
+                  </div>
+                </div>
+              </section>
+              <section id="daSectionAnalytics" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Analytics</h3>
+                  <p>Top 20 by profile views.</p>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-body">
+                    <ul class="admin-top-list" id="daAnalyticsTopUsers"></ul>
+                  </div>
+                </div>
+              </section>
+              <section id="daSectionActivity" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Recent activity</h3>
+                  <p>Last 25 signups.</p>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-body">
+                    <ul class="admin-top-list" id="daActivityRecentSignups"></ul>
+                  </div>
+                </div>
+              </section>
+              <section id="daSectionSettings" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Site settings</h3>
+                  <p>Site name, tagline, signups, announcement.</p>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-body">
+                    <div class="admin-field"><label for="daSettingsSiteName">Site name</label><input type="text" id="daSettingsSiteName" class="form-input" placeholder="nightbio" maxlength="80" /></div>
+                    <div class="admin-field"><label for="daSettingsTagline">Tagline</label><input type="text" id="daSettingsTagline" class="form-input" placeholder="Your link in one place" maxlength="120" /></div>
+                    <div class="admin-field">
+                      <label class="admin-checkbox-label"><input type="checkbox" id="daSettingsAllowSignups" checked /> Allow new signups</label>
+                      <span class="admin-field-hint">When off, new users cannot register.</span>
+                    </div>
+                    <div class="admin-field">
+                      <label class="admin-checkbox-label"><input type="checkbox" id="daSettingsAnnouncementEnabled" /> Show site-wide announcement</label>
+                      <textarea id="daSettingsAnnouncementText" class="form-input" rows="3" placeholder="Announcement text…" maxlength="500"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="daSettingsSave">Save settings</button>
+                  </div>
+                </div>
+              </section>
+              <section id="daSectionMaintenance" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Maintenance mode</h3>
+                  <p>When on, visitors see a full-screen message. Staff can still access the site.</p>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-body">
+                    <div class="admin-toggle-wrap">
+                      <div id="daMaintenanceToggle" class="admin-toggle" role="button" tabindex="0" aria-pressed="false"></div>
+                      <span id="daMaintenanceLabel" class="admin-toggle-label">Maintenance mode is off</span>
+                    </div>
+                    <div class="admin-field">
+                      <label for="daMaintenanceMessage">Message shown to visitors</label>
+                      <textarea id="daMaintenanceMessage" class="form-input" rows="4" placeholder="We'll be back soon."></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="daMaintenanceSave">Save</button>
+                  </div>
+                </div>
+              </section>
+              <section id="daSectionUsers" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">All users</h3>
+                  <p class="admin-meta" id="dashboardAdminUsersCountLine">Load with Refresh.</p>
+                </div>
+                <div class="admin-toolbar">
+                  <input type="text" id="dashboardAdminUserSearch" class="admin-search-input form-input" placeholder="Search username, name, or email…" style="max-width: 280px;" />
+                  <select id="dashboardAdminUserFilter" class="admin-filter-select form-select" style="max-width: 140px;">
+                    <option value="all">All</option>
+                    <option value="banned">Banned only</option>
+                    <option value="active">Active only</option>
+                  </select>
+                </div>
+                <div class="admin-table-wrap">
+                  <table class="admin-table">
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Views</th>
+                        <th>Badges</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dashboardAdminUserList"></tbody>
+                  </table>
+                </div>
+              </section>
+              <section id="daSectionBanned" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Banned users</h3>
+                  <p class="admin-meta" id="daBannedCountLine"></p>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-body">
+                    <ul class="admin-top-list" id="daBannedUserList"></ul>
+                    <p id="daBannedEmpty" class="admin-empty" style="display: none;">No banned users.</p>
+                  </div>
+                </div>
+              </section>
+              <section id="daSectionExport" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Export users</h3>
+                  <p>Download full user list as CSV. Uses current loaded data — Refresh first if needed.</p>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-body">
+                    <button type="button" class="btn btn-primary" id="daExportCsvBtn">Download CSV</button>
+                  </div>
+                </div>
+              </section>
+              <section id="daSectionSecurity" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Admin UIDs</h3>
+                  <p>UIDs in <code>adminUids</code> have full admin access. Edit in Firebase Console → Realtime Database.</p>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-body">
+                    <ul class="admin-top-list" id="daSecurityAdminList"></ul>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
           <div id="dashboardAdminEditModal" class="admin-modal">

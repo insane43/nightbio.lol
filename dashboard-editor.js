@@ -591,6 +591,192 @@
       }).catch(function() { showDashboardAdminToast('Failed to save.', 'error'); });
     }
 
+    function getBaseUrlDashboard() {
+      return (window.location && window.location.origin)
+        ? (window.location.origin + (window.location.pathname || '/').replace(/\/[^/]*$/, '/'))
+        : '';
+    }
+
+    function switchDaSection(section) {
+      document.querySelectorAll('.da-nav-item').forEach(function(n) {
+        n.classList.toggle('active', n.dataset.section === section);
+      });
+      document.querySelectorAll('.da-section').forEach(function(s) {
+        var id = s.id;
+        var name = id ? id.replace('daSection', '').toLowerCase() : '';
+        var first = name.charAt(0).toLowerCase();
+        var rest = name.slice(1);
+        s.classList.toggle('on', first + rest === section);
+      });
+      if (section === 'security' && typeof getAdminUids === 'function') loadDaSecurity();
+    }
+
+    function renderDaOverviewStats(users, banned) {
+      var total = (users || []).length;
+      var bannedCount = banned ? Object.keys(banned).filter(function(k) { return banned[k]; }).length : 0;
+      var totalViews = 0;
+      (users || []).forEach(function(u) { totalViews += (u.stats && u.stats.views) || 0; });
+      var el = document.getElementById('daUserCount');
+      if (el) el.textContent = total.toLocaleString();
+      el = document.getElementById('daTotalViews');
+      if (el) el.textContent = totalViews.toLocaleString();
+      el = document.getElementById('daBannedCount');
+      if (el) el.textContent = bannedCount.toLocaleString();
+      el = document.getElementById('daActiveCount');
+      if (el) el.textContent = (total - bannedCount).toLocaleString();
+      el = document.getElementById('daOverviewLastUpdated');
+      if (el) el.textContent = 'Last updated: ' + new Date().toLocaleString();
+    }
+
+    function renderDaOverviewTopUsers(users) {
+      var list = (users || []).slice().sort(function(a, b) {
+        var va = (a.stats && a.stats.views) || 0;
+        var vb = (b.stats && b.stats.views) || 0;
+        return vb - va;
+      }).slice(0, 5);
+      var el = document.getElementById('daOverviewTopUsers');
+      if (!el) return;
+      if (!list.length) {
+        el.innerHTML = '<li class="admin-empty">No profile views yet.</li>';
+        return;
+      }
+      var base = getBaseUrlDashboard();
+      el.innerHTML = list.map(function(u, i) {
+        var views = (u.stats && u.stats.views) || 0;
+        var link = base ? '<a href="' + base + 'bio?u=' + encodeURIComponent(u.username) + '" target="_blank" rel="noopener" style="color: var(--purple-accent);">' + escapeHtmlDashboard(u.username || '—') + '</a>' : escapeHtmlDashboard(u.username || '—');
+        return '<li><span class="rank">' + (i + 1) + '</span><span class="name">' + link + '</span><span class="value">' + views.toLocaleString() + ' views</span></li>';
+      }).join('');
+    }
+
+    function renderDaAnalyticsTopUsers(users) {
+      var list = (users || []).slice().sort(function(a, b) {
+        var va = (a.stats && a.stats.views) || 0;
+        var vb = (b.stats && b.stats.views) || 0;
+        return vb - va;
+      }).slice(0, 20);
+      var el = document.getElementById('daAnalyticsTopUsers');
+      if (!el) return;
+      if (!list.length) {
+        el.innerHTML = '<li class="admin-empty">No data yet.</li>';
+        return;
+      }
+      var base = getBaseUrlDashboard();
+      el.innerHTML = list.map(function(u, i) {
+        var views = (u.stats && u.stats.views) || 0;
+        var link = base ? '<a href="' + base + 'bio?u=' + encodeURIComponent(u.username) + '" target="_blank" rel="noopener" style="color: var(--purple-accent);">' + escapeHtmlDashboard(u.username || '—') + '</a>' : escapeHtmlDashboard(u.username || '—');
+        return '<li><span class="rank">' + (i + 1) + '</span><span class="name">' + link + '</span><span class="value">' + views.toLocaleString() + '</span></li>';
+      }).join('');
+    }
+
+    function renderDaActivityRecentSignups(users) {
+      var list = (users || []).slice().filter(function(u) { return u.createdAt != null; }).sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }).slice(0, 25);
+      var el = document.getElementById('daActivityRecentSignups');
+      if (!el) return;
+      if (!list.length) {
+        el.innerHTML = '<li class="admin-empty">No signups with join date yet.</li>';
+        return;
+      }
+      var base = getBaseUrlDashboard();
+      el.innerHTML = list.map(function(u) {
+        var date = u.createdAt ? (typeof u.createdAt === 'number' ? new Date(u.createdAt).toLocaleString() : String(u.createdAt)) : '—';
+        var link = base ? '<a href="' + base + 'bio?u=' + encodeURIComponent(u.username) + '" target="_blank" rel="noopener" style="color: var(--purple-accent);">' + escapeHtmlDashboard(u.username || '—') + '</a>' : escapeHtmlDashboard(u.username || '—');
+        return '<li><span class="name">' + link + '</span> <span class="admin-activity-date">' + escapeHtmlDashboard(date) + '</span></li>';
+      }).join('');
+    }
+
+    function renderDaBannedList(users, banned) {
+      var list = (users || []).filter(function(u) { return banned && banned[u.uid]; });
+      var countLine = document.getElementById('daBannedCountLine');
+      var ul = document.getElementById('daBannedUserList');
+      var empty = document.getElementById('daBannedEmpty');
+      if (countLine) countLine.textContent = list.length === 0 ? '0 banned users.' : list.length + ' banned user' + (list.length !== 1 ? 's' : '') + '.';
+      if (!ul) return;
+      if (list.length === 0) {
+        ul.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+      ul.innerHTML = list.map(function(u) {
+        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + ' — ' + escapeHtmlDashboard(u.email || '') + '</span><button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
+      }).join('');
+      ul.querySelectorAll('.unban-list-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (typeof unbanUser !== 'function') return;
+          unbanUser(btn.dataset.uid).then(function() {
+            showDashboardAdminToast('User unbanned.');
+            loadDashboardAdmin();
+          }).catch(function() { showDashboardAdminToast('Failed to unban.', 'error'); });
+        });
+      });
+    }
+
+    function loadDaMaintenance() {
+      if (typeof getSiteConfig !== 'function') return;
+      getSiteConfig().then(function(c) {
+        var t = document.getElementById('daMaintenanceToggle');
+        var l = document.getElementById('daMaintenanceLabel');
+        var m = document.getElementById('daMaintenanceMessage');
+        if (t) { t.classList.toggle('on', c.maintenanceMode); t.setAttribute('aria-pressed', c.maintenanceMode); }
+        if (l) l.textContent = c.maintenanceMode ? 'Maintenance mode is on' : 'Maintenance mode is off';
+        if (m) m.value = c.maintenanceMessage || '';
+      }).catch(function() {});
+    }
+
+    function loadDaSettings() {
+      if (typeof getSiteConfig !== 'function') return;
+      getSiteConfig().then(function(c) {
+        var el = document.getElementById('daSettingsSiteName');
+        if (el) el.value = c.siteName || 'nightbio';
+        el = document.getElementById('daSettingsTagline');
+        if (el) el.value = c.tagline || '';
+        el = document.getElementById('daSettingsAllowSignups');
+        if (el) el.checked = c.allowSignups !== false;
+        el = document.getElementById('daSettingsAnnouncementEnabled');
+        if (el) el.checked = !!c.announcementEnabled;
+        el = document.getElementById('daSettingsAnnouncementText');
+        if (el) el.value = c.announcementText || '';
+      }).catch(function() {});
+    }
+
+    function loadDaSecurity() {
+      if (typeof getAdminUids !== 'function') return;
+      getAdminUids().then(function(uids) {
+        var list = document.getElementById('daSecurityAdminList');
+        if (!list) return;
+        if (!uids.length) {
+          list.innerHTML = '<li class="admin-empty">No admin UIDs in database. Add adminUids/&lt;uid&gt; = true in Firebase Console.</li>';
+          return;
+        }
+        list.innerHTML = uids.map(function(uid) {
+          return '<li><code class="admin-uid-code">' + escapeHtmlDashboard(uid) + '</code></li>';
+        }).join('');
+      }).catch(function() { showDashboardAdminToast('Failed to load admins.', 'error'); });
+    }
+
+    function exportDaCsv() {
+      var rows = [['Username', 'Email', 'Display name', 'UID', 'Views', 'Joined']];
+      (dashboardAdminAllUsers || []).forEach(function(u) {
+        var joined = u.createdAt ? (typeof u.createdAt === 'number' ? new Date(u.createdAt).toISOString() : String(u.createdAt)) : '';
+        rows.push([
+          (u.username || '').replace(/"/g, '""'),
+          (u.email || '').replace(/"/g, '""'),
+          (u.displayName || '').replace(/"/g, '""'),
+          u.userId != null ? u.userId : '',
+          (u.stats && u.stats.views) || 0,
+          joined
+        ]);
+      });
+      var csv = rows.map(function(r) { return r.map(function(c) { return '"' + c + '"'; }).join(','); }).join('\n');
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'nightbio-users-' + (new Date().toISOString().slice(0, 10)) + '.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showDashboardAdminToast('CSV downloaded.');
+    }
+
     function loadDashboardAdmin() {
       if (typeof getAllUsers !== 'function' || typeof getBannedUids !== 'function') return;
       getAllUsers().then(function(users) {
@@ -598,10 +784,18 @@
         return getBannedUids().catch(function() { return {}; });
       }).then(function(banned) {
         dashboardAdminBanned = banned || {};
+        renderDaOverviewStats(dashboardAdminAllUsers, dashboardAdminBanned);
+        renderDaOverviewTopUsers(dashboardAdminAllUsers);
+        renderDaAnalyticsTopUsers(dashboardAdminAllUsers);
+        renderDaActivityRecentSignups(dashboardAdminAllUsers);
+        renderDaBannedList(dashboardAdminAllUsers, dashboardAdminBanned);
         renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned);
+        loadDaMaintenance();
+        loadDaSettings();
       }).catch(function(err) {
         console.error(err);
         renderDashboardAdminTable([], {});
+        renderDaOverviewStats([], {});
         showDashboardAdminToast('Failed to load users.', 'error');
       });
     }
@@ -614,7 +808,51 @@
       var refreshBtn = document.getElementById('dashboardAdminRefresh');
       if (searchEl) searchEl.addEventListener('input', function() { renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned); });
       if (filterEl) filterEl.addEventListener('change', function() { renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned); });
-      if (refreshBtn) refreshBtn.addEventListener('click', function() { loadDashboardAdmin(); });
+      if (refreshBtn) refreshBtn.addEventListener('click', function() { loadDashboardAdmin(); showDashboardAdminToast('Data refreshed.'); });
+      document.querySelectorAll('.da-nav-item').forEach(function(btn) {
+        btn.addEventListener('click', function() { switchDaSection(btn.dataset.section); });
+      });
+      document.querySelectorAll('.da-quick').forEach(function(btn) {
+        btn.addEventListener('click', function() { switchDaSection(btn.dataset.section); });
+      });
+      var maintToggle = document.getElementById('daMaintenanceToggle');
+      if (maintToggle) {
+        maintToggle.addEventListener('click', function() {
+          this.classList.toggle('on');
+          this.setAttribute('aria-pressed', this.classList.contains('on'));
+          var lbl = document.getElementById('daMaintenanceLabel');
+          if (lbl) lbl.textContent = this.classList.contains('on') ? 'Maintenance mode is on' : 'Maintenance mode is off';
+        });
+      }
+      var maintSave = document.getElementById('daMaintenanceSave');
+      if (maintSave) {
+        maintSave.addEventListener('click', function() {
+          var on = (document.getElementById('daMaintenanceToggle') || {}).classList && document.getElementById('daMaintenanceToggle').classList.contains('on');
+          var msg = (document.getElementById('daMaintenanceMessage') && document.getElementById('daMaintenanceMessage').value) ? document.getElementById('daMaintenanceMessage').value.trim() : '';
+          if (typeof setMaintenanceMode !== 'function') return;
+          setMaintenanceMode(on, msg || "We'll be back soon.").then(function() {
+            showDashboardAdminToast('Maintenance settings saved.');
+            loadDaMaintenance();
+          }).catch(function() { showDashboardAdminToast('Failed to save.', 'error'); });
+        });
+      }
+      var settingsSave = document.getElementById('daSettingsSave');
+      if (settingsSave) {
+        settingsSave.addEventListener('click', function() {
+          if (typeof setSiteConfig !== 'function') return;
+          var siteName = (document.getElementById('daSettingsSiteName') && document.getElementById('daSettingsSiteName').value) ? document.getElementById('daSettingsSiteName').value.trim() : 'nightbio';
+          var tagline = (document.getElementById('daSettingsTagline') && document.getElementById('daSettingsTagline').value) ? document.getElementById('daSettingsTagline').value.trim() : '';
+          var allowSignups = (document.getElementById('daSettingsAllowSignups') && document.getElementById('daSettingsAllowSignups').checked);
+          var announcementEnabled = !!(document.getElementById('daSettingsAnnouncementEnabled') && document.getElementById('daSettingsAnnouncementEnabled').checked);
+          var announcementText = (document.getElementById('daSettingsAnnouncementText') && document.getElementById('daSettingsAnnouncementText').value) ? document.getElementById('daSettingsAnnouncementText').value.trim() : '';
+          setSiteConfig({ siteName: siteName, tagline: tagline, allowSignups: allowSignups, announcementEnabled: announcementEnabled, announcementText: announcementText }).then(function() {
+            showDashboardAdminToast('Settings saved.');
+            loadDaSettings();
+          }).catch(function() { showDashboardAdminToast('Failed to save settings.', 'error'); });
+        });
+      }
+      var exportBtn = document.getElementById('daExportCsvBtn');
+      if (exportBtn) exportBtn.addEventListener('click', exportDaCsv);
       var editCancel = document.getElementById('dashboardAdminEditCancel');
       var editSave = document.getElementById('dashboardAdminEditSave');
       var editModal = document.getElementById('dashboardAdminEditModal');

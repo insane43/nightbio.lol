@@ -305,3 +305,28 @@
 .admin-checkbox-label input { margin: 0; }
 .admin-uid-code { font-size: 0.8rem; background: var(--bg-elevated); padding: 0.25rem 0.5rem; border-radius: 4px; word-break: break-all; }
 .admin-activity-date { font-size: 0.8rem; color: var(--text-muted); margin-left: 0.5rem; }
+
+/* Dashboard-embedded admin panel (da-*) */
+.da-wrap { max-width: 1100px; }
+.da-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem; }
+.da-title { font-size: 1.25rem; font-weight: 600; margin: 0; }
+.da-refresh { font-size: 0.85rem; padding: 0.45rem 0.85rem; }
+.da-nav { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.da-nav-item {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.da-nav-item:hover { color: var(--text-primary); background: rgba(124,107,184,0.1); }
+.da-nav-item.active { color: var(--purple-accent); background: rgba(124,107,184,0.15); border-color: rgba(124,107,184,0.3); font-weight: 500; }
+.da-body { min-height: 200px; }
+.da-section { display: none; }
+.da-section.on { display: block; animation: adminFadeIn 0.2s ease; }
+.da-section-title { font-size: 1.15rem; font-weight: 600; margin: 0 0 0.35rem; }
+.da-quick { font-size: 0.85rem; }
