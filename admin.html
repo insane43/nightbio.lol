@@ -306,7 +306,6 @@
   <script src="admin.js"></script>
   <script>
     (function() {
-      var ALLOWED_ADMIN_IP = '172.56.25.44';
       var SECTION_TITLES = { overview: 'Overview', analytics: 'Analytics', activity: 'Activity', settings: 'Settings', maintenance: 'Maintenance', users: 'All users', banned: 'Banned users', export: 'Export', security: 'Admins' };
       var denied = document.getElementById('adminDenied');
       var reasonEl = document.getElementById('adminDeniedReason');
@@ -379,20 +378,24 @@
         auth.signOut().then(function() { window.location.href = 'index'; });
       });
 
-      checkIp().then(function(ip) {
-        if (ip !== ALLOWED_ADMIN_IP) {
-          showDenied('Access is restricted to authorized IPs.', 'Your IP: ' + (ip || 'unknown'));
+      auth.onAuthStateChanged(function(user) {
+        if (!user) {
+          window.location.href = 'login?redirect=admin';
           return;
         }
-        auth.onAuthStateChanged(function(user) {
-          if (!user) {
-            window.location.href = 'login?redirect=admin';
-            return;
+        if (typeof isStaff !== 'function') {
+          showDenied('Staff check not available.', '');
+          return;
+        }
+        isStaff(user.uid).then(function(hasStaff) {
+          if (hasStaff) {
+            showContent();
+            initPanel();
+          } else {
+            showDenied('Staff access required.', 'You need the Staff badge on your account. You can also use the Admin panel tab in your dashboard if you have Staff.');
           }
-          showContent();
-          initPanel();
-        });
-      }).catch(function() { showDenied('Could not verify IP.', 'Check your connection and try again.'); });
+        }).catch(function() { showDenied('Could not verify access.', ''); });
+      });
 
       function loadSettings() {
         getSiteConfig().then(function(c) {

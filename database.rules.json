@@ -16,13 +16,13 @@
     },
     "siteConfig": {
       ".read": true,
-      ".write": "auth != null && root.child('adminUids').child(auth.uid).exists()"
+      ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
     },
     "bannedUids": {
-      ".read": "auth != null && root.child('adminUids').child(auth.uid).exists()",
+      ".read": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)",
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && root.child('adminUids').child(auth.uid).exists()"
+        ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
       }
     },
     "profileViews": {
@@ -33,13 +33,13 @@
       }
     },
     "users": {
-      ".read": "auth != null && root.child('adminUids').child(auth.uid).exists()",
+      ".read": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)",
       "$uid": {
         ".read": true,
-        ".write": "auth != null && (auth.uid == $uid || root.child('adminUids').child(auth.uid).exists())",
+        ".write": "auth != null && (auth.uid == $uid || (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true))",
         "badges": {
           "$badgeKey": {
-            ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || (auth.uid == $uid && ($badgeKey === 'community' || newData.val() === false || data.val() === true)))"
+            ".write": "auth != null && ((root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true) || (auth.uid == $uid && ($badgeKey === 'community' || newData.val() === false || data.val() === true)))"
           }
         },
         "stats": {

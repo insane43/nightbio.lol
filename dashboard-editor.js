@@ -213,6 +213,7 @@
       p.hidden = !isActive;
     });
     if (tabId === 'analytics') refreshProfileViews();
+    if (tabId === 'adminPanel' && typeof loadDashboardAdmin === 'function') loadDashboardAdmin();
   }
 
   function init(uid) {
@@ -394,6 +395,8 @@
 
       var tabPremium = document.getElementById('tabPremium');
       if (tabPremium) tabPremium.style.display = (d.badges && d.badges.premium) ? '' : 'none';
+      var tabAdminPanel = document.getElementById('tabAdminPanel');
+      if (tabAdminPanel) tabAdminPanel.style.display = (d.badges && d.badges.staff) ? '' : 'none';
       if (d.badges && d.badges.premium) {
         var set = function(id, val) { var el = document.getElementById(id); if (el) el.value = val != null && val !== '' ? val : ''; };
         set('premiumButtonShape', d.premiumButtonShape);
@@ -431,6 +434,194 @@
         switchTab(tab.dataset.tab);
       });
     });
+
+    var dashboardAdminAllUsers = [];
+    var dashboardAdminBanned = {};
+    var dashboardAdminWired = false;
+    var DASHBOARD_BADGE_KEYS = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
+
+    function escapeHtmlDashboard(s) {
+      if (s == null) return '';
+      var div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    function showDashboardAdminToast(msg, type) {
+      type = type || 'success';
+      var el = document.getElementById('dashboardAdminToast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'admin-toast ' + type;
+      el.style.display = 'block';
+      clearTimeout(window._dashboardAdminToastTimer);
+      window._dashboardAdminToastTimer = setTimeout(function() { el.style.display = 'none'; }, 3500);
+    }
+
+    function getDashboardAdminFilteredList(users, banned) {
+      var searchEl = document.getElementById('dashboardAdminUserSearch');
+      var filterEl = document.getElementById('dashboardAdminUserFilter');
+      var search = (searchEl && searchEl.value) ? searchEl.value.toLowerCase().trim() : '';
+      var filter = (filterEl && filterEl.value) ? filterEl.value : 'all';
+      var list = users || [];
+      if (search) {
+        list = list.filter(function(u) {
+          return (u.username || '').toLowerCase().indexOf(search) !== -1 ||
+            (u.displayName || '').toLowerCase().indexOf(search) !== -1 ||
+            (u.email || '').toLowerCase().indexOf(search) !== -1;
+        });
+      }
+      if (filter === 'banned') list = list.filter(function(u) { return banned && banned[u.uid]; });
+      if (filter === 'active') list = list.filter(function(u) { return !banned || !banned[u.uid]; });
+      return list;
+    }
+
+    function renderDashboardAdminTable(users, banned) {
+      var list = getDashboardAdminFilteredList(users || [], banned || {});
+      var total = (users || []).length;
+      var countLine = document.getElementById('dashboardAdminUsersCountLine');
+      if (countLine) {
+        if (list.length === total) countLine.textContent = 'Showing ' + total + ' user' + (total !== 1 ? 's' : '') + '.';
+        else countLine.textContent = 'Showing ' + list.length + ' of ' + total + ' users.';
+      }
+      var tbody = document.getElementById('dashboardAdminUserList');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">No users match.</td></tr>';
+        return;
+      }
+      var base = (window.location && window.location.origin) ? (window.location.origin + (window.location.pathname || '/').replace(/\/[^/]*$/, '/')) : '';
+      list.forEach(function(u) {
+        var badges = u.badges || {};
+        var badgeHtml = DASHBOARD_BADGE_KEYS.map(function(k) {
+          return '<span class="badge-pill ' + (badges[k] ? 'on' : '') + '" title="' + k + '">' + k.charAt(0).toUpperCase() + '</span>';
+        }).join('');
+        var isBanned = !!(banned && banned[u.uid]);
+        var profileUrl = base ? base + 'bio?u=' + encodeURIComponent(u.username) : '#';
+        var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
+        var tr = document.createElement('tr');
+        tr.title = uidTitle;
+        tr.innerHTML =
+          '<td><span class="user-name" title="' + escapeHtmlDashboard(uidTitle) + '">' + escapeHtmlDashboard(u.displayName || u.username || '—') + '</span></td>' +
+          '<td><a href="' + profileUrl + '" target="_blank" rel="noopener" style="color: var(--purple-accent);" title="' + escapeHtmlDashboard(uidTitle) + '">' + escapeHtmlDashboard(u.username || '—') + '</a></td>' +
+          '<td>' + escapeHtmlDashboard((u.email || '').slice(0, 40)) + (u.email && u.email.length > 40 ? '…' : '') + '</td>' +
+          '<td>' + ((u.stats && u.stats.views) || 0).toLocaleString() + '</td>' +
+          '<td>' + badgeHtml + '</td>' +
+          '<td>' + (isBanned ? '<span class="badge-pill badge-banned">Banned</span>' : '<span class="badge-pill">Active</span>') + '</td>' +
+          '<td class="actions">' +
+            '<button type="button" class="btn-icon edit-user-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Edit">✎</button>' +
+            '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>' +
+            (isBanned
+              ? '<button type="button" class="btn-icon unban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Unban">↩</button>'
+              : '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Ban">⊗</button>') +
+          '</td>';
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('.edit-user-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { openDashboardEditModal(btn.dataset.uid); });
+      });
+      tbody.querySelectorAll('.ban-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (!confirm('Ban this user? They will not be able to sign in.')) return;
+          if (typeof banUser !== 'function') return;
+          banUser(btn.dataset.uid).then(function() {
+            showDashboardAdminToast('User banned.');
+            loadDashboardAdmin();
+          }).catch(function() { showDashboardAdminToast('Failed to ban.', 'error'); });
+        });
+      });
+      tbody.querySelectorAll('.unban-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (typeof unbanUser !== 'function') return;
+          unbanUser(btn.dataset.uid).then(function() {
+            showDashboardAdminToast('User unbanned.');
+            loadDashboardAdmin();
+          }).catch(function() { showDashboardAdminToast('Failed to unban.', 'error'); });
+        });
+      });
+    }
+
+    function openDashboardEditModal(uid) {
+      var uidEl = document.getElementById('dashboardAdminEditUid');
+      if (uidEl) uidEl.value = uid;
+      if (typeof getCurrentUserBio !== 'function') return;
+      getCurrentUserBio(uid).then(function(data) {
+        if (!data) return;
+        var dn = document.getElementById('dashboardAdminEditDisplayName');
+        var bio = document.getElementById('dashboardAdminEditBio');
+        if (dn) dn.value = data.displayName || '';
+        if (bio) bio.value = data.bio || '';
+        var listEl = document.getElementById('dashboardAdminEditBadgesList');
+        if (listEl) {
+          listEl.innerHTML = '';
+          var badges = data.badges || {};
+          DASHBOARD_BADGE_KEYS.forEach(function(k) {
+            var label = document.createElement('label');
+            label.className = 'admin-edit-badge-label';
+            label.innerHTML = '<input type="checkbox" class="edit-badge-cb" data-badge="' + k + '" ' + (badges[k] ? 'checked' : '') + '> ' + k;
+            listEl.appendChild(label);
+          });
+        }
+        var modal = document.getElementById('dashboardAdminEditModal');
+        if (modal) modal.classList.add('on');
+      }).catch(function() { showDashboardAdminToast('Could not load user.', 'error'); });
+    }
+
+    function saveDashboardEditUser() {
+      var uidEl = document.getElementById('dashboardAdminEditUid');
+      var uid = uidEl ? uidEl.value : '';
+      if (!uid || typeof adminUpdateUserProfile !== 'function') return;
+      var data = {
+        displayName: (document.getElementById('dashboardAdminEditDisplayName') && document.getElementById('dashboardAdminEditDisplayName').value) || '',
+        bio: (document.getElementById('dashboardAdminEditBio') && document.getElementById('dashboardAdminEditBio').value) || '',
+        badges: {}
+      };
+      var listEl = document.getElementById('dashboardAdminEditBadgesList');
+      if (listEl) {
+        listEl.querySelectorAll('.edit-badge-cb').forEach(function(cb) {
+          data.badges[cb.dataset.badge] = cb.checked;
+        });
+      }
+      adminUpdateUserProfile(uid, data).then(function() {
+        var modal = document.getElementById('dashboardAdminEditModal');
+        if (modal) modal.classList.remove('on');
+        showDashboardAdminToast('User updated.');
+        loadDashboardAdmin();
+      }).catch(function() { showDashboardAdminToast('Failed to save.', 'error'); });
+    }
+
+    function loadDashboardAdmin() {
+      if (typeof getAllUsers !== 'function' || typeof getBannedUids !== 'function') return;
+      getAllUsers().then(function(users) {
+        dashboardAdminAllUsers = users || [];
+        return getBannedUids().catch(function() { return {}; });
+      }).then(function(banned) {
+        dashboardAdminBanned = banned || {};
+        renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned);
+      }).catch(function(err) {
+        console.error(err);
+        renderDashboardAdminTable([], {});
+        showDashboardAdminToast('Failed to load users.', 'error');
+      });
+    }
+    window.loadDashboardAdmin = loadDashboardAdmin;
+
+    if (!dashboardAdminWired) {
+      dashboardAdminWired = true;
+      var searchEl = document.getElementById('dashboardAdminUserSearch');
+      var filterEl = document.getElementById('dashboardAdminUserFilter');
+      var refreshBtn = document.getElementById('dashboardAdminRefresh');
+      if (searchEl) searchEl.addEventListener('input', function() { renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned); });
+      if (filterEl) filterEl.addEventListener('change', function() { renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned); });
+      if (refreshBtn) refreshBtn.addEventListener('click', function() { loadDashboardAdmin(); });
+      var editCancel = document.getElementById('dashboardAdminEditCancel');
+      var editSave = document.getElementById('dashboardAdminEditSave');
+      var editModal = document.getElementById('dashboardAdminEditModal');
+      if (editCancel) editCancel.addEventListener('click', function() { if (editModal) editModal.classList.remove('on'); });
+      if (editModal) editModal.addEventListener('click', function(e) { if (e.target === editModal) editModal.classList.remove('on'); });
+      if (editSave) editSave.addEventListener('click', saveDashboardEditUser);
+    }
 
     function syncMediaFromInputs() {
       if (avatarURLInput) {

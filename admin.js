@@ -1,9 +1,17 @@
-// Admin panel — nightbio.lol (use from admin only)
+// Admin panel — nightbio.lol (staff badge or adminUids)
 
 function isAdmin(uid) {
   var db = getDb();
   if (!db || !uid) return Promise.resolve(false);
   return db.ref('adminUids/' + uid).once('value').then(function(snap) {
+    return snap.val() === true;
+  });
+}
+
+function isStaff(uid) {
+  var db = getDb();
+  if (!db || !uid) return Promise.resolve(false);
+  return db.ref('users/' + uid + '/badges/staff').once('value').then(function(snap) {
     return snap.val() === true;
   });
 }

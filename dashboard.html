@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit your bio — nightbio.lol</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin.css">
 </head>
 <body class="dashboard-page">
   <div class="translate-wrapper" aria-label="Translate page">
@@ -67,6 +68,7 @@
         <button type="button" class="editor-tab" role="tab" id="tabSeo" aria-selected="false" data-tab="seo">SEO</button>
         <button type="button" class="editor-tab" role="tab" id="tabBadges" aria-selected="false" data-tab="badges">Badges</button>
         <button type="button" class="editor-tab editor-tab-premium" role="tab" id="tabPremium" aria-selected="false" data-tab="premium" style="display: none;">Premium</button>
+        <button type="button" class="editor-tab editor-tab-staff" role="tab" id="tabAdminPanel" aria-selected="false" data-tab="adminPanel" style="display: none;">Admin panel</button>
       </nav>
 
       <div class="editor-panels">
@@ -324,6 +326,65 @@
           </div>
         </section>
 
+        <!-- Admin panel (only visible with staff badge) -->
+        <section class="editor-panel" id="panelAdminPanel" role="tabpanel" aria-labelledby="tabAdminPanel" hidden>
+          <div class="panel-card">
+            <h2 class="panel-title">Staff — User management</h2>
+            <p class="panel-desc">Search, edit profiles, grant badges, and ban or unban users. Only visible with the Staff badge.</p>
+            <p class="panel-desc admin-meta" id="dashboardAdminUsersCountLine">Load users below.</p>
+            <div class="admin-toolbar" style="margin-bottom: 1rem;">
+              <input type="text" id="dashboardAdminUserSearch" class="admin-search-input form-input" placeholder="Search username, name, or email…" style="max-width: 280px;" />
+              <select id="dashboardAdminUserFilter" class="admin-filter-select form-select" style="max-width: 140px;">
+                <option value="all">All users</option>
+                <option value="banned">Banned only</option>
+                <option value="active">Active only</option>
+              </select>
+              <button type="button" class="btn btn-ghost" id="dashboardAdminRefresh">Refresh</button>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Views</th>
+                    <th>Badges</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardAdminUserList"></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="dashboardAdminEditModal" class="admin-modal">
+            <div class="admin-modal-box">
+              <div class="admin-modal-header">Edit user</div>
+              <div class="admin-modal-body">
+                <input type="hidden" id="dashboardAdminEditUid" />
+                <div class="admin-field">
+                  <label for="dashboardAdminEditDisplayName">Display name</label>
+                  <input type="text" id="dashboardAdminEditDisplayName" class="form-input" placeholder="Display name" />
+                </div>
+                <div class="admin-field">
+                  <label for="dashboardAdminEditBio">Bio</label>
+                  <textarea id="dashboardAdminEditBio" class="form-input" rows="4" placeholder="Short bio…"></textarea>
+                </div>
+                <div class="admin-field">
+                  <label>Badges</label>
+                  <div id="dashboardAdminEditBadgesList" class="admin-badges-grid"></div>
+                </div>
+              </div>
+              <div class="admin-modal-footer">
+                <button type="button" class="btn btn-ghost" id="dashboardAdminEditCancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="dashboardAdminEditSave">Save changes</button>
+              </div>
+            </div>
+          </div>
+          <div id="dashboardAdminToast" class="admin-toast" style="display: none;"></div>
+        </section>
+
         <!-- Premium tab (only visible with premium badge) -->
         <section class="editor-panel" id="panelPremium" role="tabpanel" aria-labelledby="tabPremium" hidden>
           <div class="panel-card premium-card">
@@ -472,6 +533,7 @@
   <script src="badge-icons.js"></script>
   <script src="link-platforms.js"></script>
   <script src="bio.js"></script>
+  <script src="admin.js"></script>
   <script src="maintenance.js"></script>
   <script src="dashboard-editor.js"></script>
   <script>
