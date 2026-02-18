@@ -12,10 +12,10 @@
       var known = ['index', 'login', 'signup', 'dashboard', 'admin', 'bio', ''];
       if (segment && known.indexOf(segment) === -1 && segment.indexOf('.') === -1 && segment.length >= 2) {
         var base = path.substring(0, path.lastIndexOf('/') + 1);
-        window.location.replace(base + 'bio.html?u=' + encodeURIComponent(segment));
+        window.location.replace(base + 'bio?u=' + encodeURIComponent(segment));
         return;
       }
-      window.location.replace((path.substring(0, path.lastIndexOf('/') + 1) || '/') + 'index.html');
+      window.location.replace((path.substring(0, path.lastIndexOf('/') + 1) || '/') + 'index');
     })();
   </script>
 </head>

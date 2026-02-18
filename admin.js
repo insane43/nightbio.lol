@@ -11,18 +11,27 @@ function isAdmin(uid) {
 function getAllUsers() {
   var db = getDb();
   if (!db) return Promise.reject(new Error('Database not ready'));
-  return db.ref('users').once('value').then(function(snap) {
+  return Promise.all([
+    db.ref('users').once('value'),
+    db.ref('profileViews').once('value')
+  ]).then(function(results) {
+    var snap = results[0];
+    var viewsSnap = results[1];
     var val = snap.val();
+    var profileViews = (viewsSnap && viewsSnap.val()) || {};
     if (!val) return [];
     return Object.keys(val).map(function(uid) {
       var u = val[uid];
+      var views = (profileViews[uid] != null) ? profileViews[uid] : ((u.stats && u.stats.views) || 0);
       return {
         uid: uid,
+        userId: u.userId != null ? u.userId : null,
         username: u.username || '',
         email: u.email || '',
         displayName: u.displayName || '',
+        createdAt: u.createdAt != null ? u.createdAt : null,
         badges: mergeBadges(u.badges),
-        stats: u.stats || { views: 0 }
+        stats: { views: views }
       };
     });
   });
@@ -35,7 +44,12 @@ function getSiteConfig() {
     var v = snap.val();
     return {
       maintenanceMode: !!(v && v.maintenanceMode),
-      maintenanceMessage: (v && v.maintenanceMessage) || 'We\'ll be back soon.'
+      maintenanceMessage: (v && v.maintenanceMessage) || 'We\'ll be back soon.',
+      siteName: (v && v.siteName) || 'nightbio',
+      tagline: (v && v.tagline) || 'Your link in one place',
+      allowSignups: v && v.allowSignups === false ? false : true,
+      announcementEnabled: !!(v && v.announcementEnabled),
+      announcementText: (v && v.announcementText) || ''
     };
   });
 }
@@ -49,6 +63,30 @@ function setMaintenanceMode(on, message) {
     maintenanceUpdatedAt: firebase.database.ServerValue.TIMESTAMP
   };
   return db.ref('siteConfig').update(updates);
+}
+
+function setSiteConfig(data) {
+  var db = getDb();
+  if (!db) return Promise.reject(new Error('Database not ready'));
+  var updates = {
+    siteName: String(data.siteName || 'nightbio').trim().slice(0, 80),
+    tagline: String(data.tagline || '').trim().slice(0, 120),
+    allowSignups: data.allowSignups !== false,
+    announcementEnabled: !!data.announcementEnabled,
+    announcementText: String(data.announcementText || '').trim().slice(0, 500),
+    siteConfigUpdatedAt: firebase.database.ServerValue.TIMESTAMP
+  };
+  return db.ref('siteConfig').update(updates);
+}
+
+function getAdminUids() {
+  var db = getDb();
+  if (!db) return Promise.reject(new Error('Database not ready'));
+  return db.ref('adminUids').once('value').then(function(snap) {
+    var val = snap.val();
+    if (!val || typeof val !== 'object') return [];
+    return Object.keys(val).filter(function(k) { return val[k]; });
+  });
 }
 
 function getBannedUids() {

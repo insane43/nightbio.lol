@@ -26,22 +26,39 @@ function isUsernameTaken(username) {
   return ref.once('value').then(snap => snap.exists());
 }
 
-// On signup: save user profile and username index
+// Get next sequential user ID (UID 1, 2, 3...) and increment counter
+function getNextUserId() {
+  const db = getDb();
+  if (!db) return Promise.reject(new Error('Database not ready'));
+  return db.ref('meta/lastUserId').transaction(function(current) {
+    return (current || 0) + 1;
+  }).then(function(result) {
+    var snap = result && result.snapshot;
+    if (snap && snap.val != null) return snap.val();
+    if (typeof result === 'number') return result;
+    return 1;
+  });
+}
+
+// On signup: assign next UID, save user profile and username index
 function saveUserProfile(uid, username, email) {
   const db = getDb();
   if (!db) return Promise.reject(new Error('Database not ready'));
   const normalized = String(username).trim().toLowerCase();
-  var userData = {
-    username: username.trim(),
-    email: email.trim(),
-    createdAt: firebase.database.ServerValue.TIMESTAMP,
-    badges: { community: true, og: false, owner: false, staff: false, verified: false, premium: false }
-  };
-  const updates = {
-    ['users/' + uid]: userData,
-    ['usernames/' + normalized]: uid
-  };
-  return db.ref().update(updates);
+  return getNextUserId().then(function(userId) {
+    var userData = {
+      username: username.trim(),
+      email: email.trim(),
+      userId: userId,
+      createdAt: firebase.database.ServerValue.TIMESTAMP,
+      badges: { community: true, og: false, owner: false, staff: false, verified: false, premium: false }
+    };
+    const updates = {
+      ['users/' + uid]: userData,
+      ['usernames/' + normalized]: uid
+    };
+    return db.ref().update(updates);
+  });
 }
 
 // Validate username format (alphanumeric, underscore, 3–20 chars)
@@ -57,7 +74,7 @@ function slugToUsername(s) {
   return out.length >= 3 ? out : 'user';
 }
 
-// Ensure OAuth user has a profile in Realtime DB (username + email). Creates one if missing.
+// Ensure OAuth user has a profile in Realtime DB (username + email + userId). Creates one if missing.
 function ensureOAuthUserProfile(user) {
   const db = getDb();
   if (!db) return Promise.reject(new Error('Database not ready'));

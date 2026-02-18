@@ -28,6 +28,7 @@
         <h1 id="bioName" class="bio-name"></h1>
         <div id="bioBadges" class="bio-badges"></div>
         <p id="bioBio" class="bio-bio-text"></p>
+        <p id="bioViews" class="bio-views" style="display: none;"></p>
         <div id="bioSongWrap" class="bio-song-wrap" style="display: none;"></div>
         <div id="bioLinks" class="bio-links"></div>
       </div>
@@ -38,12 +39,12 @@
     <div id="bio404" class="bio-404" style="display: none;">
       <h1>Bio not found</h1>
       <p>This user doesn't exist or hasn't set up their bio yet.</p>
-      <a href="index.html">Back to nightbio</a>
+      <a href="index">Back to nightbio</a>
     </div>
   </main>
 
   <footer class="bio-footer">
-    <a href="index.html">nightbio.lol</a>
+    <a href="index">nightbio.lol</a>
   </footer>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -53,10 +54,10 @@
   <script src="auth.js"></script>
   <script src="maintenance.js"></script>
   <script src="badge-icons.js"></script>
+  <script src="link-icons.js"></script>
   <script src="bio.js"></script>
   <script>
     (function() {
-      var LINK_ICONS = { instagram: '📷', youtube: '▶', tiktok: '♪', twitter: '𝕏', discord: '💬', spotify: '♫', github: '⌘', twitch: '▶', linkedin: 'in', paypal: '$', snapchat: '👻', telegram: '✈', reddit: '🔴', link: '🔗' };
 
       function setMetaTags(data) {
         var title = (data.metaTitle && data.metaTitle.trim()) ? data.metaTitle.trim() : ((data.displayName || data.username) + ' — nightbio.lol');
@@ -103,6 +104,84 @@
         type();
       }
 
+      // Custom tooltip (hover/focus) for public bio
+      var _nbTooltip = null;
+      var _nbTooltipActiveEl = null;
+      function ensureTooltip() {
+        if (_nbTooltip) return _nbTooltip;
+        var t = document.createElement('div');
+        t.id = 'nbTooltip';
+        t.className = 'nb-tooltip';
+        t.setAttribute('role', 'tooltip');
+        t.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(t);
+        _nbTooltip = t;
+        return t;
+      }
+      function setTooltipPos(x, y) {
+        var t = ensureTooltip();
+        var pad = 12;
+        var rect = t.getBoundingClientRect();
+        var left = x + 12;
+        var top = y + 12;
+        var maxLeft = Math.max(pad, (window.innerWidth || 0) - rect.width - pad);
+        var maxTop = Math.max(pad, (window.innerHeight || 0) - rect.height - pad);
+        if (left > maxLeft) left = x - rect.width - 12;
+        if (top > maxTop) top = y - rect.height - 12;
+        left = Math.min(maxLeft, Math.max(pad, left));
+        top = Math.min(maxTop, Math.max(pad, top));
+        t.style.left = left + 'px';
+        t.style.top = top + 'px';
+      }
+      function showTooltip(el, text, x, y) {
+        if (!el || !text) return;
+        var t = ensureTooltip();
+        _nbTooltipActiveEl = el;
+        t.textContent = text;
+        t.style.display = 'block';
+        t.setAttribute('aria-hidden', 'false');
+        // Position after content so rect is accurate
+        setTooltipPos(x, y);
+        t.classList.add('show');
+      }
+      function hideTooltip() {
+        if (!_nbTooltip) return;
+        _nbTooltipActiveEl = null;
+        _nbTooltip.classList.remove('show');
+        _nbTooltip.setAttribute('aria-hidden', 'true');
+        // keep in DOM for reuse
+      }
+      function getTooltipTarget(node) {
+        if (!node || !node.closest) return null;
+        return node.closest('[data-tooltip]');
+      }
+      document.addEventListener('mousemove', function(ev) {
+        if (!_nbTooltipActiveEl || !_nbTooltip || !_nbTooltip.classList.contains('show')) return;
+        setTooltipPos(ev.clientX, ev.clientY);
+      }, { passive: true });
+      document.addEventListener('mouseover', function(ev) {
+        var target = getTooltipTarget(ev.target);
+        if (!target) return;
+        var text = target.getAttribute('data-tooltip') || '';
+        if (!text) return;
+        showTooltip(target, text, ev.clientX, ev.clientY);
+      });
+      document.addEventListener('mouseout', function(ev) {
+        var rel = ev.relatedTarget;
+        if (_nbTooltipActiveEl && rel && _nbTooltipActiveEl.contains(rel)) return;
+        hideTooltip();
+      });
+      document.addEventListener('focusin', function(ev) {
+        var target = getTooltipTarget(ev.target);
+        if (!target) return;
+        var text = target.getAttribute('data-tooltip') || '';
+        if (!text) return;
+        var r = target.getBoundingClientRect();
+        showTooltip(target, text, r.left + r.width / 2, r.top);
+      });
+      document.addEventListener('focusout', function() { hideTooltip(); });
+      window.addEventListener('scroll', function() { hideTooltip(); }, { passive: true });
+
       initFirebase();
 
       var params = new URLSearchParams(window.location.search);
@@ -138,15 +217,64 @@
         var buttonStyle = data.buttonStyle || 'filled';
         var bgEffect = data.backgroundEffect || 'none';
 
-        content.className = 'bio-content-wrap bio-layout-' + layout + ' bio-btn-' + buttonStyle;
+        var premium = data.badges && data.badges.premium;
+        document.body.classList.toggle('bio-display-card', data.displayStyle === 'card');
+        var mainEl = document.getElementById('bioMain');
+        if (mainEl) {
+          if (data.displayStyle === 'card') {
+            mainEl.style.setProperty('--modal-opacity', String((data.modalOpacity != null ? Math.min(100, Math.max(0, data.modalOpacity)) : 96) / 100));
+            mainEl.style.setProperty('--modal-blur', String(Math.min(24, Math.max(0, data.modalBlur != null ? data.modalBlur : 0))) + 'px');
+            mainEl.style.setProperty('--modal-border-opacity', String((data.modalBorderOpacity != null ? Math.min(100, Math.max(0, data.modalBorderOpacity)) : 20) / 100));
+            mainEl.style.setProperty('--modal-radius', String(Math.min(32, Math.max(8, data.modalRadius != null ? data.modalRadius : 24))) + 'px');
+          } else {
+            mainEl.style.removeProperty('--modal-opacity');
+            mainEl.style.removeProperty('--modal-blur');
+            mainEl.style.removeProperty('--modal-border-opacity');
+            mainEl.style.removeProperty('--modal-radius');
+          }
+        }
+        if (premium && data.premiumCustomFontFamily && data.premiumCustomFontFamily.trim()) {
+          fontFamily = data.premiumCustomFontFamily.trim();
+        }
+        var profileAlign = (data.profileAlignment === 'left' || data.profileAlignment === 'right') ? data.profileAlignment : 'center';
+        content.className = 'bio-content-wrap bio-layout-' + layout + ' bio-align-' + profileAlign + ' bio-btn-' + buttonStyle +
+          (premium && data.premiumButtonShape ? ' bio-premium-btn-' + data.premiumButtonShape : '') +
+          (premium && data.premiumLinkHoverEffect ? ' bio-premium-hover-' + data.premiumLinkHoverEffect : '') +
+          (premium && data.premiumLayoutPreset ? ' bio-premium-layout-' + data.premiumLayoutPreset : '') +
+          (premium && data.premiumProfileAnimation ? ' bio-premium-anim-' + data.premiumProfileAnimation : '');
         document.body.classList.remove('bio-bg-none', 'bio-bg-gradient', 'bio-bg-pattern');
         document.body.classList.add('bio-bg-' + (bgEffect === 'none' ? 'none' : bgEffect));
+        if (premium && data.premiumVideoBackground && data.premiumVideoBackground.trim()) {
+          document.body.classList.add('bio-premium-video-bg');
+          var existingVideo = document.getElementById('bioPremiumVideoBg');
+          if (existingVideo) existingVideo.remove();
+          var vid = document.createElement('video');
+          vid.id = 'bioPremiumVideoBg';
+          vid.autoplay = true;
+          vid.muted = true;
+          vid.loop = true;
+          vid.playsInline = true;
+          vid.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;';
+          var src = document.createElement('source');
+          src.src = data.premiumVideoBackground.trim();
+          src.type = 'video/mp4';
+          vid.appendChild(src);
+          document.body.insertBefore(vid, document.body.firstChild);
+        } else {
+          document.body.classList.remove('bio-premium-video-bg');
+          var oldV = document.getElementById('bioPremiumVideoBg');
+          if (oldV) oldV.remove();
+        }
 
         loadFont(fontFamily);
         document.body.style.setProperty('--bio-font', fontFamily);
         document.body.style.setProperty('--bio-font-size', fontSize + 'px');
         document.body.style.setProperty('--bio-letter-spacing', letterSpacing + 'px');
         if (data.accentColor) document.body.style.setProperty('--purple-accent', data.accentColor);
+        if (premium) {
+          if (data.premiumLinkFontSize != null) content.style.setProperty('--bio-link-font-size', Math.min(24, Math.max(12, data.premiumLinkFontSize)) + 'px');
+          if (data.premiumLinkBorderRadius != null) content.style.setProperty('--bio-link-radius', Math.min(50, Math.max(0, data.premiumLinkBorderRadius)) + 'px');
+        }
 
         var banner = document.getElementById('bioBanner');
         var avatar = document.getElementById('bioAvatar');
@@ -155,25 +283,101 @@
         var songWrap = document.getElementById('bioSongWrap');
         var linksEl = document.getElementById('bioLinks');
 
-        if (layout === 'minimal') {
+        // Cover image is used as full-page background (not a small banner)
+        if (banner) {
           banner.style.display = 'none';
-        } else if (data.bannerURL) {
-          banner.src = data.bannerURL;
-          banner.style.display = 'block';
+          banner.removeAttribute('src');
+        }
+        var coverUrl = (data.bannerURL && data.bannerURL.trim()) ? data.bannerURL.trim() : '';
+        var coverEl = document.getElementById('bioCoverBg');
+        if (!coverUrl) {
+          document.body.classList.remove('bio-has-cover-bg');
+          if (coverEl) coverEl.remove();
         } else {
-          banner.style.display = 'none';
+          document.body.classList.add('bio-has-cover-bg');
+          if (!coverEl) {
+            coverEl = document.createElement('div');
+            coverEl.id = 'bioCoverBg';
+            coverEl.style.cssText = 'position:fixed;inset:0;z-index:-2;background-size:cover;background-position:center;pointer-events:none;';
+            document.body.insertBefore(coverEl, document.body.firstChild);
+          }
+          coverEl.style.backgroundImage = 'url(' + coverUrl.replace(/["\\]/g, '') + ')';
+          if (premium && data.premiumBannerBlur > 0) {
+            coverEl.style.filter = 'blur(' + Math.min(20, data.premiumBannerBlur) + 'px)';
+            coverEl.style.transform = 'scale(1.04)';
+          } else {
+            coverEl.style.filter = '';
+            coverEl.style.transform = '';
+          }
         }
 
         if (data.avatarURL) {
           avatar.src = data.avatarURL;
           avatar.alt = data.displayName || data.username;
           avatar.style.display = 'block';
+          if (premium && data.premiumAvatarBorder && data.premiumAvatarBorder.trim()) {
+            avatar.style.border = data.premiumAvatarBorder.trim();
+          } else {
+            avatar.style.border = '';
+          }
         } else {
           avatar.style.display = 'none';
           avatar.removeAttribute('src');
         }
 
+        // Premium: 3D tilt parallax on card only when hovering over the card
+        if (window._bioParallaxCleanup) { try { window._bioParallaxCleanup(); } catch (e) {} window._bioParallaxCleanup = null; }
+        var parallaxOnCard = premium && data.premiumParallax && data.displayStyle === 'card';
+        document.body.classList.toggle('bio-premium-parallax', !!parallaxOnCard);
+        if (parallaxOnCard && mainEl) {
+          var maxDeg = 6;
+          function setTilt(rotY, rotX) {
+            mainEl.style.setProperty('--nb-tilt-y', rotY + 'deg');
+            mainEl.style.setProperty('--nb-tilt-x', rotX + 'deg');
+          }
+          function onMove(ev) {
+            var r = mainEl.getBoundingClientRect();
+            var cx = ev.clientX - r.left;
+            var cy = ev.clientY - r.top;
+            var x = (cx / Math.max(1, r.width)) * 2 - 1;
+            var y = (cy / Math.max(1, r.height)) * 2 - 1;
+            setTilt((x * maxDeg).toFixed(2), ((-y) * maxDeg).toFixed(2));
+          }
+          function onEnter() {
+            mainEl.addEventListener('mousemove', onMove, { passive: true });
+          }
+          function onLeave() {
+            mainEl.removeEventListener('mousemove', onMove);
+            setTilt('0', '0');
+          }
+          mainEl.addEventListener('mouseenter', onEnter);
+          mainEl.addEventListener('mouseleave', onLeave);
+          window._bioParallaxCleanup = function() {
+            mainEl.removeEventListener('mouseenter', onEnter);
+            mainEl.removeEventListener('mouseleave', onLeave);
+            mainEl.removeEventListener('mousemove', onMove);
+            mainEl.style.removeProperty('--nb-tilt-y');
+            mainEl.style.removeProperty('--nb-tilt-x');
+          };
+        }
+
         nameEl.textContent = data.displayName || data.username || '';
+        if (premium && data.premiumNameGradient && data.premiumNameGradient.trim()) {
+          nameEl.style.background = data.premiumNameGradient.trim();
+          nameEl.style.webkitBackgroundClip = 'text';
+          nameEl.style.backgroundClip = 'text';
+          nameEl.style.color = 'transparent';
+        } else {
+          nameEl.style.background = '';
+          nameEl.style.webkitBackgroundClip = '';
+          nameEl.style.backgroundClip = '';
+          nameEl.style.color = '';
+        }
+        if (premium && data.premiumBioFontSize != null) {
+          bioEl.style.fontSize = Math.min(24, Math.max(12, data.premiumBioFontSize)) + 'px';
+        } else {
+          bioEl.style.fontSize = '';
+        }
 
         var badgesRow = document.getElementById('bioBadges');
         if (badgesRow) {
@@ -184,9 +388,12 @@
           var order = ['community', 'verified', 'staff', 'owner', 'og', 'premium'];
           order.forEach(function(key) {
             if (!badges[key]) return;
+            var info = (window.BIO_BADGES && window.BIO_BADGES[key]) ? window.BIO_BADGES[key] : null;
             var span = document.createElement('span');
             span.className = 'bio-badge bio-badge-' + key;
-            span.setAttribute('title', labels[key] || key);
+            var tip = info ? ((info.label || (labels[key] || key)) + (info.desc ? ' — ' + info.desc : '')) : (labels[key] || key);
+            span.setAttribute('data-tooltip', tip);
+            span.setAttribute('tabindex', '0');
             if (icons[key]) {
               var iconWrap = document.createElement('span');
               iconWrap.className = 'bio-badge-icon';
@@ -202,14 +409,32 @@
         }
 
         if (data.bio) {
-          if (data.typewriterBio) {
+          bioEl.style.display = 'block';
+          if (premium && data.typewriterBio) {
+            bioEl.textContent = data.bio;
+            bioEl.style.minHeight = bioEl.offsetHeight + 'px';
+            bioEl.textContent = '';
             typewriterEffect(bioEl, data.bio, 35);
           } else {
             bioEl.textContent = data.bio;
-            bioEl.style.display = 'block';
           }
         } else {
           bioEl.style.display = 'none';
+        }
+
+        var viewsEl = document.getElementById('bioViews');
+        if (viewsEl) {
+          if (data.showViewsOnBio && data.stats && typeof data.stats.views === 'number') {
+            viewsEl.textContent = (data.stats.views || 0).toLocaleString() + ' profile view' + ((data.stats.views || 0) === 1 ? '' : 's');
+            viewsEl.style.display = 'block';
+            viewsEl.setAttribute('data-tooltip', 'Profile views');
+            viewsEl.setAttribute('tabindex', '0');
+          } else {
+            viewsEl.style.display = 'none';
+            viewsEl.textContent = '';
+            viewsEl.removeAttribute('data-tooltip');
+            viewsEl.removeAttribute('tabindex');
+          }
         }
 
         if (data.songURL && data.songURL.trim()) {
@@ -241,15 +466,31 @@
           a.rel = 'noopener';
           a.className = 'bio-link-btn';
           var iconKey = (l.icon && l.icon.trim()) ? l.icon.trim() : 'link';
-          var iconChar = LINK_ICONS[iconKey] || LINK_ICONS.link;
           var iconSpan = document.createElement('span');
           iconSpan.className = 'bio-link-icon';
           iconSpan.setAttribute('aria-hidden', 'true');
-          iconSpan.textContent = iconChar;
+          var svg = (window.LINK_ICON_SVG && window.LINK_ICON_SVG[iconKey]) ? window.LINK_ICON_SVG[iconKey] : (window.LINK_ICON_SVG && window.LINK_ICON_SVG.link) ? window.LINK_ICON_SVG.link : '';
+          if (svg) {
+            iconSpan.innerHTML = svg;
+          } else {
+            iconSpan.textContent = '\u27A4';
+          }
           a.appendChild(iconSpan);
           a.appendChild(document.createTextNode(l.label || l.url));
           linksEl.appendChild(a);
         });
+
+        var footer = document.querySelector('.bio-footer');
+        if (footer) footer.style.display = (premium && data.premiumHideBranding) ? 'none' : '';
+
+        var customCssEl = document.getElementById('bioPremiumCustomCSS');
+        if (customCssEl) customCssEl.remove();
+        if (premium && data.premiumCustomCSS && data.premiumCustomCSS.trim()) {
+          var styleEl = document.createElement('style');
+          styleEl.id = 'bioPremiumCustomCSS';
+          styleEl.textContent = data.premiumCustomCSS.trim();
+          document.head.appendChild(styleEl);
+        }
       }
 
       if (!username || !username.trim()) {

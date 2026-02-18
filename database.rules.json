@@ -8,26 +8,39 @@
       ".read": "auth != null",
       ".write": false
     },
+    "meta": {
+      "lastUserId": {
+        ".read": "auth != null",
+        ".write": "auth != null && newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() > data.val())"
+      }
+    },
     "siteConfig": {
       ".read": true,
-      ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true"
+      ".write": "auth != null && root.child('adminUids').child(auth.uid).exists()"
     },
     "bannedUids": {
-      ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
+      ".read": "auth != null && root.child('adminUids').child(auth.uid).exists()",
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true"
+        ".write": "auth != null && root.child('adminUids').child(auth.uid).exists()"
+      }
+    },
+    "profileViews": {
+      ".read": true,
+      "$uid": {
+        ".read": true,
+        ".write": "newData.isNumber() && newData.val() >= 0"
       }
     },
     "users": {
-      ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
+      ".read": "auth != null && root.child('adminUids').child(auth.uid).exists()",
       "$uid": {
         ".read": true,
-        ".write": "auth != null && (auth.uid == $uid || root.child('adminUids').child(auth.uid).val() === true)",
+        ".write": "auth != null && (auth.uid == $uid || root.child('adminUids').child(auth.uid).exists())",
         "stats": {
           "views": {
             ".read": "auth != null && auth.uid == $uid",
-            ".write": "newData.isNumber() && newData.val() >= 0"
+            ".write": "auth != null && auth.uid == $uid"
           }
         }
       }

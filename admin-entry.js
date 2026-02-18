@@ -60,7 +60,7 @@
         }
         auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD)
           .then(function() {
-            window.location.href = 'admin.html';
+            window.location.href = 'admin';
           })
           .catch(function(err) {
             var code = (err && err.code) || '';

@@ -45,7 +45,7 @@
 
   <main class="page">
     <div class="brand">
-      <a href="index.html">
+      <a href="index">
         <div class="logo-text">nightbio</div>
         <div class="tagline">Your link in one place</div>
       </a>
@@ -54,6 +54,8 @@
     <div class="card">
       <h1>Create account</h1>
       <p class="subtitle">Join nightbio and get your bio link.</p>
+
+      <div id="signupDisabled" class="message" style="display: none;">Signups are currently disabled. Check back later.</div>
 
       <div id="msg" class="message msg-placeholder empty" role="alert" aria-live="polite"></div>
 
@@ -90,7 +92,7 @@
       </form>
 
       <div class="card-footer">
-        Already have an account? <a href="login.html">Log in</a>
+        Already have an account? <a href="login">Log in</a>
       </div>
     </div>
   </main>
@@ -100,12 +102,22 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
+  <script src="site-config.js"></script>
   <script src="maintenance.js"></script>
   <script src="admin-entry.js"></script>
   <script>
     (function() {
       initFirebase();
-      const form = document.getElementById('signupForm');
+      var form = document.getElementById('signupForm');
+      var signupDisabledEl = document.getElementById('signupDisabled');
+      function applySignupConfig(config) {
+        if (config && config.allowSignups === false) {
+          if (form) form.style.display = 'none';
+          if (signupDisabledEl) signupDisabledEl.style.display = 'block';
+        }
+      }
+      if (window._siteConfig) applySignupConfig(window._siteConfig);
+      window.addEventListener('siteConfigReady', function(e) { applySignupConfig(e.detail); });
       const msgEl = document.getElementById('msg');
       const submitBtn = document.getElementById('submitBtn');
       const usernameInput = document.getElementById('username');
@@ -186,7 +198,7 @@
             var user = result.user;
             return ensureOAuthUserProfile(user).then(function() {
               showMsg('Account created. Redirecting…', 'success');
-              setTimeout(function() { window.location.href = 'dashboard.html'; }, 600);
+              setTimeout(function() { window.location.href = 'dashboard'; }, 600);
             });
           }).catch(function(err) {
             var code = err.code || '';

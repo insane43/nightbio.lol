@@ -41,7 +41,7 @@
   <div class="bg-grid"></div>
 
   <header class="editor-header">
-    <a href="index.html" class="editor-logo">
+    <a href="index" class="editor-logo">
       <span class="logo-text">nightbio</span>
     </a>
     <div class="editor-url-strip" id="bioUrlStrip" style="display: none;">
@@ -66,6 +66,7 @@
         <button type="button" class="editor-tab" role="tab" id="tabAnalytics" aria-selected="false" data-tab="analytics">Analytics</button>
         <button type="button" class="editor-tab" role="tab" id="tabSeo" aria-selected="false" data-tab="seo">SEO</button>
         <button type="button" class="editor-tab" role="tab" id="tabBadges" aria-selected="false" data-tab="badges">Badges</button>
+        <button type="button" class="editor-tab editor-tab-premium" role="tab" id="tabPremium" aria-selected="false" data-tab="premium" style="display: none;">Premium</button>
       </nav>
 
       <div class="editor-panels">
@@ -73,6 +74,7 @@
         <section class="editor-panel active" id="panelProfile" role="tabpanel" aria-labelledby="tabProfile">
           <div class="panel-card">
             <h2 class="panel-title">Profile picture &amp; banner</h2>
+            <p class="panel-desc">Paste image URLs (e.g. from Imgur, your site, or any direct image link). No upload needed.</p>
             <div class="media-upload-grid">
               <div class="media-upload-box avatar-upload-box">
                 <div class="media-preview-wrap">
@@ -82,8 +84,8 @@
                     <span>Profile photo</span>
                   </div>
                 </div>
-                <input type="file" id="avatarFile" accept="image/*" class="media-file-input">
-                <button type="button" class="btn btn-ghost media-upload-trigger" id="avatarUploadBtn">Change photo</button>
+                <label for="avatarURLInput" class="form-label-inline">Profile picture URL</label>
+                <input type="url" id="avatarURLInput" placeholder="https://..." class="form-input" maxlength="500">
               </div>
               <div class="media-upload-box banner-upload-box">
                 <div class="media-preview-wrap banner-preview-wrap">
@@ -93,8 +95,8 @@
                     <span>Cover image</span>
                   </div>
                 </div>
-                <input type="file" id="bannerFile" accept="image/*" class="media-file-input">
-                <button type="button" class="btn btn-ghost media-upload-trigger" id="bannerUploadBtn">Change cover</button>
+                <label for="bannerURLInput" class="form-label-inline">Cover image URL</label>
+                <input type="url" id="bannerURLInput" placeholder="https://..." class="form-input" maxlength="500">
               </div>
             </div>
           </div>
@@ -110,14 +112,9 @@
               <span class="char-count"><span id="bioCharCount">0</span>/500</span>
             </div>
             <div class="form-group">
-              <label>Profile song (optional)</label>
-              <p class="panel-desc" style="margin-bottom: 0.5rem;">Upload an MP3 to play on your profile when someone visits. Max 10MB.</p>
-              <input type="file" id="songFileInput" accept="audio/mpeg,audio/mp3,.mp3" style="display: none;">
-              <div class="song-upload-row">
-                <button type="button" class="btn btn-ghost" id="songUploadBtn">Upload MP3</button>
-                <span id="songFileName" class="song-filename"></span>
-                <button type="button" class="btn btn-ghost song-remove-btn" id="songRemoveBtn" style="display: none;">Remove</button>
-              </div>
+              <label for="songURLInput">Profile song (optional)</label>
+              <p class="panel-desc" style="margin-bottom: 0.5rem;">Paste a direct link to an MP3 file. Visitors can play it on your profile.</p>
+              <input type="url" id="songURLInput" placeholder="https://... (direct MP3 link)" class="form-input" maxlength="500">
             </div>
           </div>
         </section>
@@ -164,6 +161,47 @@
                 <option value="wide">Wide (full-width banner)</option>
               </select>
             </div>
+            <div class="form-group">
+              <label for="profileAlignmentSelect">Profile position</label>
+              <select id="profileAlignmentSelect" class="form-select">
+                <option value="center">Center (PFP, bio, links centered)</option>
+                <option value="left">Left (PFP, bio, links aligned left)</option>
+                <option value="right">Right (PFP, bio, links aligned right)</option>
+              </select>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Display style</h2>
+            <p class="panel-desc">Show your bio full-width or inside a centered card.</p>
+            <div class="form-group">
+              <label for="displayStyleSelect">Display</label>
+              <select id="displayStyleSelect" class="form-select">
+                <option value="default">Full page</option>
+                <option value="card">Card / modal</option>
+              </select>
+            </div>
+            <div id="modalOptionsWrap" class="modal-options-wrap" style="display: none;">
+              <h3 class="panel-subtitle">Card appearance</h3>
+              <div class="form-group">
+                <label for="modalOpacity">Background opacity (%)</label>
+                <input type="range" id="modalOpacity" min="20" max="100" value="96" class="form-range">
+                <span id="modalOpacityValue" class="form-range-value">96%</span>
+              </div>
+              <div class="form-group">
+                <label for="modalBlur">Backdrop blur (px)</label>
+                <input type="range" id="modalBlur" min="0" max="24" value="0" class="form-range">
+                <span id="modalBlurValue" class="form-range-value">0</span>
+              </div>
+              <div class="form-group">
+                <label for="modalBorderOpacity">Border opacity (%)</label>
+                <input type="range" id="modalBorderOpacity" min="0" max="100" value="20" class="form-range">
+                <span id="modalBorderOpacityValue" class="form-range-value">20%</span>
+              </div>
+              <div class="form-group">
+                <label for="modalRadius">Corner radius (px)</label>
+                <input type="number" id="modalRadius" min="8" max="32" value="24" class="form-input-num">
+              </div>
+            </div>
           </div>
           <div class="panel-card">
             <h2 class="panel-title">Theme</h2>
@@ -205,10 +243,6 @@
                 <input type="number" id="letterSpacing" min="-1" max="2" step="0.1" value="0" class="form-input-num">
               </div>
             </div>
-            <div class="form-group form-check">
-              <input type="checkbox" id="typewriterBio" class="form-checkbox">
-              <label for="typewriterBio">Typewriter effect on bio</label>
-            </div>
           </div>
           <div class="panel-card">
             <h2 class="panel-title">Background</h2>
@@ -233,6 +267,13 @@
                 <span class="analytics-value" id="profileViewsCount">—</span>
                 <span class="analytics-label">Profile views</span>
               </div>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="showViewsOnBio" aria-describedby="showViewsOnBioDesc">
+                Show profile views on my bio link
+              </label>
+              <p class="panel-desc" id="showViewsOnBioDesc">When enabled, visitors will see your profile view count on your public bio page.</p>
             </div>
           </div>
         </section>
@@ -273,6 +314,124 @@
             <div class="badges-grid" id="badgesList"></div>
           </div>
         </section>
+
+        <!-- Premium tab (only visible with premium badge) -->
+        <section class="editor-panel" id="panelPremium" role="tabpanel" aria-labelledby="tabPremium" hidden>
+          <div class="panel-card premium-card">
+            <h2 class="panel-title">Premium features</h2>
+            <p class="panel-desc">Unlock these options with the Premium badge. Customize your profile with advanced styling and effects.</p>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Link styling</h2>
+            <div class="form-group">
+              <label for="premiumButtonShape">Button shape</label>
+              <select id="premiumButtonShape" class="form-select">
+                <option value="">Default</option>
+                <option value="pill">Pill (fully rounded)</option>
+                <option value="rounded">Rounded</option>
+                <option value="square">Square</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="premiumLinkHoverEffect">Link hover effect</label>
+              <select id="premiumLinkHoverEffect" class="form-select">
+                <option value="">Default</option>
+                <option value="glow">Glow</option>
+                <option value="lift">Lift</option>
+                <option value="scale">Scale</option>
+                <option value="underline">Underline</option>
+              </select>
+            </div>
+            <div class="form-group form-row">
+              <div>
+                <label for="premiumLinkFontSize">Link font size</label>
+                <input type="number" id="premiumLinkFontSize" min="12" max="24" value="16" class="form-input-num" placeholder="16">
+              </div>
+              <div>
+                <label for="premiumLinkBorderRadius">Link corner radius (px)</label>
+                <input type="number" id="premiumLinkBorderRadius" min="0" max="50" value="8" class="form-input-num" placeholder="8">
+              </div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Name &amp; bio</h2>
+            <div class="form-group">
+              <label for="premiumNameGradient">Name gradient (CSS gradient)</label>
+              <input type="text" id="premiumNameGradient" placeholder="e.g. linear-gradient(90deg, #a855f7, #ec4899)" class="form-input" maxlength="200">
+              <p class="panel-desc">Leave empty for solid color. Example: linear-gradient(90deg, #a855f7, #ec4899)</p>
+            </div>
+            <div class="form-group">
+              <label for="premiumBioFontSize">Bio font size (px)</label>
+              <input type="number" id="premiumBioFontSize" min="12" max="24" value="15" class="form-input-num" placeholder="15">
+            </div>
+            <div class="form-group form-check">
+              <input type="checkbox" id="typewriterBio" class="form-checkbox">
+              <label for="typewriterBio">Typewriter effect on bio (Premium)</label>
+            </div>
+            <div class="form-group">
+              <label for="premiumCustomFontFamily">Premium font (Google Font family name)</label>
+              <input type="text" id="premiumCustomFontFamily" placeholder="e.g. Sora" class="form-input" maxlength="80">
+              <p class="panel-desc">Optional. Overrides the font dropdown on your public bio.</p>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Layout presets</h2>
+            <p class="panel-desc">Extra premium looks. These stack on top of your normal Layout style.</p>
+            <div class="form-group">
+              <label for="premiumLayoutPreset">Preset</label>
+              <select id="premiumLayoutPreset" class="form-select">
+                <option value="">Default</option>
+                <option value="sleek">Sleek</option>
+                <option value="modern">Modern</option>
+                <option value="simplistic">Simplistic</option>
+              </select>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Motion</h2>
+            <div class="form-group">
+              <label for="premiumProfileAnimation">Profile animation</label>
+              <select id="premiumProfileAnimation" class="form-select">
+                <option value="">None</option>
+                <option value="float">Float</option>
+                <option value="fadeUp">Fade up</option>
+                <option value="glowPulse">Glow pulse</option>
+              </select>
+            </div>
+            <div class="form-group form-check">
+              <input type="checkbox" id="premiumParallax" class="form-checkbox">
+              <label for="premiumParallax">Parallax profile animation (banner/avatar)</label>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Background &amp; media</h2>
+            <div class="form-group">
+              <label for="premiumVideoBackground">Video background URL</label>
+              <input type="url" id="premiumVideoBackground" placeholder="https://... (video URL)" class="form-input" maxlength="500">
+              <p class="panel-desc">Optional. A looping video behind your profile (e.g. MP4). Leave empty for static background.</p>
+            </div>
+            <div class="form-group">
+              <label for="premiumBannerBlur">Cover image blur (0 = none)</label>
+              <input type="number" id="premiumBannerBlur" min="0" max="20" value="0" class="form-input-num" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="premiumAvatarBorder">Avatar border (CSS)</label>
+              <input type="text" id="premiumAvatarBorder" placeholder="e.g. 3px solid #7c6bb8" class="form-input" maxlength="100">
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Advanced</h2>
+            <div class="form-group form-check">
+              <input type="checkbox" id="premiumHideBranding" class="form-checkbox">
+              <label for="premiumHideBranding">Hide “nightbio.lol” footer on profile</label>
+            </div>
+            <div class="form-group">
+              <label for="premiumCustomCSS">Custom CSS (snippet)</label>
+              <textarea id="premiumCustomCSS" placeholder=".bio-name { letter-spacing: 0.1em; }" rows="4" class="form-input" maxlength="2000"></textarea>
+              <p class="panel-desc">Optional. Applied only on your public bio. Keep it short and safe.</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -311,23 +470,23 @@
       initFirebase();
       var auth = getAuth();
       document.getElementById('logoutBtn').addEventListener('click', function() {
-        auth.signOut().then(function() { window.location.href = 'index.html'; });
+        auth.signOut().then(function() { window.location.href = 'index'; });
       });
       auth.onAuthStateChanged(function(user) {
         if (!user) {
-          window.location.href = 'login.html';
+          window.location.href = 'login';
           return;
         }
         if (!user.emailVerified) {
           auth.signOut();
-          window.location.href = 'login.html?verified=0';
+          window.location.href = 'login?verified=0';
           return;
         }
         if (typeof isUserBanned === 'function') {
           isUserBanned(user.uid).then(function(banned) {
             if (banned) {
               auth.signOut();
-              window.location.href = 'index.html?banned=1';
+              window.location.href = 'index?banned=1';
               return;
             }
             window.dashboardEditor && window.dashboardEditor.init(user.uid);

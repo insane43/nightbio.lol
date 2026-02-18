@@ -49,13 +49,18 @@
     var displayName = document.getElementById('displayName');
     var bioText = document.getElementById('bioText');
     var accentColor = document.getElementById('accentColor');
+    var avatarURLIn = document.getElementById('avatarURLInput');
+    var bannerURLIn = document.getElementById('bannerURLInput');
+    var songURLIn = document.getElementById('songURLInput');
     return {
       displayName: displayName ? displayName.value.trim() : '',
       bio: bioText ? bioText.value.trim() : '',
-      avatarURL: window._editorCurrentData && window._editorCurrentData.avatarURL || '',
-      bannerURL: window._editorCurrentData && window._editorCurrentData.bannerURL || '',
+      avatarURL: (avatarURLIn && avatarURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.avatarURL) || '',
+      bannerURL: (bannerURLIn && bannerURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.bannerURL) || '',
+      songURL: (songURLIn && songURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.songURL) || '',
       accentColor: accentColor ? accentColor.value : '#7c6bb8',
       layout: (document.getElementById('layoutSelect') && document.getElementById('layoutSelect').value) || 'classic',
+      displayStyle: (document.getElementById('displayStyleSelect') && document.getElementById('displayStyleSelect').value) || 'default',
       fontFamily: (document.getElementById('fontFamily') && document.getElementById('fontFamily').value) || 'Outfit',
       fontSize: parseInt(document.getElementById('fontSize') && document.getElementById('fontSize').value, 10) || 16,
       letterSpacing: parseFloat(document.getElementById('letterSpacing') && document.getElementById('letterSpacing').value) || 0,
@@ -220,10 +225,9 @@
     var bioUrlInput = document.getElementById('bioUrlInput');
     var copyBioUrlBtn = document.getElementById('copyBioUrlBtn');
     var viewBioBtn = document.getElementById('viewBioBtn');
-    var avatarFile = document.getElementById('avatarFile');
-    var bannerFile = document.getElementById('bannerFile');
-    var avatarUploadBtn = document.getElementById('avatarUploadBtn');
-    var bannerUploadBtn = document.getElementById('bannerUploadBtn');
+    var avatarURLInput = document.getElementById('avatarURLInput');
+    var bannerURLInput = document.getElementById('bannerURLInput');
+    var songURLInput = document.getElementById('songURLInput');
     var avatarPreview = document.getElementById('avatarPreview');
     var bannerPreview = document.getElementById('bannerPreview');
     var avatarPlaceholder = document.getElementById('avatarPlaceholder');
@@ -231,10 +235,6 @@
     var displayName = document.getElementById('displayName');
     var bioText = document.getElementById('bioText');
     var bioCharCount = document.getElementById('bioCharCount');
-    var songFileInput = document.getElementById('songFileInput');
-    var songUploadBtn = document.getElementById('songUploadBtn');
-    var songFileName = document.getElementById('songFileName');
-    var songRemoveBtn = document.getElementById('songRemoveBtn');
     var accentColor = document.getElementById('accentColor');
     var accentColorHex = document.getElementById('accentColorHex');
     var linkList = document.getElementById('linkList');
@@ -244,8 +244,8 @@
         var base = (typeof window !== 'undefined' && window.location && window.location.origin)
           ? (window.location.origin + (window.location.pathname || '/').replace(/\/[^/]*$/, '/'))
           : BASE_URL + '/';
-        var fullUrl = base + 'bio.html?u=' + encodeURIComponent(username);
-        var viewHref = 'bio.html?u=' + encodeURIComponent(username);
+        var fullUrl = base + 'bio?u=' + encodeURIComponent(username);
+        var viewHref = 'bio?u=' + encodeURIComponent(username);
         if (bioUrlInput) bioUrlInput.value = fullUrl;
         if (bioUrlStrip) bioUrlStrip.style.display = 'flex';
         if (viewBioBtn) viewBioBtn.href = viewHref;
@@ -321,13 +321,31 @@
         bioText.value = d.bio || '';
         if (bioCharCount) bioCharCount.textContent = (d.bio || '').length;
       }
-      if (songFileName) songFileName.textContent = (d.songURL && d.songURL.trim()) ? 'Song uploaded' : '';
-      if (songRemoveBtn) songRemoveBtn.style.display = (d.songURL && d.songURL.trim()) ? '' : 'none';
       if (accentColor) accentColor.value = d.accentColor || '#7c6bb8';
       if (accentColorHex) accentColorHex.value = d.accentColor || '#7c6bb8';
 
       var layoutSel = document.getElementById('layoutSelect');
       if (layoutSel) layoutSel.value = d.layout || 'classic';
+      var profileAlignSel = document.getElementById('profileAlignmentSelect');
+      if (profileAlignSel) profileAlignSel.value = (/^(left|right|center)$/i.test(d.profileAlignment) ? d.profileAlignment.toLowerCase() : 'center');
+      var displayStyleSel = document.getElementById('displayStyleSelect');
+      if (displayStyleSel) displayStyleSel.value = (d.displayStyle === 'card') ? 'card' : 'default';
+      var modalWrap = document.getElementById('modalOptionsWrap');
+      if (modalWrap) modalWrap.style.display = (d.displayStyle === 'card') ? 'block' : 'none';
+      var modalOpacityIn = document.getElementById('modalOpacity');
+      var modalBlurIn = document.getElementById('modalBlur');
+      var modalBorderOpacityIn = document.getElementById('modalBorderOpacity');
+      var modalRadiusIn = document.getElementById('modalRadius');
+      if (modalOpacityIn) { modalOpacityIn.value = d.modalOpacity != null ? d.modalOpacity : 96; }
+      if (modalBlurIn) { modalBlurIn.value = d.modalBlur != null ? d.modalBlur : 0; }
+      if (modalBorderOpacityIn) { modalBorderOpacityIn.value = d.modalBorderOpacity != null ? d.modalBorderOpacity : 20; }
+      if (modalRadiusIn) { modalRadiusIn.value = d.modalRadius != null ? d.modalRadius : 24; }
+      var modalOpacityVal = document.getElementById('modalOpacityValue');
+      var modalBlurVal = document.getElementById('modalBlurValue');
+      var modalBorderVal = document.getElementById('modalBorderOpacityValue');
+      if (modalOpacityVal) modalOpacityVal.textContent = (d.modalOpacity != null ? d.modalOpacity : 96) + '%';
+      if (modalBlurVal) modalBlurVal.textContent = String(d.modalBlur != null ? d.modalBlur : 0);
+      if (modalBorderVal) modalBorderVal.textContent = (d.modalBorderOpacity != null ? d.modalBorderOpacity : 20) + '%';
       var fontSel = document.getElementById('fontFamily');
       if (fontSel) fontSel.value = d.fontFamily || 'Outfit';
       var fontSizeIn = document.getElementById('fontSize');
@@ -335,7 +353,7 @@
       var letterSpacingIn = document.getElementById('letterSpacing');
       if (letterSpacingIn) letterSpacingIn.value = d.letterSpacing != null ? d.letterSpacing : 0;
       var typewriterCb = document.getElementById('typewriterBio');
-      if (typewriterCb) typewriterCb.checked = !!d.typewriterBio;
+      if (typewriterCb) typewriterCb.checked = (d.badges && d.badges.premium) ? !!d.typewriterBio : false;
       var bgEffect = document.getElementById('backgroundEffect');
       if (bgEffect) bgEffect.value = d.backgroundEffect || 'none';
       var btnStyle = document.getElementById('buttonStyle');
@@ -354,15 +372,44 @@
       window._editorCurrentData.badges = d.badges || { community: true, og: false, owner: false, staff: false, verified: false, premium: false };
       renderBadgesList(window._editorCurrentData.badges);
 
+      var showViewsCb = document.getElementById('showViewsOnBio');
+      if (showViewsCb) showViewsCb.checked = !!d.showViewsOnBio;
+      refreshProfileViews();
+
+      if (avatarURLInput) avatarURLInput.value = d.avatarURL || '';
+      if (bannerURLInput) bannerURLInput.value = d.bannerURL || '';
+      if (songURLInput) songURLInput.value = d.songURL || '';
       if (avatarPreview && d.avatarURL) {
         avatarPreview.src = d.avatarURL;
         avatarPreview.style.display = 'block';
         if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
-      }
+      } else if (avatarPlaceholder) avatarPlaceholder.style.display = '';
       if (bannerPreview && d.bannerURL) {
         bannerPreview.src = d.bannerURL;
         bannerPreview.style.display = 'block';
         if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
+      } else if (bannerPlaceholder) bannerPlaceholder.style.display = '';
+
+      var tabPremium = document.getElementById('tabPremium');
+      if (tabPremium) tabPremium.style.display = (d.badges && d.badges.premium) ? '' : 'none';
+      if (d.badges && d.badges.premium) {
+        var set = function(id, val) { var el = document.getElementById(id); if (el) el.value = val != null && val !== '' ? val : ''; };
+        set('premiumButtonShape', d.premiumButtonShape);
+        set('premiumLinkHoverEffect', d.premiumLinkHoverEffect);
+        set('premiumLinkFontSize', d.premiumLinkFontSize != null ? d.premiumLinkFontSize : '');
+        set('premiumLinkBorderRadius', d.premiumLinkBorderRadius != null ? d.premiumLinkBorderRadius : '');
+        set('premiumNameGradient', d.premiumNameGradient);
+        set('premiumBioFontSize', d.premiumBioFontSize != null ? d.premiumBioFontSize : '');
+        set('premiumCustomFontFamily', d.premiumCustomFontFamily);
+        set('premiumLayoutPreset', d.premiumLayoutPreset);
+        set('premiumProfileAnimation', d.premiumProfileAnimation);
+        var pPar = document.getElementById('premiumParallax');
+        if (pPar) pPar.checked = !!d.premiumParallax;
+        set('premiumVideoBackground', d.premiumVideoBackground);
+        set('premiumBannerBlur', d.premiumBannerBlur != null ? d.premiumBannerBlur : '');
+        set('premiumAvatarBorder', d.premiumAvatarBorder);
+        document.getElementById('premiumHideBranding').checked = !!d.premiumHideBranding;
+        set('premiumCustomCSS', d.premiumCustomCSS);
       }
 
       if (linkList) {
@@ -383,105 +430,49 @@
       });
     });
 
-    // File upload triggers
-    if (avatarUploadBtn && avatarFile) {
-      avatarUploadBtn.addEventListener('click', function() { avatarFile.click(); });
-    }
-    if (bannerUploadBtn && bannerFile) {
-      bannerUploadBtn.addEventListener('click', function() { bannerFile.click(); });
-    }
-
-    if (avatarFile) {
-      avatarFile.addEventListener('change', function() {
-        var file = avatarFile.files && avatarFile.files[0];
-        if (!file) return;
-        uploadBioImage(uid, file, 'avatar').then(function(url) {
-          window._editorCurrentData.avatarURL = url;
-          if (avatarPreview) {
-            avatarPreview.src = url;
+    function syncMediaFromInputs() {
+      if (avatarURLInput) {
+        window._editorCurrentData.avatarURL = avatarURLInput.value.trim();
+        if (avatarPreview) {
+          if (window._editorCurrentData.avatarURL) {
+            avatarPreview.src = window._editorCurrentData.avatarURL;
             avatarPreview.style.display = 'block';
+            if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
+          } else {
+            avatarPreview.style.display = 'none';
+            avatarPreview.removeAttribute('src');
+            if (avatarPlaceholder) avatarPlaceholder.style.display = '';
           }
-          if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
-          clearMsg(msgEl);
-          updatePreview();
-        }).catch(function() {
-          showMsg(msgEl, 'Failed to upload photo.', 'error');
-        });
-      });
-    }
-    if (bannerFile) {
-      bannerFile.addEventListener('change', function() {
-        var file = bannerFile.files && bannerFile.files[0];
-        if (!file) return;
-        uploadBioImage(uid, file, 'banner').then(function(url) {
-          window._editorCurrentData.bannerURL = url;
-          if (bannerPreview) {
-            bannerPreview.src = url;
+        }
+      }
+      if (bannerURLInput) {
+        window._editorCurrentData.bannerURL = bannerURLInput.value.trim();
+        if (bannerPreview) {
+          if (window._editorCurrentData.bannerURL) {
+            bannerPreview.src = window._editorCurrentData.bannerURL;
             bannerPreview.style.display = 'block';
+            if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
+          } else {
+            bannerPreview.style.display = 'none';
+            bannerPreview.removeAttribute('src');
+            if (bannerPlaceholder) bannerPlaceholder.style.display = '';
           }
-          if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
-          clearMsg(msgEl);
-          updatePreview();
-        }).catch(function() {
-          showMsg(msgEl, 'Failed to upload cover.', 'error');
-        });
-      });
-    }
-
-    if (songUploadBtn && songFileInput) {
-      songUploadBtn.addEventListener('click', function() { songFileInput.click(); });
-    }
-    if (songFileInput) {
-      songFileInput.addEventListener('change', function() {
-        var file = songFileInput.files && songFileInput.files[0];
-        if (!file) return;
-        if (file.size > 10 * 1024 * 1024) {
-          showMsg(msgEl, 'File too large. Max 10MB.', 'error');
-          return;
         }
-        var btn = songUploadBtn;
-        if (btn) btn.disabled = true;
-        var timedOut = false;
-        var hasProgress = false;
-        var timeout = setTimeout(function() {
-          if (hasProgress) return;
-          timedOut = true;
-          showMsg(msgEl, 'Upload timed out. If your file is large, try a smaller MP3. Or check if firebasestorage.googleapis.com is blocked.', 'error');
-          if (btn) btn.disabled = false;
-        }, 90000);
-        function onProgress(pct) {
-          hasProgress = true;
-          showMsg(msgEl, 'Uploading song… ' + pct + '%', 'info');
-        }
-        uploadBioSong(uid, file, onProgress).then(function(url) {
-          clearTimeout(timeout);
-          if (timedOut) return;
-          window._editorCurrentData.songURL = url;
-          if (songFileName) songFileName.textContent = file.name || 'Song uploaded';
-          if (songRemoveBtn) songRemoveBtn.style.display = '';
-          clearMsg(msgEl);
-          showMsg(msgEl, 'Song uploaded. Save your profile to apply.', 'success');
-          updatePreview();
-        }).catch(function(err) {
-          clearTimeout(timeout);
-          if (timedOut) return;
-          var msg = (err && err.message) ? err.message : 'Upload failed. Use MP3, max 10MB. Deploy storage rules: firebase deploy --only storage';
-          showMsg(msgEl, msg, 'error');
-        }).then(function() {
-          if (!timedOut && btn) btn.disabled = false;
-        });
-        showMsg(msgEl, 'Uploading song… 0%', 'info');
-        songFileInput.value = '';
-      });
+      }
+      if (songURLInput) window._editorCurrentData.songURL = songURLInput.value.trim();
+      updatePreview();
     }
-    if (songRemoveBtn) {
-      songRemoveBtn.addEventListener('click', function() {
-        window._editorCurrentData.songURL = '';
-        if (songFileName) songFileName.textContent = '';
-        songRemoveBtn.style.display = 'none';
-        if (songFileInput) songFileInput.value = '';
-        updatePreview();
-      });
+    if (avatarURLInput) {
+      avatarURLInput.addEventListener('input', syncMediaFromInputs);
+      avatarURLInput.addEventListener('change', syncMediaFromInputs);
+    }
+    if (bannerURLInput) {
+      bannerURLInput.addEventListener('input', syncMediaFromInputs);
+      bannerURLInput.addEventListener('change', syncMediaFromInputs);
+    }
+    if (songURLInput) {
+      songURLInput.addEventListener('input', function() { window._editorCurrentData.songURL = songURLInput.value.trim(); updatePreview(); });
+      songURLInput.addEventListener('change', function() { window._editorCurrentData.songURL = songURLInput.value.trim(); updatePreview(); });
     }
 
     if (displayName) {
@@ -518,39 +509,87 @@
       });
     }
 
+    function getEditorDataForSave() {
+      var layoutSel = document.getElementById('layoutSelect');
+      var fontSel = document.getElementById('fontFamily');
+      var fontSizeIn = document.getElementById('fontSize');
+      var letterSpacingIn = document.getElementById('letterSpacing');
+      var typewriterCb = document.getElementById('typewriterBio');
+      var bgEffect = document.getElementById('backgroundEffect');
+      var btnStyle = document.getElementById('buttonStyle');
+      var metaTitleIn = document.getElementById('metaTitle');
+      var metaDescIn = document.getElementById('metaDescription');
+      var metaImageIn = document.getElementById('metaImageURL');
+      var badgeCommunityEl = document.getElementById('badgeCommunity');
+      var showViewsCb = document.getElementById('showViewsOnBio');
+      var avatarURLIn = document.getElementById('avatarURLInput');
+      var bannerURLIn = document.getElementById('bannerURLInput');
+      var songURLIn = document.getElementById('songURLInput');
+      var payload = {
+        displayName: displayName ? displayName.value.trim() : '',
+        bio: bioText ? bioText.value.trim() : '',
+        songURL: (songURLIn && songURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.songURL) || '',
+        avatarURL: (avatarURLIn && avatarURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.avatarURL) || '',
+        bannerURL: (bannerURLIn && bannerURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.bannerURL) || '',
+        accentColor: accentColor ? accentColor.value : '#7c6bb8',
+        layout: layoutSel ? layoutSel.value : 'classic',
+        profileAlignment: (document.getElementById('profileAlignmentSelect') && document.getElementById('profileAlignmentSelect').value) || 'center',
+        displayStyle: (document.getElementById('displayStyleSelect') && document.getElementById('displayStyleSelect').value) || 'default',
+        modalOpacity: (function() { var el = document.getElementById('modalOpacity'); return el ? parseInt(el.value, 10) : 96; })(),
+        modalBlur: (function() { var el = document.getElementById('modalBlur'); return el ? parseInt(el.value, 10) : 0; })(),
+        modalBorderOpacity: (function() { var el = document.getElementById('modalBorderOpacity'); return el ? parseInt(el.value, 10) : 20; })(),
+        modalRadius: (function() { var el = document.getElementById('modalRadius'); return el ? parseInt(el.value, 10) : 24; })(),
+        fontFamily: fontSel ? fontSel.value : 'Outfit',
+        fontSize: fontSizeIn ? (parseInt(fontSizeIn.value, 10) || 16) : 16,
+        letterSpacing: letterSpacingIn ? (parseFloat(letterSpacingIn.value) || 0) : 0,
+        typewriterBio: (window._editorCurrentData && window._editorCurrentData.badges && window._editorCurrentData.badges.premium) ? (typewriterCb ? typewriterCb.checked : false) : false,
+        backgroundEffect: bgEffect ? bgEffect.value : 'none',
+        buttonStyle: btnStyle ? btnStyle.value : 'filled',
+        metaTitle: metaTitleIn ? metaTitleIn.value.trim() : '',
+        metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
+        metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
+        showViewsOnBio: showViewsCb ? showViewsCb.checked : false,
+        badges: { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
+        links: getLinksFromList()
+      };
+      if (window._editorCurrentData && window._editorCurrentData.badges && window._editorCurrentData.badges.premium) {
+        var pBtnShape = document.getElementById('premiumButtonShape');
+        var pLinkHover = document.getElementById('premiumLinkHoverEffect');
+        var pLinkFs = document.getElementById('premiumLinkFontSize');
+        var pLinkBr = document.getElementById('premiumLinkBorderRadius');
+        var pNameGrad = document.getElementById('premiumNameGradient');
+        var pBioFs = document.getElementById('premiumBioFontSize');
+        var pVidBg = document.getElementById('premiumVideoBackground');
+        var pBannerBlur = document.getElementById('premiumBannerBlur');
+        var pAvatarBorder = document.getElementById('premiumAvatarBorder');
+        var pHideBrand = document.getElementById('premiumHideBranding');
+        var pCustomCSS = document.getElementById('premiumCustomCSS');
+        var pCustomFont = document.getElementById('premiumCustomFontFamily');
+        var pLayoutPreset = document.getElementById('premiumLayoutPreset');
+        var pAnim = document.getElementById('premiumProfileAnimation');
+        var pParallax = document.getElementById('premiumParallax');
+        payload.premiumButtonShape = pBtnShape ? pBtnShape.value.trim() : '';
+        payload.premiumLinkHoverEffect = pLinkHover ? pLinkHover.value.trim() : '';
+        payload.premiumLinkFontSize = pLinkFs && pLinkFs.value.trim() !== '' ? parseInt(pLinkFs.value, 10) : null;
+        payload.premiumLinkBorderRadius = pLinkBr && pLinkBr.value.trim() !== '' ? parseInt(pLinkBr.value, 10) : null;
+        payload.premiumNameGradient = pNameGrad ? pNameGrad.value.trim() : '';
+        payload.premiumBioFontSize = pBioFs && pBioFs.value.trim() !== '' ? parseInt(pBioFs.value, 10) : null;
+        payload.premiumVideoBackground = pVidBg ? pVidBg.value.trim() : '';
+        payload.premiumBannerBlur = pBannerBlur && pBannerBlur.value.trim() !== '' ? parseInt(pBannerBlur.value, 10) : 0;
+        payload.premiumAvatarBorder = pAvatarBorder ? pAvatarBorder.value.trim() : '';
+        payload.premiumHideBranding = pHideBrand ? pHideBrand.checked : false;
+        payload.premiumCustomCSS = pCustomCSS ? pCustomCSS.value.trim() : '';
+        payload.premiumCustomFontFamily = pCustomFont ? pCustomFont.value.trim() : '';
+        payload.premiumLayoutPreset = pLayoutPreset ? pLayoutPreset.value.trim() : '';
+        payload.premiumProfileAnimation = pAnim ? pAnim.value.trim() : '';
+        payload.premiumParallax = pParallax ? !!pParallax.checked : false;
+      }
+      return payload;
+    }
+
     if (saveBtn) {
       saveBtn.addEventListener('click', function() {
-        var layoutSel = document.getElementById('layoutSelect');
-        var fontSel = document.getElementById('fontFamily');
-        var fontSizeIn = document.getElementById('fontSize');
-        var letterSpacingIn = document.getElementById('letterSpacing');
-        var typewriterCb = document.getElementById('typewriterBio');
-        var bgEffect = document.getElementById('backgroundEffect');
-        var btnStyle = document.getElementById('buttonStyle');
-        var metaTitleIn = document.getElementById('metaTitle');
-        var metaDescIn = document.getElementById('metaDescription');
-        var metaImageIn = document.getElementById('metaImageURL');
-        var badgeCommunityEl = document.getElementById('badgeCommunity');
-        var data = {
-          displayName: displayName ? displayName.value.trim() : '',
-          bio: bioText ? bioText.value.trim() : '',
-          songURL: (window._editorCurrentData && window._editorCurrentData.songURL) ? window._editorCurrentData.songURL.trim() : '',
-          avatarURL: window._editorCurrentData.avatarURL || '',
-          bannerURL: window._editorCurrentData.bannerURL || '',
-          accentColor: accentColor ? accentColor.value : '#7c6bb8',
-          layout: layoutSel ? layoutSel.value : 'classic',
-          fontFamily: fontSel ? fontSel.value : 'Outfit',
-          fontSize: fontSizeIn ? (parseInt(fontSizeIn.value, 10) || 16) : 16,
-          letterSpacing: letterSpacingIn ? (parseFloat(letterSpacingIn.value) || 0) : 0,
-          typewriterBio: typewriterCb ? typewriterCb.checked : false,
-          backgroundEffect: bgEffect ? bgEffect.value : 'none',
-          buttonStyle: btnStyle ? btnStyle.value : 'filled',
-          metaTitle: metaTitleIn ? metaTitleIn.value.trim() : '',
-          metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
-          metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
-          badges: { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
-          links: getLinksFromList()
-        };
+        var data = getEditorDataForSave();
         saveBtn.disabled = true;
         clearMsg(msgEl);
         saveBio(uid, data).then(function() {
@@ -606,6 +645,25 @@
         updatePreview();
       });
     }
+
+    var displayStyleSel = document.getElementById('displayStyleSelect');
+    if (displayStyleSel) {
+      displayStyleSel.addEventListener('change', function() {
+        var wrap = document.getElementById('modalOptionsWrap');
+        if (wrap) wrap.style.display = this.value === 'card' ? 'block' : 'none';
+        updatePreview();
+      });
+    }
+    function bindModalRange(id, valueId, suffix) {
+      var el = document.getElementById(id);
+      var valEl = document.getElementById(valueId);
+      if (!el || !valEl) return;
+      el.addEventListener('input', function() { valEl.textContent = el.value + (suffix || ''); });
+      el.addEventListener('change', function() { valEl.textContent = el.value + (suffix || ''); });
+    }
+    bindModalRange('modalOpacity', 'modalOpacityValue', '%');
+    bindModalRange('modalBlur', 'modalBlurValue', '');
+    bindModalRange('modalBorderOpacity', 'modalBorderOpacityValue', '%');
 
     var metaDescIn = document.getElementById('metaDescription');
     if (metaDescIn) {

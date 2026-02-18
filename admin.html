@@ -15,7 +15,7 @@
     <h1>Access denied</h1>
     <p id="adminDeniedReason">Access is restricted to authorized IPs.</p>
     <p id="adminDeniedHint" style="margin-top: 0.5rem; font-size: 0.9rem;"></p>
-    <a href="index.html" class="btn btn-primary">Back to nightbio</a>
+    <a href="index" class="btn btn-primary">Back to nightbio</a>
   </div>
 
   <div id="adminLoading" class="admin-loading">
@@ -34,19 +34,26 @@
             <div class="admin-sidebar-nav-section-title">General</div>
             <a href="#" class="admin-nav active" data-section="overview">Overview</a>
             <a href="#" class="admin-nav" data-section="analytics">Analytics</a>
+            <a href="#" class="admin-nav" data-section="activity">Activity</a>
           </div>
           <div class="admin-sidebar-nav-section">
             <div class="admin-sidebar-nav-section-title">Site</div>
+            <a href="#" class="admin-nav" data-section="settings">Settings</a>
             <a href="#" class="admin-nav" data-section="maintenance">Maintenance</a>
           </div>
           <div class="admin-sidebar-nav-section">
             <div class="admin-sidebar-nav-section-title">Users</div>
             <a href="#" class="admin-nav" data-section="users">All users</a>
             <a href="#" class="admin-nav" data-section="banned">Banned users</a>
+            <a href="#" class="admin-nav" data-section="export">Export</a>
+          </div>
+          <div class="admin-sidebar-nav-section">
+            <div class="admin-sidebar-nav-section-title">Security</div>
+            <a href="#" class="admin-nav" data-section="security">Admins</a>
           </div>
         </nav>
         <div class="admin-sidebar-footer">
-          <a href="dashboard.html" class="btn btn-ghost">Dashboard</a>
+          <a href="dashboard" class="btn btn-ghost">Dashboard</a>
           <button type="button" class="btn btn-ghost" id="adminLogout">Log out</button>
         </div>
       </aside>
@@ -116,6 +123,40 @@
             </div>
           </section>
 
+          <section id="sectionSettings" class="admin-section">
+            <div class="admin-page-header">
+              <h1>Site settings</h1>
+              <p>Site name, tagline, signups, and global announcement. Changes apply across the site.</p>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-body">
+                <div class="admin-field">
+                  <label for="settingsSiteName">Site name</label>
+                  <input type="text" id="settingsSiteName" placeholder="nightbio" maxlength="80">
+                </div>
+                <div class="admin-field">
+                  <label for="settingsTagline">Tagline</label>
+                  <input type="text" id="settingsTagline" placeholder="Your link in one place" maxlength="120">
+                </div>
+                <div class="admin-field">
+                  <label class="admin-checkbox-label">
+                    <input type="checkbox" id="settingsAllowSignups" checked>
+                    Allow new signups
+                  </label>
+                  <span class="admin-field-hint">When off, the signup page shows a disabled message and new users cannot register.</span>
+                </div>
+                <div class="admin-field">
+                  <label class="admin-checkbox-label">
+                    <input type="checkbox" id="settingsAnnouncementEnabled">
+                    Show site-wide announcement
+                  </label>
+                  <textarea id="settingsAnnouncementText" rows="3" placeholder="Announcement text shown at the top of index and signup pages…" maxlength="500"></textarea>
+                </div>
+                <button type="button" class="btn btn-primary" id="settingsSave">Save settings</button>
+              </div>
+            </div>
+          </section>
+
           <section id="sectionMaintenance" class="admin-section">
             <div class="admin-page-header">
               <h1>Maintenance mode</h1>
@@ -168,6 +209,46 @@
                 </thead>
                 <tbody id="adminUserList"></tbody>
               </table>
+            </div>
+          </section>
+
+          <section id="sectionExport" class="admin-section">
+            <div class="admin-page-header">
+              <h1>Export users</h1>
+              <p>Download the full user list as a CSV file (username, email, display name, UID #, views, joined date).</p>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-body">
+                <p class="admin-card-desc">Click to generate and download. Uses current loaded data — click Refresh on Overview first if needed.</p>
+                <button type="button" class="btn btn-primary" id="exportCsvBtn">Download CSV</button>
+              </div>
+            </div>
+          </section>
+
+          <section id="sectionActivity" class="admin-section">
+            <div class="admin-page-header">
+              <h1>Recent activity</h1>
+              <p>Latest signups (by join date). Helps you see new registrations at a glance.</p>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-header">Last 25 signups</div>
+              <div class="admin-card-body">
+                <ul class="admin-top-list" id="activityRecentSignups"></ul>
+              </div>
+            </div>
+          </section>
+
+          <section id="sectionSecurity" class="admin-section">
+            <div class="admin-page-header">
+              <h1>Admin access</h1>
+              <p>UIDs listed here have full admin access. To add or remove admins, edit <code>adminUids</code> in Firebase Console → Realtime Database.</p>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-header">Current admin UIDs</div>
+              <div class="admin-card-body">
+                <ul class="admin-top-list" id="securityAdminList"></ul>
+                <p class="admin-field-hint">To add: set <code>adminUids/&lt;uid&gt; = true</code>. To remove: delete the key. Then deploy database rules if needed.</p>
+              </div>
             </div>
           </section>
 
@@ -226,7 +307,7 @@
   <script>
     (function() {
       var ALLOWED_ADMIN_IP = '172.56.25.44';
-      var SECTION_TITLES = { overview: 'Overview', analytics: 'Analytics', maintenance: 'Maintenance', users: 'All users', banned: 'Banned users' };
+      var SECTION_TITLES = { overview: 'Overview', analytics: 'Analytics', activity: 'Activity', settings: 'Settings', maintenance: 'Maintenance', users: 'All users', banned: 'Banned users', export: 'Export', security: 'Admins' };
       var denied = document.getElementById('adminDenied');
       var reasonEl = document.getElementById('adminDeniedReason');
       var hintEl = document.getElementById('adminDeniedHint');
@@ -280,6 +361,9 @@
         setHeaderTitle(section);
         if (section === 'banned') renderBannedList();
         if (section === 'analytics') renderAnalyticsTopUsers();
+        if (section === 'activity') renderActivity();
+        if (section === 'settings') loadSettings();
+        if (section === 'security') loadSecurity();
       }
 
       function getBaseUrl() {
@@ -292,7 +376,7 @@
       var auth = getAuth();
 
       document.getElementById('adminLogout').addEventListener('click', function() {
-        auth.signOut().then(function() { window.location.href = 'index.html'; });
+        auth.signOut().then(function() { window.location.href = 'index'; });
       });
 
       checkIp().then(function(ip) {
@@ -302,13 +386,78 @@
         }
         auth.onAuthStateChanged(function(user) {
           if (!user) {
-            window.location.href = 'login.html?redirect=admin.html';
+            window.location.href = 'login?redirect=admin';
             return;
           }
           showContent();
           initPanel();
         });
       }).catch(function() { showDenied('Could not verify IP.', 'Check your connection and try again.'); });
+
+      function loadSettings() {
+        getSiteConfig().then(function(c) {
+          var el = document.getElementById('settingsSiteName');
+          if (el) el.value = c.siteName || 'nightbio';
+          el = document.getElementById('settingsTagline');
+          if (el) el.value = c.tagline || '';
+          el = document.getElementById('settingsAllowSignups');
+          if (el) el.checked = c.allowSignups !== false;
+          el = document.getElementById('settingsAnnouncementEnabled');
+          if (el) el.checked = !!c.announcementEnabled;
+          el = document.getElementById('settingsAnnouncementText');
+          if (el) el.value = c.announcementText || '';
+        }).catch(function() { showToast('Failed to load settings.', 'error'); });
+      }
+      function loadSecurity() {
+        getAdminUids().then(function(uids) {
+          var list = document.getElementById('securityAdminList');
+          if (!list) return;
+          if (!uids.length) {
+            list.innerHTML = '<li class="admin-empty">No admin UIDs in database. Add adminUids/&lt;your-uid&gt; = true in Firebase Console.</li>';
+            return;
+          }
+          list.innerHTML = uids.map(function(uid) {
+            return '<li><code class="admin-uid-code">' + escapeHtml(uid) + '</code></li>';
+          }).join('');
+        }).catch(function() { showToast('Failed to load admins.', 'error'); });
+      }
+      function renderActivity() {
+        var list = (allUsers || []).slice().filter(function(u) { return u.createdAt != null; }).sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }).slice(0, 25);
+        var el = document.getElementById('activityRecentSignups');
+        if (!el) return;
+        if (!list.length) {
+          el.innerHTML = '<li class="admin-empty">No signups with join date yet, or data not loaded. Refresh Overview first.</li>';
+          return;
+        }
+        var base = getBaseUrl();
+        el.innerHTML = list.map(function(u) {
+          var date = u.createdAt ? (typeof u.createdAt === 'number' ? new Date(u.createdAt).toLocaleString() : String(u.createdAt)) : '—';
+          var link = base ? '<a href="' + base + 'bio?u=' + encodeURIComponent(u.username) + '" target="_blank" rel="noopener" style="color: var(--purple-accent);">' + escapeHtml(u.username || '—') + '</a>' : escapeHtml(u.username || '—');
+          return '<li><span class="name">' + link + '</span> <span class="admin-activity-date">' + escapeHtml(date) + '</span></li>';
+        }).join('');
+      }
+      function exportCsv() {
+        var rows = [['Username', 'Email', 'Display name', 'UID', 'Views', 'Joined']];
+        (allUsers || []).forEach(function(u) {
+          var joined = u.createdAt ? (typeof u.createdAt === 'number' ? new Date(u.createdAt).toISOString() : String(u.createdAt)) : '';
+          rows.push([
+            (u.username || '').replace(/"/g, '""'),
+            (u.email || '').replace(/"/g, '""'),
+            (u.displayName || '').replace(/"/g, '""'),
+            u.userId != null ? u.userId : '',
+            (u.stats && u.stats.views) || 0,
+            joined
+          ]);
+        });
+        var csv = rows.map(function(r) { return r.map(function(c) { return '"' + c + '"'; }).join(','); }).join('\n');
+        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'nightbio-users-' + (new Date().toISOString().slice(0, 10)) + '.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast('CSV downloaded.');
+      }
 
       function initPanel() {
         loadOverview();
@@ -330,6 +479,7 @@
         document.getElementById('adminRefresh').addEventListener('click', function() {
           loadOverview();
           loadMaintenance();
+          loadSettings();
           showToast('Data refreshed.');
         });
 
@@ -357,6 +507,20 @@
           if (e.target === this) this.classList.remove('on');
         });
         document.getElementById('editUserSave').addEventListener('click', saveEditUser);
+
+        document.getElementById('settingsSave').addEventListener('click', function() {
+          var siteName = document.getElementById('settingsSiteName').value.trim() || 'nightbio';
+          var tagline = document.getElementById('settingsTagline').value.trim();
+          var allowSignups = document.getElementById('settingsAllowSignups').checked;
+          var announcementEnabled = document.getElementById('settingsAnnouncementEnabled').checked;
+          var announcementText = document.getElementById('settingsAnnouncementText').value.trim();
+          setSiteConfig({ siteName: siteName, tagline: tagline, allowSignups: allowSignups, announcementEnabled: announcementEnabled, announcementText: announcementText }).then(function() {
+            showToast('Settings saved.');
+            loadSettings();
+          }).catch(function() { showToast('Failed to save settings.', 'error'); });
+        });
+        var exportBtn = document.getElementById('exportCsvBtn');
+        if (exportBtn) exportBtn.addEventListener('click', exportCsv);
       }
 
       function loadOverview() {
@@ -444,8 +608,9 @@
         var base = getBaseUrl();
         el.innerHTML = list.map(function(u, i) {
           var views = (u.stats && u.stats.views) || 0;
-          var link = base ? '<a href="' + base + 'bio.html?u=' + encodeURIComponent(u.username) + '" target="_blank" rel="noopener" style="color: var(--purple-accent);">' + escapeHtml(u.username || '—') + '</a>' : escapeHtml(u.username || '—');
-          return '<li><span class="rank">' + (i + 1) + '</span><span class="name">' + link + '</span><span class="value">' + views.toLocaleString() + ' views</span></li>';
+          var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
+          var link = base ? '<a href="' + base + 'bio?u=' + encodeURIComponent(u.username) + '" target="_blank" rel="noopener" style="color: var(--purple-accent);" title="' + escapeHtml(uidTitle) + '">' + escapeHtml(u.username || '—') + '</a>' : escapeHtml(u.username || '—');
+          return '<li title="' + escapeHtml(uidTitle) + '"><span class="rank">' + (i + 1) + '</span><span class="name">' + link + '</span><span class="value">' + views.toLocaleString() + ' views</span></li>';
         }).join('');
       }
 
@@ -464,8 +629,9 @@
         var base = getBaseUrl();
         el.innerHTML = list.map(function(u, i) {
           var views = (u.stats && u.stats.views) || 0;
-          var link = base ? '<a href="' + base + 'bio.html?u=' + encodeURIComponent(u.username) + '" target="_blank" rel="noopener" style="color: var(--purple-accent);">' + escapeHtml(u.username || '—') + '</a>' : escapeHtml(u.username || '—');
-          return '<li><span class="rank">' + (i + 1) + '</span><span class="name">' + link + '</span><span class="value">' + views.toLocaleString() + '</span></li>';
+          var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
+          var link = base ? '<a href="' + base + 'bio?u=' + encodeURIComponent(u.username) + '" target="_blank" rel="noopener" style="color: var(--purple-accent);" title="' + escapeHtml(uidTitle) + '">' + escapeHtml(u.username || '—') + '</a>' : escapeHtml(u.username || '—');
+          return '<li title="' + escapeHtml(uidTitle) + '"><span class="rank">' + (i + 1) + '</span><span class="name">' + link + '</span><span class="value">' + views.toLocaleString() + '</span></li>';
         }).join('');
       }
 
@@ -519,11 +685,13 @@
             return '<span class="badge-pill ' + (badges[k] ? 'on' : '') + '" title="' + k + '">' + k.charAt(0).toUpperCase() + '</span>';
           }).join('');
           var isBanned = !!(banned && banned[u.uid]);
-          var profileUrl = base ? base + 'bio.html?u=' + encodeURIComponent(u.username) : '#';
+          var profileUrl = base ? base + 'bio?u=' + encodeURIComponent(u.username) : '#';
+          var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
           var tr = document.createElement('tr');
+          tr.title = uidTitle;
           tr.innerHTML =
-            '<td><span class="user-name">' + escapeHtml(u.displayName || u.username || '—') + '</span></td>' +
-            '<td><a href="' + profileUrl + '" target="_blank" rel="noopener" style="color: var(--purple-accent);">' + escapeHtml(u.username || '—') + '</a></td>' +
+            '<td><span class="user-name" title="' + escapeHtml(uidTitle) + '">' + escapeHtml(u.displayName || u.username || '—') + '</span></td>' +
+            '<td><a href="' + profileUrl + '" target="_blank" rel="noopener" style="color: var(--purple-accent);" title="' + escapeHtml(uidTitle) + '">' + escapeHtml(u.username || '—') + '</a></td>' +
             '<td>' + escapeHtml((u.email || '').slice(0, 40)) + (u.email && u.email.length > 40 ? '…' : '') + '</td>' +
             '<td>' + ((u.stats && u.stats.views) || 0).toLocaleString() + '</td>' +
             '<td>' + badgeHtml + '</td>' +

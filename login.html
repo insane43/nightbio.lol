@@ -45,7 +45,7 @@
 
   <main class="page">
     <div class="brand">
-      <a href="index.html">
+      <a href="index">
         <div class="logo-text">nightbio</div>
         <div class="tagline">Your link in one place</div>
       </a>
@@ -95,7 +95,7 @@
       </div>
 
       <div class="card-footer">
-        Don’t have an account? <a href="signup.html">Sign up</a>
+        Don’t have an account? <a href="signup">Sign up</a>
       </div>
     </div>
   </main>
@@ -275,7 +275,7 @@
                 sessionStorage.removeItem(RATE_LIMIT_LOCKOUT_KEY);
                 showMsg('You’re in! Redirecting…', 'success');
                 var r = (new URLSearchParams(window.location.search)).get('redirect');
-                var url = (r === 'admin.html' || (r && r.indexOf('admin') !== -1)) ? 'admin.html' : 'dashboard.html';
+                var url = (r === 'admin' || (r && r.indexOf('admin') !== -1)) ? 'admin' : 'dashboard';
                 window.location.href = url;
               });
             });
@@ -345,7 +345,7 @@
           sessionStorage.removeItem(RATE_LIMIT_LOCKOUT_KEY);
           showMsg('You’re in! Redirecting…', 'success');
           var redirect = (new URLSearchParams(window.location.search)).get('redirect');
-          var url = (redirect === 'admin.html' || (redirect && redirect.indexOf('admin') !== -1)) ? 'admin.html' : 'dashboard.html';
+          var url = (redirect === 'admin' || (redirect && redirect.indexOf('admin') !== -1)) ? 'admin' : 'dashboard';
           setTimeout(function() { window.location.href = url; }, 800);
         } catch (err) {
           var code = err.code || '';
