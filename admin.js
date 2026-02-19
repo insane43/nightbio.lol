@@ -132,13 +132,14 @@ function getHardBannedUids() {
 function hardBanUser(uid) {
   var db = getDb();
   if (!db || !uid) return Promise.reject(new Error('Invalid'));
+  var ipToKey = typeof ipToBannedIPKey === 'function' ? ipToBannedIPKey : function(ip) { return String(ip || '').trim().replace(/\./g, '_'); };
   return db.ref('users/' + uid + '/lastKnownIP').once('value').then(function(snap) {
     var ip = snap.val();
     if (typeof ip !== 'string' || !ip.trim()) return Promise.reject(new Error('No IP on file'));
     ip = ip.trim();
     var updates = {
       ['bannedUids/' + uid]: true,
-      ['bannedIPs/' + ip]: true,
+      ['bannedIPs/' + ipToKey(ip)]: true,
       ['hardBannedUids/' + uid]: true
     };
     return db.ref().update(updates);
@@ -148,10 +149,11 @@ function hardBanUser(uid) {
 function removeIPBan(uid) {
   var db = getDb();
   if (!db || !uid) return Promise.reject(new Error('Invalid'));
+  var ipToKey = typeof ipToBannedIPKey === 'function' ? ipToBannedIPKey : function(ip) { return String(ip || '').trim().replace(/\./g, '_'); };
   return db.ref('users/' + uid + '/lastKnownIP').once('value').then(function(snap) {
     var ip = snap.val();
     var updates = { ['hardBannedUids/' + uid]: null };
-    if (typeof ip === 'string' && ip.trim()) updates['bannedIPs/' + ip.trim()] = null;
+    if (typeof ip === 'string' && ip.trim()) updates['bannedIPs/' + ipToKey(ip)] = null;
     return db.ref().update(updates);
   });
 }

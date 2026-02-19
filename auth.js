@@ -17,6 +17,11 @@ function isUserBanned(uid) {
   });
 }
 
+// Encode IP for use as Firebase key (keys cannot contain ".")
+function ipToBannedIPKey(ip) {
+  return String(ip || '').trim().replace(/\./g, '_');
+}
+
 // Get client IP (for ban enforcement and saving). Uses public API.
 function getClientIP() {
   return fetch('https://api.ipify.org?format=json').then(function(r) { return r.json(); }).then(function(d) { return (d && d.ip) ? String(d.ip).trim() : ''; }).catch(function() { return ''; });
@@ -39,7 +44,7 @@ function isIPBanned() {
   if (!db) return Promise.resolve(false);
   return getClientIP().then(function(ip) {
     if (!ip) return false;
-    return db.ref('bannedIPs/' + ip).once('value').then(function(snap) { return snap.val() === true; });
+    return db.ref('bannedIPs/' + ipToBannedIPKey(ip)).once('value').then(function(snap) { return snap.val() === true; });
   });
 }
 
