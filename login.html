@@ -7,17 +7,33 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-logo" href="/">
+        <img alt="nightbio.lol logo" src="/nightbio-logo-pfp.png">
+        <h1>nightbio<span>.</span>lol</h1>
+      </a>
+      <div class="site-nav-links">
+        <a href="help">Help Center</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        <a href="login">Login</a>
+        <a href="signup" class="site-nav-cta">Sign up</a>
+      </div>
+      <button type="button" class="site-nav-hamburger" id="navHamburger" aria-label="Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+      </button>
+      <div class="site-nav-drawer" id="navDrawer">
+        <a href="help">Help Center</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        <a href="login">Login</a>
+        <a href="signup" class="site-nav-cta">Sign up</a>
+      </div>
+    </div>
+  </nav>
   <div class="bg-gradient"></div>
   <div class="bg-grid"></div>
 
   <main class="page">
-    <div class="brand">
-      <a href="index">
-        <div class="logo-text">nightbio</div>
-        <div class="tagline">Your link in one place</div>
-      </a>
-    </div>
-
     <div class="card">
       <h1>Log in</h1>
       <p class="subtitle">Welcome back to nightbio.</p>
@@ -330,6 +346,13 @@
           setLoading(false);
         }
       });
+    })();
+  </script>
+  <script>
+    (function() {
+      var drawer = document.getElementById('navDrawer');
+      var hamburger = document.getElementById('navHamburger');
+      if (drawer && hamburger) hamburger.addEventListener('click', function() { drawer.classList.toggle('open'); });
     })();
   </script>
 </body>

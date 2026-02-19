@@ -30,6 +30,41 @@
       if (logo && config.siteName) logo.textContent = config.siteName;
       if (taglineEl && config.tagline) taglineEl.textContent = config.tagline;
 
+      var viewsEl = document.getElementById('statViews');
+      var usersEl = document.getElementById('statUsers');
+      if (viewsEl && c.publicTotalViews != null) viewsEl.textContent = Number(c.publicTotalViews).toLocaleString();
+      if (usersEl && c.publicTotalUsers != null) usersEl.textContent = Number(c.publicTotalUsers).toLocaleString();
+
+      // Live stats on index: profileViews (sum) and usernames (count) are publicly readable
+      if (viewsEl || usersEl) {
+        var viewsDone = !viewsEl;
+        var usersDone = !usersEl;
+        function maybeDone() {
+          if (viewsDone && usersDone) return;
+        }
+        if (viewsEl) {
+          db.ref('profileViews').once('value').then(function(snap) {
+            var v = snap.val() || {};
+            var total = 0;
+            Object.keys(v).forEach(function(uid) {
+              var n = v[uid];
+              if (typeof n === 'number' && n >= 0) total += n;
+            });
+            viewsEl.textContent = total.toLocaleString();
+            viewsDone = true;
+            maybeDone();
+          }).catch(function() { viewsDone = true; maybeDone(); });
+        }
+        if (usersEl) {
+          db.ref('usernames').once('value').then(function(snap) {
+            var u = snap.val() || {};
+            usersEl.textContent = Object.keys(u).length.toLocaleString();
+            usersDone = true;
+            maybeDone();
+          }).catch(function() { usersDone = true; maybeDone(); });
+        }
+      }
+
       try {
         window.dispatchEvent(new CustomEvent('siteConfigReady', { detail: config }));
       } catch (e) {}

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help Center — nightbio.lol</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .help-page { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .help-hero { text-align: center; margin-bottom: 3rem; }
+    .help-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+    .help-hero p { color: var(--text-muted); font-size: 1.05rem; }
+    .help-toc { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 2.5rem; }
+    .help-toc h2 { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .help-toc ul { list-style: none; margin: 0; padding: 0; }
+    .help-toc li { margin-bottom: 0.4rem; }
+    .help-toc a { color: var(--purple-accent); text-decoration: none; font-size: 0.95rem; }
+    .help-toc a:hover { text-decoration: underline; }
+    .help-section { margin-bottom: 2.5rem; scroll-margin-top: 1rem; }
+    .help-section h2 { font-size: 1.35rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.5rem; }
+    .help-section h2 .num { display: inline-flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: 8px; background: rgba(124, 107, 184, 0.2); color: var(--purple-accent); font-size: 0.9rem; font-weight: 700; }
+    .help-section h3 { font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin: 1.25rem 0 0.5rem; }
+    .help-section p { color: var(--text-primary); line-height: 1.7; margin-bottom: 1rem; font-size: 0.95rem; }
+    .help-section ul, .help-section ol { margin: 0 0 1rem 1.5rem; color: var(--text-muted); line-height: 1.65; font-size: 0.95rem; }
+    .help-section li { margin-bottom: 0.4rem; }
+    .help-section a { color: var(--purple-accent); text-decoration: none; }
+    .help-section a:hover { text-decoration: underline; }
+    .help-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin: 1rem 0; }
+    .help-card strong { color: var(--text-primary); }
+    .help-tip { border-left: 3px solid var(--purple-accent); padding-left: 1rem; margin: 1rem 0; color: var(--text-muted); font-size: 0.9rem; }
+    .help-faq details { border-bottom: 1px solid var(--border-subtle); }
+    .help-faq summary { padding: 1rem 0; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; color: var(--text-primary); }
+    .help-faq summary::-webkit-details-marker { display: none; }
+    .help-faq summary::after { content: '+'; font-size: 1.2rem; color: var(--purple-accent); }
+    .help-faq details[open] summary::after { content: '−'; }
+    .help-faq p { margin: 0 0 1rem 0; padding-bottom: 1rem; }
+    .help-cta { text-align: center; margin-top: 2.5rem; padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-subtle); }
+    .help-cta p { margin-bottom: 0.75rem; }
+    .help-cta a.btn { display: inline-block; margin-top: 0.5rem; text-decoration: none; }
+    .help-section code { background: var(--bg-elevated); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; color: var(--text-primary); }
+  </style>
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-logo" href="/">
+        <img alt="nightbio.lol logo" src="/nightbio-logo-pfp.png">
+        <h1>nightbio<span>.</span>lol</h1>
+      </a>
+      <div class="site-nav-links">
+        <a href="help">Help Center</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        <a href="login">Login</a>
+        <a href="signup" class="site-nav-cta">Sign up</a>
+      </div>
+      <button type="button" class="site-nav-hamburger" id="navHamburger" aria-label="Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+      </button>
+      <div class="site-nav-drawer" id="navDrawer">
+        <a href="help">Help Center</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        <a href="login">Login</a>
+        <a href="signup" class="site-nav-cta">Sign up</a>
+      </div>
+    </div>
+  </nav>
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <main class="help-page">
+    <header class="help-hero">
+      <h1>Help Center</h1>
+      <p>Everything you need to build and share your one link.</p>
+    </header>
+
+    <nav class="help-toc" aria-label="On this page">
+      <h2>On this page</h2>
+      <ul>
+        <li><a href="#getting-started">Getting started</a></li>
+        <li><a href="#your-profile">Building your profile</a></li>
+        <li><a href="#links">Adding & managing links</a></li>
+        <li><a href="#sharing">Sharing & growing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#contact">Contact & community</a></li>
+      </ul>
+    </nav>
+
+    <section class="help-section" id="getting-started">
+      <h2><span class="num">1</span> Getting started</h2>
+      <p>nightbio gives you a single link that leads to a page with your photo, bio, and all your important links. No coding required.</p>
+
+      <h3>Create your account</h3>
+      <p>Go to <a href="signup">Sign up</a> and choose either <strong>email + password</strong> or <strong>Continue with Google</strong>. You’ll be asked to pick a <strong>username</strong>—this becomes part of your link: <strong>nightbio.lol/yourusername</strong>. Choose something memorable and consistent with your brand (e.g. your handle or name).</p>
+      <div class="help-card">
+        <strong>Username rules:</strong> Letters, numbers, and underscores only. Usually 3–20 characters. Once set, you can change it later from your dashboard, but your old link will stop working so update it wherever you’ve shared it.
+      </div>
+
+      <h3>Your first steps</h3>
+      <ol>
+        <li>After signing up, you’re taken to your <strong>Dashboard</strong>.</li>
+        <li>Add a profile photo and display name so visitors know who you are.</li>
+        <li>Write a short bio (one or two sentences).</li>
+        <li>Add at least one link—your main social, store, or site.</li>
+      </ol>
+      <p>Your page is live as soon as you have an account. You can share the link and keep editing; changes appear immediately.</p>
+    </section>
+
+    <section class="help-section" id="your-profile">
+      <h2><span class="num">2</span> Building your profile</h2>
+      <p>Your profile is the top of your bio page. Make it clear and on-brand.</p>
+
+      <h3>Profile photo</h3>
+      <p>Upload a square image (e.g. 400×400 px or larger). It appears as a circle on your page. Use a clear headshot or logo so people recognize you.</p>
+
+      <h3>Display name</h3>
+      <p>This is the name shown on your page. It can be different from your username—for example, your username might be <code>jordan</code> and your display name “Jordan Lee.”</p>
+
+      <h3>Bio</h3>
+      <p>A short description that appears under your name. Use it to say what you do, what you share, or where else to find you. Keep it concise; most visitors scan quickly.</p>
+
+      <div class="help-tip">Tip: Update your bio when you launch something new (e.g. “New EP out now” or “Streaming Wednesdays”).</div>
+    </section>
+
+    <section class="help-section" id="links">
+      <h2><span class="num">3</span> Adding & managing links</h2>
+      <p>Links are the buttons on your bio page. You can add as many as you need and reorder them anytime.</p>
+
+      <h3>Adding a link</h3>
+      <p>In the dashboard, use the <strong>Add link</strong> (or similar) option. Enter the <strong>URL</strong> (e.g. <code>https://instagram.com/you</code>) and a <strong>label</strong> (e.g. “Instagram”). The label is the text on the button—keep it short and clear.</p>
+
+      <h3>What you can link</h3>
+      <ul>
+        <li>Social profiles (Instagram, TikTok, YouTube, Twitter/X, etc.)</li>
+        <li>Stores (Shopify, Etsy, Gumroad)</li>
+        <li>Music (Spotify, SoundCloud, Apple Music)</li>
+        <li>Newsletters, portfolios, blogs</li>
+        <li>Any other URL you want to share</li>
+      </ul>
+
+      <h3>Order and visibility</h3>
+      <p>Drag links to change their order. Put your most important link first. You can remove a link at any time—it will disappear from your public page immediately.</p>
+    </section>
+
+    <section class="help-section" id="sharing">
+      <h2><span class="num">4</span> Sharing & growing</h2>
+      <p>Your bio link works anywhere you can paste a URL.</p>
+
+      <h3>Where to put your link</h3>
+      <ul>
+        <li><strong>Instagram / TikTok / Twitter:</strong> Put <strong>nightbio.lol/yourusername</strong> in your bio. Many platforms allow one clickable link; nightbio lets that one link open the door to everything else.</li>
+        <li><strong>Streaming:</strong> Add it to your stream description or overlay.</li>
+        <li><strong>Email & messages:</strong> Use it in signatures or when someone asks “where can I find you?”</li>
+      </ul>
+
+      <h3>Profile views</h3>
+      <p>If the feature is enabled, you can see how many times your bio page has been viewed from your dashboard. Use this to see what’s driving traffic and when to refresh your links or bio.</p>
+    </section>
+
+    <section class="help-section" id="faq">
+      <h2><span class="num">5</span> FAQ</h2>
+      <div class="help-faq">
+        <details>
+          <summary>Is nightbio free?</summary>
+          <p>Yes. You can create an account, build your profile, and add links at no cost. We may offer optional paid features in the future.</p>
+        </details>
+        <details>
+          <summary>Can I change my username?</summary>
+          <p>Yes, from your dashboard. Your old link (nightbio.lol/oldname) will no longer work, so update it anywhere you’ve shared it and tell followers if needed.</p>
+        </details>
+        <details>
+          <summary>Who can see my bio page?</summary>
+          <p>Anyone with your link. Your page is public. Only you can log in and edit your profile and links.</p>
+        </details>
+        <details>
+          <summary>Can I use nightbio for my business or brand?</summary>
+          <p>Yes. Many creators and small businesses use nightbio to centralize their links. Make sure your use complies with our <a href="tos">Terms of Service</a>.</p>
+        </details>
+        <details>
+          <summary>What if I forget my password?</summary>
+          <p>On the <a href="login">Login</a> page, use the “Forgot password?” link. Enter your email and we’ll send a link to reset it. Check spam if you don’t see it.</p>
+        </details>
+        <details>
+          <summary>Does nightbio support custom domains?</summary>
+          <p>Currently your link is nightbio.lol/yourusername. Custom domain support may be added in the future; check our announcements or Discord for updates.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="help-section" id="troubleshooting">
+      <h2><span class="num">6</span> Troubleshooting</h2>
+      <h3>I can’t log in</h3>
+      <p>Confirm you’re using the same method you signed up with (email vs. Google). If you used “Continue with Google,” use that again. If you forgot your password, use “Forgot password?” on the login page. If you still have trouble, reach out on Discord.</p>
+
+      <h3>My link shows a 404 or “page not found”</h3>
+      <p>Check that the URL is exactly <strong>nightbio.lol/yourusername</strong> (no typos, no extra slashes). If you recently changed your username, the old link no longer works—use the new one.</p>
+
+      <h3>My profile or links aren’t updating</h3>
+      <p>Changes are usually instant. Try a hard refresh (Ctrl+F5 or Cmd+Shift+R) or open your link in an incognito/private window to rule out caching.</p>
+
+      <h3>Signups are disabled</h3>
+      <p>We sometimes temporarily disable new signups for maintenance or capacity. Check our Discord or the homepage for updates and try again later.</p>
+    </section>
+
+    <section class="help-section" id="contact">
+      <h2><span class="num">7</span> Contact & community</h2>
+      <p>We’re here to help. For questions, bugs, or feedback:</p>
+      <ul>
+        <li><strong>Discord:</strong> Join <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">our server</a>—fastest way to get help and connect with other users.</li>
+        <li><strong>Terms & rules:</strong> Read our <a href="tos">Terms of Service</a> to understand the rules of the platform.</li>
+      </ul>
+      <div class="help-cta">
+        <p>Ready to build your one link?</p>
+        <a href="signup" class="btn btn-primary">Create free account</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function() {
+      var p = window.location.pathname;
+      if (p.endsWith('help.html')) {
+        window.location.replace('/help' + (window.location.hash || ''));
+        return;
+      }
+      var drawer = document.getElementById('navDrawer');
+      var hamburger = document.getElementById('navHamburger');
+      if (drawer && hamburger) hamburger.addEventListener('click', function() { drawer.classList.toggle('open'); });
+    })();
+  </script>
+</body>
+</html>

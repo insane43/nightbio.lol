@@ -7,6 +7,30 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-logo" href="/">
+        <img alt="nightbio.lol logo" src="/nightbio-logo-pfp.png">
+        <h1>nightbio<span>.</span>lol</h1>
+      </a>
+      <div class="site-nav-links">
+        <a href="help">Help Center</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        <a href="login">Login</a>
+        <a href="signup" class="site-nav-cta">Sign up</a>
+      </div>
+      <button type="button" class="site-nav-hamburger" id="navHamburger" aria-label="Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+      </button>
+      <div class="site-nav-drawer" id="navDrawer">
+        <a href="help">Help Center</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        <a href="login">Login</a>
+        <a href="signup" class="site-nav-cta">Sign up</a>
+      </div>
+    </div>
+  </nav>
+
   <div class="translate-wrapper" aria-label="Translate page">
     <span class="translate-label">Language</span>
     <select class="lang-select" id="customLangSelect" aria-label="Select language">
@@ -43,23 +67,85 @@
   <div id="bannedBanner" class="banned-banner" style="display: none;">
     Your account has been suspended. Contact support if you believe this is an error.
   </div>
-  <main class="page">
-    <div class="brand">
-      <a href="index">
-        <div class="logo-text">nightbio</div>
-        <div class="tagline">Your link in one place</div>
-      </a>
-    </div>
 
-    <div class="card" style="text-align: center; padding: 2.5rem;">
-      <h1 style="margin-bottom: 0.75rem;">One link for everything</h1>
-      <p class="subtitle" style="margin-bottom: 2rem;">Create your bio page. Share one link. Stand out.</p>
-      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-        <a href="login" class="btn btn-primary" style="text-decoration: none;">Log in</a>
-        <a href="signup" class="btn btn-ghost" style="text-decoration: none;">Create account</a>
+  <main class="page">
+    <section class="landing-hero">
+      <h1>One link for everything</h1>
+      <p class="tagline">Create your bio page. Share one link. Stand out.</p>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+        <a href="login" class="btn btn-ghost" style="text-decoration: none;">Log in</a>
+        <a href="signup" class="btn btn-primary" style="text-decoration: none;">Create account</a>
       </div>
-    </div>
+    </section>
+
+    <section class="landing-section">
+      <h2>Your bio, one link</h2>
+      <div class="landing-preview-phone">
+        <div class="landing-preview-phone-inner">
+          <div class="preview-banner"></div>
+          <div class="preview-profile">
+            <div class="preview-avatar-wrap">NB</div>
+            <div class="preview-name">nightbio</div>
+            <div class="preview-bio">Your link in one place. Add socials, music, store.</div>
+            <a href="#" class="preview-link-btn">Instagram</a>
+            <a href="#" class="preview-link-btn">YouTube</a>
+            <a href="#" class="preview-link-btn">Link</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <h2>Join creators on nightbio</h2>
+      <div class="landing-stats" id="landingStats">
+        <div class="landing-stat">
+          <div class="landing-stat-value" id="statViews">—</div>
+          <div class="landing-stat-label">Profile views</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat-value" id="statUsers">—</div>
+          <div class="landing-stat-label">Users</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <h2>FAQ</h2>
+      <div class="landing-faq">
+        <details>
+          <summary>What is nightbio?</summary>
+          <p>nightbio is a free link-in-bio tool. You get one short link (e.g. nightbio.lol/yourname) that leads to a page with your photo, bio, and all your links—socials, music, store, whatever you want.</p>
+        </details>
+        <details>
+          <summary>Is it free?</summary>
+          <p>Yes. You can create an account and build your bio page at no cost. We may offer optional paid features in the future.</p>
+        </details>
+        <details>
+          <summary>How do I get my link?</summary>
+          <p>After signing up, choose a username. Your link will be nightbio.lol/yourusername. You can share it anywhere—Instagram, TikTok, Twitter, etc.</p>
+        </details>
+        <details>
+          <summary>Can I change my username or links later?</summary>
+          <p>Yes. From your dashboard you can edit your profile, add or remove links, and update your bio anytime.</p>
+        </details>
+        <details>
+          <summary>Who can see my profile?</summary>
+          <p>Anyone with your link can view your public bio page. Only you can log in and edit your content.</p>
+        </details>
+      </div>
+    </section>
+
+    <footer class="landing-footer">
+      <p><strong>nightbio.lol</strong> — One link for everything.</p>
+      <p style="margin-top: 0.5rem;">
+        <a href="help">Help Center</a> · <a href="tos">Terms of Service</a> · <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+      </p>
+      <p style="margin-top: 0.75rem; font-size: 0.8rem; opacity: 0.85;">
+        nightbio and the nightbio logo are trademarks. Use of this service is subject to our <a href="tos" style="color: var(--purple-accent);">terms</a> and acceptable use.
+      </p>
+    </footer>
   </main>
+
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -70,8 +156,15 @@
   <script>
     if ((new URLSearchParams(window.location.search)).get('banned') === '1') {
       var b = document.getElementById('bannedBanner');
-      if (b) { b.style.display = 'block'; }
+      if (b) b.style.display = 'block';
     }
+    (function() {
+      var drawer = document.getElementById('navDrawer');
+      var hamburger = document.getElementById('navHamburger');
+      if (drawer && hamburger) {
+        hamburger.addEventListener('click', function() { drawer.classList.toggle('open'); });
+      }
+    })();
   </script>
   <script src="translate.js"></script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
