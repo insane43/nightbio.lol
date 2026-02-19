@@ -545,8 +545,11 @@
         var isHardBanned = !!(hardBanned && hardBanned[u.uid]);
         var profileUrl = base ? base + 'bio?u=' + encodeURIComponent(u.username) : '#';
         var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
+        var rawEmail = u.email || '';
+        var emailDisplay = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span>') : '—';
         var actions = '<button type="button" class="btn-icon edit-user-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Edit">✎</button>' +
-          '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>';
+          '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>' +
+          (rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '');
         if (isBanned) {
           actions += '<button type="button" class="btn-icon unban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Unban">↩</button>';
           if (isHardBanned && typeof removeIPBan === 'function') actions += '<button type="button" class="btn-icon danger-outline remove-ip-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Remove IP ban">IP</button>';
@@ -554,8 +557,6 @@
           actions += '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Ban">⊗</button>';
           if (typeof hardBanUser === 'function') actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Hard ban (account + IP)">⊛</button>';
         }
-        var rawEmail = u.email || '';
-        var emailDisplay = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span><button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>') : '—';
         var tr = document.createElement('tr');
         tr.title = uidTitle;
         tr.innerHTML =
@@ -612,9 +613,9 @@
       });
       tbody.querySelectorAll('.admin-email-reveal').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          var cell = btn.closest('td');
-          if (!cell) return;
-          var span = cell.querySelector('.admin-email-text');
+          var row = btn.closest('tr');
+          if (!row) return;
+          var span = row.querySelector('.admin-email-text');
           if (!span) return;
           var full = span.dataset.email || '';
           var masked = span.dataset.masked || '***';
@@ -791,8 +792,8 @@
       if (empty) empty.style.display = 'none';
       ul.innerHTML = list.map(function(u) {
         var rawEmail = u.email || '';
-        var emailPart = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span> <button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>') : '';
-        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + (emailPart ? ' — ' + emailPart : '') + '</span><button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
+        var emailPart = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span>') : '';
+        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + (emailPart ? ' — ' + emailPart : '') + '</span>' + (rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '') + '<button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
       }).join('');
       ul.querySelectorAll('.unban-list-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -805,9 +806,9 @@
       });
       ul.querySelectorAll('.admin-email-reveal').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          var li = btn.closest('li');
-          if (!li) return;
-          var span = li.querySelector('.admin-email-text');
+          var row = btn.closest('li');
+          if (!row) return;
+          var span = row.querySelector('.admin-email-text');
           if (!span) return;
           var full = span.dataset.email || '';
           var masked = span.dataset.masked || '***';
