@@ -1286,49 +1286,56 @@ textarea.form-input {
   color: var(--purple-accent);
 }
 
-/* Live preview — phone mockup */
+/* Live preview — clean phone mockup */
+.editor-preview {
+  display: flex;
+  justify-content: center;
+  padding: 0 0.5rem;
+}
 .preview-phone {
-  width: 280px;
-  background: #1a1a1a;
-  border-radius: 28px;
-  padding: 12px;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+  width: 300px;
+  background: linear-gradient(160deg, #252528 0%, #1c1c1e 100%);
+  border-radius: 32px;
+  padding: 14px;
+  box-shadow: 0 24px 56px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
   position: relative;
 }
 .preview-phone-notch {
   position: absolute;
-  top: 12px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
-  width: 80px;
-  height: 20px;
-  background: #0a0a0a;
-  border-radius: 0 0 12px 12px;
+  width: 68px;
+  height: 18px;
+  background: #0d0d0e;
+  border-radius: 0 0 10px 10px;
   z-index: 2;
 }
 .preview-screen {
   background: var(--bg-deep);
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
-  min-height: 480px;
+  min-height: 500px;
+  max-height: 72vh;
+  overflow-y: auto;
   --preview-accent: var(--purple-accent);
 }
 .preview-banner {
-  height: 90px;
+  height: 76px;
   background: var(--purple-dim);
   background-size: cover;
   background-position: center;
 }
 .preview-profile {
   text-align: center;
-  padding: 0 1rem 1.5rem;
-  margin-top: -36px;
+  padding: 0 1.25rem 1.35rem;
+  margin-top: -30px;
   position: relative;
   z-index: 1;
 }
 .preview-avatar-wrap {
-  width: 72px;
-  height: 72px;
+  width: 60px;
+  height: 60px;
   margin: 0 auto;
   border-radius: 50%;
   overflow: hidden;
@@ -1337,104 +1344,86 @@ textarea.form-input {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
 }
-.preview-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.preview-avatar { width: 100%; height: 100%; object-fit: cover; }
 .preview-avatar-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   color: var(--text-muted);
   font-weight: 600;
 }
 .preview-name {
-  font-size: 1.1rem;
+  font-size: 0.98rem;
   font-weight: 700;
   margin-top: 0.5rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
   color: var(--text-primary);
-}
-.preview-bio {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-  margin-bottom: 1rem;
-  min-height: 2.8em;
-}
-.preview-links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.preview-link-btn {
-  display: block;
-  width: 100%;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  background: rgba(124, 107, 184, 0.08);
-  border: 1px solid var(--preview-accent);
-  border-radius: var(--radius-sm);
-  text-align: center;
-  text-decoration: none;
-}
-.preview-screen {
-  --preview-accent: var(--purple-accent);
-}
-.preview-link-btn {
-  border-color: var(--preview-accent);
-  background: rgba(124, 107, 184, 0.08);
-}
-.preview-avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: var(--text-muted);
-  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 .preview-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.28rem;
   justify-content: center;
-  margin: 0.4rem 0 0.3rem;
+  margin: 0.3rem 0 0.35rem;
 }
 .preview-badge-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.15rem 0.4rem;
-  font-size: 0.65rem;
+  padding: 0.1rem 0.32rem;
+  font-size: 0.58rem;
   font-weight: 600;
   border-radius: 999px;
-  background: rgba(124, 107, 184, 0.2);
+  background: rgba(124, 107, 184, 0.12);
   color: var(--preview-accent);
-  border: 1px solid rgba(124, 107, 184, 0.4);
+  border: 1px solid rgba(124, 107, 184, 0.22);
+}
+.preview-bio {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 0.7rem;
+  min-height: 2.4em;
+  max-height: 4.2em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 .preview-views {
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   color: var(--text-muted);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
+  opacity: 0.88;
 }
-.preview-song-wrap {
-  margin-bottom: 0.75rem;
+.preview-song-wrap { margin-bottom: 0.6rem; }
+.preview-song-wrap iframe { border-radius: 10px; max-height: 70px; }
+.preview-song-wrap audio { width: 100%; height: 30px; border-radius: 8px; }
+.preview-links { display: flex; flex-direction: column; gap: 0.4rem; }
+.preview-link-btn {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: rgba(124, 107, 184, 0.08);
+  border: 1px solid rgba(124, 107, 184, 0.3);
+  border-radius: 10px;
+  text-align: center;
+  text-decoration: none;
 }
-.preview-song-wrap iframe { border-radius: 8px; }
-.preview-song-wrap audio { width: 100%; height: 36px; }
 .preview-layout-minimal .preview-banner { display: none !important; }
+.preview-layout-minimal .preview-profile { margin-top: 0; padding-top: 0.9rem; }
 .preview-display-card .preview-screen {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-  border: 1px solid var(--border-subtle);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,255,255,0.05);
 }
 .preview-align-left .preview-profile { text-align: left; }
 .preview-align-left .preview-avatar-wrap { margin-left: 0; margin-right: auto; }
