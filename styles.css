@@ -1688,11 +1688,17 @@ html { scrollbar-gutter: stable; }
   display: block;
 }
 .bio-page.bio-display-card .bio-profile .bio-bio-text,
-.bio-page.bio-display-card .bio-profile .bio-links,
 .bio-page.bio-display-card .bio-profile .bio-song-wrap {
   display: block;
   width: 100%;
   max-width: 100%;
+}
+.bio-page.bio-display-card .bio-profile .bio-links {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  gap: 0.6rem;
 }
 /* Keep badges using same layout as full profile (don’t override .bio-badges) */
 .bio-page.bio-display-card .bio-name { margin-top: 0.5rem; margin-bottom: 0.2rem; }
