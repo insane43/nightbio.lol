@@ -59,8 +59,6 @@
       bannerURL: (bannerURLIn && bannerURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.bannerURL) || '',
       songURL: (songURLIn && songURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.songURL) || '',
       accentColor: accentColor ? accentColor.value : '#7c6bb8',
-      layout: (document.getElementById('layoutSelect') && document.getElementById('layoutSelect').value) || 'classic',
-      profileAlignment: (document.getElementById('profileAlignmentSelect') && document.getElementById('profileAlignmentSelect').value) || 'center',
       displayStyle: (document.getElementById('displayStyleSelect') && document.getElementById('displayStyleSelect').value) || 'default',
       fontFamily: (document.getElementById('fontFamily') && document.getElementById('fontFamily').value) || 'Outfit',
       fontSize: parseInt(document.getElementById('fontSize') && document.getElementById('fontSize').value, 10) || 16,
@@ -327,10 +325,6 @@
       if (accentColor) accentColor.value = d.accentColor || '#7c6bb8';
       if (accentColorHex) accentColorHex.value = d.accentColor || '#7c6bb8';
 
-      var layoutSel = document.getElementById('layoutSelect');
-      if (layoutSel) layoutSel.value = d.layout || 'classic';
-      var profileAlignSel = document.getElementById('profileAlignmentSelect');
-      if (profileAlignSel) profileAlignSel.value = (/^(left|right|center)$/i.test(d.profileAlignment) ? d.profileAlignment.toLowerCase() : 'center');
       var displayStyleSel = document.getElementById('displayStyleSelect');
       if (displayStyleSel) displayStyleSel.value = (d.displayStyle === 'card') ? 'card' : 'default';
       var modalWrap = document.getElementById('modalOptionsWrap');
@@ -943,7 +937,6 @@
     }
 
     function getEditorDataForSave() {
-      var layoutSel = document.getElementById('layoutSelect');
       var fontSel = document.getElementById('fontFamily');
       var fontSizeIn = document.getElementById('fontSize');
       var letterSpacingIn = document.getElementById('letterSpacing');
@@ -965,8 +958,8 @@
         avatarURL: (avatarURLIn && avatarURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.avatarURL) || '',
         bannerURL: (bannerURLIn && bannerURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.bannerURL) || '',
         accentColor: accentColor ? accentColor.value : '#7c6bb8',
-        layout: layoutSel ? layoutSel.value : 'classic',
-        profileAlignment: (document.getElementById('profileAlignmentSelect') && document.getElementById('profileAlignmentSelect').value) || 'center',
+        layout: 'classic',
+        profileAlignment: 'center',
         displayStyle: (document.getElementById('displayStyleSelect') && document.getElementById('displayStyleSelect').value) || 'default',
         modalOpacity: (function() { var el = document.getElementById('modalOpacity'); return el ? parseInt(el.value, 10) : 96; })(),
         modalBlur: (function() { var el = document.getElementById('modalBlur'); return el ? parseInt(el.value, 10) : 0; })(),
@@ -1041,35 +1034,30 @@
       templateSelect.addEventListener('change', function() {
         var v = templateSelect.value;
         if (!v) return;
-        var layoutSel = document.getElementById('layoutSelect');
         var fontSel = document.getElementById('fontFamily');
         var accentColorEl = document.getElementById('accentColor');
         var accentHex = document.getElementById('accentColorHex');
         var btnStyle = document.getElementById('buttonStyle');
         var bgEffect = document.getElementById('backgroundEffect');
         if (v === 'minimal') {
-          if (layoutSel) layoutSel.value = 'minimal';
           if (fontSel) fontSel.value = 'Inter';
           if (accentColorEl) accentColorEl.value = '#64748b';
           if (accentHex) accentHex.value = '#64748b';
           if (btnStyle) btnStyle.value = 'outline';
           if (bgEffect) bgEffect.value = 'none';
         } else if (v === 'classic') {
-          if (layoutSel) layoutSel.value = 'classic';
           if (fontSel) fontSel.value = 'Outfit';
           if (accentColorEl) accentColorEl.value = '#7c6bb8';
           if (accentHex) accentHex.value = '#7c6bb8';
           if (btnStyle) btnStyle.value = 'filled';
           if (bgEffect) bgEffect.value = 'gradient';
         } else if (v === 'neon') {
-          if (layoutSel) layoutSel.value = 'classic';
           if (fontSel) fontSel.value = 'Space Mono';
           if (accentColorEl) accentColorEl.value = '#22d3ee';
           if (accentHex) accentHex.value = '#22d3ee';
           if (btnStyle) btnStyle.value = 'outline';
           if (bgEffect) bgEffect.value = 'gradient';
         } else if (v === 'warm') {
-          if (layoutSel) layoutSel.value = 'wide';
           if (fontSel) fontSel.value = 'Playfair Display';
           if (accentColorEl) accentColorEl.value = '#ea580c';
           if (accentHex) accentHex.value = '#ea580c';
@@ -1080,10 +1068,6 @@
       });
     }
 
-    var layoutSel = document.getElementById('layoutSelect');
-    if (layoutSel) layoutSel.addEventListener('change', updatePreview);
-    var profileAlignSel = document.getElementById('profileAlignmentSelect');
-    if (profileAlignSel) profileAlignSel.addEventListener('change', updatePreview);
     var displayStyleSel = document.getElementById('displayStyleSelect');
     if (displayStyleSel) {
       displayStyleSel.addEventListener('change', function() {
