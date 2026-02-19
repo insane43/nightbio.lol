@@ -293,8 +293,8 @@
           toggle.addEventListener('change', function() {
             window._editorCurrentData.badgeVisibility = window._editorCurrentData.badgeVisibility || {};
             if (info.userCanToggle) {
-              window._editorCurrentData.badges = window._editorCurrentData.badges || {};
-              window._editorCurrentData.badges[key] = this.checked;
+            window._editorCurrentData.badges = window._editorCurrentData.badges || {};
+            window._editorCurrentData.badges[key] = this.checked;
             } else {
               window._editorCurrentData.badgeVisibility[key] = this.checked;
             }
@@ -366,6 +366,27 @@
       if (displayStyleSel) displayStyleSel.value = (d.displayStyle === 'card') ? 'card' : 'default';
       var modalWrap = document.getElementById('modalOptionsWrap');
       if (modalWrap) modalWrap.style.display = (d.displayStyle === 'card') ? 'block' : 'none';
+      var modalBgMode = document.getElementById('modalBackgroundMode');
+      var modalSolidWrap = document.getElementById('modalSolidColorWrap');
+      var modalGradWrap = document.getElementById('modalGradientWrap');
+      if (modalBgMode) {
+        var mode = (d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2) ? 'gradient' : (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? 'solid' : 'default';
+        modalBgMode.value = mode;
+        if (modalSolidWrap) modalSolidWrap.style.display = mode === 'solid' ? '' : 'none';
+        if (modalGradWrap) modalGradWrap.style.display = mode === 'gradient' ? '' : 'none';
+      }
+      var modalBgColor = document.getElementById('modalBackgroundColor');
+      var modalBgColorHex = document.getElementById('modalBackgroundColorHex');
+      if (modalBgColor) modalBgColor.value = (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '#12121a';
+      if (modalBgColorHex) modalBgColorHex.value = (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '#12121a';
+      var modalGrad1 = document.getElementById('modalGradientColor1');
+      var modalGrad1Hex = document.getElementById('modalGradientColor1Hex');
+      var modalGrad2 = document.getElementById('modalGradientColor2');
+      var modalGrad2Hex = document.getElementById('modalGradientColor2Hex');
+      if (modalGrad1) modalGrad1.value = (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '#1a1a24';
+      if (modalGrad1Hex) modalGrad1Hex.value = (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '#1a1a24';
+      if (modalGrad2) modalGrad2.value = (d.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor2)) ? d.modalGradientColor2 : '#12121a';
+      if (modalGrad2Hex) modalGrad2Hex.value = (d.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor2)) ? d.modalGradientColor2 : '#12121a';
       var modalOpacityIn = document.getElementById('modalOpacity');
       var modalBlurIn = document.getElementById('modalBlur');
       var modalBorderOpacityIn = document.getElementById('modalBorderOpacity');
@@ -457,6 +478,10 @@
         if (gB) gB.checked = !!d.premiumGlowBadges;
         var gBio = document.getElementById('premiumGlowBio');
         if (gBio) gBio.checked = !!d.premiumGlowBio;
+        var glowColorEl = document.getElementById('premiumGlowColor');
+        var glowColorHexEl = document.getElementById('premiumGlowColorHex');
+        if (glowColorEl) glowColorEl.value = (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '#7c6bb8';
+        if (glowColorHexEl) glowColorHexEl.value = (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '#7c6bb8';
         set('premiumCustomCSS', d.premiumCustomCSS);
       }
 
@@ -1024,11 +1049,11 @@
       }
       if (bannerURLInput) {
         window._editorCurrentData.bannerURL = bannerURLInput.value.trim();
-        if (bannerPreview) {
+          if (bannerPreview) {
           if (window._editorCurrentData.bannerURL) {
             bannerPreview.src = window._editorCurrentData.bannerURL;
             bannerPreview.style.display = 'block';
-            if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
+          if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
           } else {
             bannerPreview.style.display = 'none';
             bannerPreview.removeAttribute('src');
@@ -1037,7 +1062,7 @@
         }
       }
       if (songURLInput) window._editorCurrentData.songURL = songURLInput.value.trim();
-      updatePreview();
+          updatePreview();
     }
     if (avatarURLInput) {
       avatarURLInput.addEventListener('input', syncMediaFromInputs);
@@ -1148,27 +1173,27 @@
     }
 
     function getEditorDataForSave() {
-      var fontSel = document.getElementById('fontFamily');
-      var fontSizeIn = document.getElementById('fontSize');
-      var letterSpacingIn = document.getElementById('letterSpacing');
-      var typewriterCb = document.getElementById('typewriterBio');
-      var bgEffect = document.getElementById('backgroundEffect');
-      var btnStyle = document.getElementById('buttonStyle');
-      var metaTitleIn = document.getElementById('metaTitle');
-      var metaDescIn = document.getElementById('metaDescription');
-      var metaImageIn = document.getElementById('metaImageURL');
-      var badgeCommunityEl = document.getElementById('badgeCommunity');
+        var fontSel = document.getElementById('fontFamily');
+        var fontSizeIn = document.getElementById('fontSize');
+        var letterSpacingIn = document.getElementById('letterSpacing');
+        var typewriterCb = document.getElementById('typewriterBio');
+        var bgEffect = document.getElementById('backgroundEffect');
+        var btnStyle = document.getElementById('buttonStyle');
+        var metaTitleIn = document.getElementById('metaTitle');
+        var metaDescIn = document.getElementById('metaDescription');
+        var metaImageIn = document.getElementById('metaImageURL');
+        var badgeCommunityEl = document.getElementById('badgeCommunity');
       var showViewsCb = document.getElementById('showViewsOnBio');
       var avatarURLIn = document.getElementById('avatarURLInput');
       var bannerURLIn = document.getElementById('bannerURLInput');
       var songURLIn = document.getElementById('songURLInput');
       var payload = {
-        displayName: displayName ? displayName.value.trim() : '',
-        bio: bioText ? bioText.value.trim() : '',
+          displayName: displayName ? displayName.value.trim() : '',
+          bio: bioText ? bioText.value.trim() : '',
         songURL: (songURLIn && songURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.songURL) || '',
         avatarURL: (avatarURLIn && avatarURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.avatarURL) || '',
         bannerURL: (bannerURLIn && bannerURLIn.value.trim()) || (window._editorCurrentData && window._editorCurrentData.bannerURL) || '',
-        accentColor: accentColor ? accentColor.value : '#7c6bb8',
+          accentColor: accentColor ? accentColor.value : '#7c6bb8',
         layout: 'classic',
         profileAlignment: 'center',
         displayStyle: (document.getElementById('displayStyleSelect') && document.getElementById('displayStyleSelect').value) || 'default',
@@ -1176,21 +1201,25 @@
         modalBlur: (function() { var el = document.getElementById('modalBlur'); return el ? parseInt(el.value, 10) : 0; })(),
         modalBorderOpacity: (function() { var el = document.getElementById('modalBorderOpacity'); return el ? parseInt(el.value, 10) : 20; })(),
         modalRadius: (function() { var el = document.getElementById('modalRadius'); return el ? parseInt(el.value, 10) : 24; })(),
-        fontFamily: fontSel ? fontSel.value : 'Outfit',
-        fontSize: fontSizeIn ? (parseInt(fontSizeIn.value, 10) || 16) : 16,
-        letterSpacing: letterSpacingIn ? (parseFloat(letterSpacingIn.value) || 0) : 0,
+        modalUseGradient: (function() { var el = document.getElementById('modalBackgroundMode'); return el ? el.value === 'gradient' : false; })(),
+        modalBackgroundColor: (function() { var el = document.getElementById('modalBackgroundColor'); return el && /^#[0-9A-Fa-f]{6}$/.test(el.value) ? el.value : ''; })(),
+        modalGradientColor1: (function() { var el = document.getElementById('modalGradientColor1'); return el && /^#[0-9A-Fa-f]{6}$/.test(el.value) ? el.value : ''; })(),
+        modalGradientColor2: (function() { var el = document.getElementById('modalGradientColor2'); return el && /^#[0-9A-Fa-f]{6}$/.test(el.value) ? el.value : ''; })(),
+          fontFamily: fontSel ? fontSel.value : 'Outfit',
+          fontSize: fontSizeIn ? (parseInt(fontSizeIn.value, 10) || 16) : 16,
+          letterSpacing: letterSpacingIn ? (parseFloat(letterSpacingIn.value) || 0) : 0,
         typewriterBio: (window._editorCurrentData && window._editorCurrentData.badges && window._editorCurrentData.badges.premium) ? (typewriterCb ? typewriterCb.checked : false) : false,
-        backgroundEffect: bgEffect ? bgEffect.value : 'none',
-        buttonStyle: btnStyle ? btnStyle.value : 'filled',
-        metaTitle: metaTitleIn ? metaTitleIn.value.trim() : '',
-        metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
-        metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
+          backgroundEffect: bgEffect ? bgEffect.value : 'none',
+          buttonStyle: btnStyle ? btnStyle.value : 'filled',
+          metaTitle: metaTitleIn ? metaTitleIn.value.trim() : '',
+          metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
+          metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
         showViewsOnBio: showViewsCb ? showViewsCb.checked : false,
         clickToEnter: (function() { var el = document.getElementById('clickToEnter'); return el ? el.checked : false; })(),
         badges: window._editorCurrentData.badges || { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
         badgeVisibility: window._editorCurrentData.badgeVisibility || {},
-        links: getLinksFromList()
-      };
+          links: getLinksFromList()
+        };
       if (window._editorCurrentData && window._editorCurrentData.badges && window._editorCurrentData.badges.premium) {
         var pBtnShape = document.getElementById('premiumButtonShape');
         var pLinkHover = document.getElementById('premiumLinkHoverEffect');
@@ -1227,6 +1256,8 @@
         payload.premiumGlowSocials = pGlowSocials ? !!pGlowSocials.checked : false;
         payload.premiumGlowBadges = pGlowBadges ? !!pGlowBadges.checked : false;
         payload.premiumGlowBio = pGlowBio ? !!pGlowBio.checked : false;
+        var pGlowColorEl = document.getElementById('premiumGlowColor');
+        payload.premiumGlowColor = (pGlowColorEl && /^#[0-9A-Fa-f]{6}$/.test(pGlowColorEl.value)) ? pGlowColorEl.value : '';
         payload.premiumCustomCSS = pCustomCSS ? pCustomCSS.value.trim() : '';
         payload.premiumCustomFontFamily = pCustomFont ? pCustomFont.value.trim() : '';
         payload.premiumLayoutPreset = pLayoutPreset ? pLayoutPreset.value.trim() : '';
@@ -1298,6 +1329,35 @@
         updatePreview();
       });
     }
+    var modalBgModeEl = document.getElementById('modalBackgroundMode');
+    if (modalBgModeEl) {
+      modalBgModeEl.addEventListener('change', function() {
+        var solidWrap = document.getElementById('modalSolidColorWrap');
+        var gradWrap = document.getElementById('modalGradientWrap');
+        if (solidWrap) solidWrap.style.display = this.value === 'solid' ? '' : 'none';
+        if (gradWrap) gradWrap.style.display = this.value === 'gradient' ? '' : 'none';
+        updatePreview();
+      });
+    }
+    var premiumGlowColorEl = document.getElementById('premiumGlowColor');
+    var premiumGlowColorHexEl = document.getElementById('premiumGlowColorHex');
+    if (premiumGlowColorEl && premiumGlowColorHexEl) {
+      premiumGlowColorEl.addEventListener('input', function() { premiumGlowColorHexEl.value = premiumGlowColorEl.value; });
+      premiumGlowColorHexEl.addEventListener('input', function() {
+        var v = premiumGlowColorHexEl.value.trim();
+        if (/^#[0-9A-Fa-f]{6}$/.test(v)) premiumGlowColorEl.value = v;
+      });
+    }
+    function syncModalColorPicker(colorId, hexId) {
+      var colorEl = document.getElementById(colorId);
+      var hexEl = document.getElementById(hexId);
+      if (!colorEl || !hexEl) return;
+      colorEl.addEventListener('input', function() { hexEl.value = colorEl.value; });
+      hexEl.addEventListener('input', function() { if (/^#[0-9A-Fa-f]{6}$/.test(hexEl.value.trim())) colorEl.value = hexEl.value.trim(); });
+    }
+    syncModalColorPicker('modalBackgroundColor', 'modalBackgroundColorHex');
+    syncModalColorPicker('modalGradientColor1', 'modalGradientColor1Hex');
+    syncModalColorPicker('modalGradientColor2', 'modalGradientColor2Hex');
     var btnStyleEl = document.getElementById('buttonStyle');
     if (btnStyleEl) btnStyleEl.addEventListener('change', updatePreview);
     var showViewsCbEl = document.getElementById('showViewsOnBio');

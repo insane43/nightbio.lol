@@ -90,6 +90,10 @@ function loadBioForUid(uid) {
       modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
       modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
       modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
+      modalUseGradient: !!(d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2),
+      modalBackgroundColor: (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '',
+      modalGradientColor1: (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '',
+      modalGradientColor2: (d.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor2)) ? d.modalGradientColor2 : '',
       clickToEnter: !!d.clickToEnter,
       metaTitle: d.metaTitle || '',
       metaDescription: d.metaDescription || '',
@@ -106,6 +110,7 @@ function loadBioForUid(uid) {
       premiumGlowSocials: !!d.premiumGlowSocials,
       premiumGlowBadges: !!d.premiumGlowBadges,
       premiumGlowBio: !!d.premiumGlowBio,
+      premiumGlowColor: (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '',
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
@@ -200,6 +205,10 @@ function getCurrentUserBio(uid) {
       modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
       modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
       modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
+      modalUseGradient: !!(d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2),
+      modalBackgroundColor: (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '',
+      modalGradientColor1: (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '',
+      modalGradientColor2: (d.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor2)) ? d.modalGradientColor2 : '',
       clickToEnter: !!d.clickToEnter,
       metaTitle: d.metaTitle || '',
       metaDescription: d.metaDescription || '',
@@ -217,6 +226,7 @@ function getCurrentUserBio(uid) {
       premiumGlowSocials: !!d.premiumGlowSocials,
       premiumGlowBadges: !!d.premiumGlowBadges,
       premiumGlowBio: !!d.premiumGlowBio,
+      premiumGlowColor: (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '',
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
@@ -292,6 +302,11 @@ function saveBio(uid, data) {
   if (data.premiumGlowSocials !== undefined) updates.premiumGlowSocials = !!data.premiumGlowSocials;
   if (data.premiumGlowBadges !== undefined) updates.premiumGlowBadges = !!data.premiumGlowBadges;
   if (data.premiumGlowBio !== undefined) updates.premiumGlowBio = !!data.premiumGlowBio;
+  if (data.premiumGlowColor !== undefined) updates.premiumGlowColor = (data.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(data.premiumGlowColor)) ? data.premiumGlowColor : '';
+  if (data.modalUseGradient !== undefined) updates.modalUseGradient = !!data.modalUseGradient;
+  if (data.modalBackgroundColor !== undefined) updates.modalBackgroundColor = (data.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(data.modalBackgroundColor)) ? data.modalBackgroundColor : '';
+  if (data.modalGradientColor1 !== undefined) updates.modalGradientColor1 = (data.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(data.modalGradientColor1)) ? data.modalGradientColor1 : '';
+  if (data.modalGradientColor2 !== undefined) updates.modalGradientColor2 = (data.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(data.modalGradientColor2)) ? data.modalGradientColor2 : '';
   if (data.premiumNameGradient !== undefined) updates.premiumNameGradient = String(data.premiumNameGradient || '').trim().slice(0, 200);
   if (data.premiumBioFontSize !== undefined) updates.premiumBioFontSize = data.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(data.premiumBioFontSize, 10) || 15)) : null;
   if (data.premiumVideoBackground !== undefined) updates.premiumVideoBackground = String(data.premiumVideoBackground || '').trim().slice(0, 500);

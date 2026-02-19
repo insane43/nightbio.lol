@@ -257,15 +257,29 @@
         var mainEl = document.getElementById('bioMain');
         if (mainEl) {
           if (data.displayStyle === 'card') {
-            mainEl.style.setProperty('--modal-opacity', String((data.modalOpacity != null ? Math.min(100, Math.max(0, data.modalOpacity)) : 96) / 100));
+            var modalOpacityVal = (data.modalOpacity != null ? Math.min(100, Math.max(0, data.modalOpacity)) : 96) / 100;
+            mainEl.style.setProperty('--modal-opacity', String(modalOpacityVal));
             mainEl.style.setProperty('--modal-blur', String(Math.min(24, Math.max(0, data.modalBlur != null ? data.modalBlur : 0))) + 'px');
             mainEl.style.setProperty('--modal-border-opacity', String((data.modalBorderOpacity != null ? Math.min(100, Math.max(0, data.modalBorderOpacity)) : 20) / 100));
             mainEl.style.setProperty('--modal-radius', String(Math.min(32, Math.max(8, data.modalRadius != null ? data.modalRadius : 24))) + 'px');
+            function hexToRgba(hex, a) {
+              var m = (hex || '').match(/^#?([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$/);
+              if (!m) return '';
+              return 'rgba(' + parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) + ',' + a + ')';
+            }
+            if (data.modalUseGradient && data.modalGradientColor1 && data.modalGradientColor2) {
+              mainEl.style.background = 'linear-gradient(180deg, ' + hexToRgba(data.modalGradientColor1, modalOpacityVal) + ', ' + hexToRgba(data.modalGradientColor2, modalOpacityVal) + ')';
+            } else if (data.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(data.modalBackgroundColor)) {
+              mainEl.style.background = hexToRgba(data.modalBackgroundColor, modalOpacityVal);
+            } else {
+              mainEl.style.background = '';
+            }
           } else {
             mainEl.style.removeProperty('--modal-opacity');
             mainEl.style.removeProperty('--modal-blur');
             mainEl.style.removeProperty('--modal-border-opacity');
             mainEl.style.removeProperty('--modal-radius');
+            mainEl.style.background = '';
           }
         }
         if (premium && data.premiumCustomFontFamily && data.premiumCustomFontFamily.trim()) {
@@ -311,6 +325,11 @@
         document.body.style.setProperty('--bio-font-size', fontSize + 'px');
         document.body.style.setProperty('--bio-letter-spacing', letterSpacing + 'px');
         if (data.accentColor) document.body.style.setProperty('--purple-accent', data.accentColor);
+        if (premium && data.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(data.premiumGlowColor)) {
+          content.style.setProperty('--bio-glow-color', data.premiumGlowColor);
+        } else {
+          content.style.removeProperty('--bio-glow-color');
+        }
         if (premium) {
           if (data.premiumLinkFontSize != null) content.style.setProperty('--bio-link-font-size', Math.min(24, Math.max(12, data.premiumLinkFontSize)) + 'px');
           if (data.premiumLinkBorderRadius != null) content.style.setProperty('--bio-link-radius', Math.min(50, Math.max(0, data.premiumLinkBorderRadius)) + 'px');
@@ -430,6 +449,37 @@
           nameEl.style.backgroundClip = '';
           nameEl.style.color = '';
         }
+        var particleEffect = (premium && data.premiumUsernameEffect) ? data.premiumUsernameEffect : '';
+        var isParticleEffect = particleEffect === 'white-particles' || particleEffect === 'black-particles' || particleEffect === 'blue-particles';
+        if (isParticleEffect && nameEl.parentNode) {
+          var existingWrap = nameEl.closest('.bio-name-particles-wrap');
+          if (existingWrap && existingWrap !== nameEl.parentNode) existingWrap = null;
+          if (!existingWrap) {
+            var wrap = document.createElement('div');
+            wrap.className = 'bio-name-particles-wrap bio-name-particles-' + particleEffect;
+            var particlesContainer = document.createElement('div');
+            particlesContainer.className = 'bio-particles-container';
+            var particleCount = 24;
+            for (var p = 0; p < particleCount; p++) {
+              var dot = document.createElement('span');
+              dot.className = 'bio-particle';
+              dot.style.left = '50%';
+              dot.style.top = '50%';
+              dot.style.animationDelay = (p * 0.15) + 's';
+              dot.style.animationDuration = (3.2 + (p % 5) * 0.3) + 's';
+              particlesContainer.appendChild(dot);
+            }
+            nameEl.parentNode.insertBefore(wrap, nameEl);
+            wrap.appendChild(nameEl);
+            wrap.appendChild(particlesContainer);
+          }
+        } else {
+          var oldWrap = nameEl.closest('.bio-name-particles-wrap');
+          if (oldWrap && oldWrap.parentNode) {
+            oldWrap.parentNode.insertBefore(nameEl, oldWrap);
+            oldWrap.remove();
+          }
+        }
         if (premium && data.premiumBioFontSize != null) {
           bioEl.style.fontSize = Math.min(24, Math.max(12, data.premiumBioFontSize)) + 'px';
         } else {
@@ -457,10 +507,6 @@
               iconWrap.innerHTML = icons[key];
               span.appendChild(iconWrap);
             }
-            var labelSpan = document.createElement('span');
-            labelSpan.className = 'bio-badge-label';
-            labelSpan.textContent = labels[key] || key;
-            span.appendChild(labelSpan);
             badgesRow.appendChild(span);
           });
         }

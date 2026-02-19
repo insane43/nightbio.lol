@@ -9,6 +9,7 @@
     "aliases": {
       ".read": true,
       "$normalized": {
+        ".read": true,
         ".write": "auth != null && (newData.val() === auth.uid || data.val() === auth.uid)"
       }
     },

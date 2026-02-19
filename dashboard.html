@@ -191,6 +191,32 @@
             <div id="modalOptionsWrap" class="modal-options-wrap" style="display: none;">
               <h3 class="panel-subtitle">Card appearance</h3>
               <div class="form-group">
+                <label for="modalBackgroundMode">Card background</label>
+                <select id="modalBackgroundMode" class="form-select">
+                  <option value="default">Default (dark)</option>
+                  <option value="solid">Solid color</option>
+                  <option value="gradient">Two-color gradient</option>
+                </select>
+              </div>
+              <div id="modalSolidColorWrap" class="form-group" style="display: none;">
+                <label for="modalBackgroundColor">Card color</label>
+                <div class="color-picker-wrap">
+                  <input type="color" id="modalBackgroundColor" value="#12121a" aria-label="Card background color">
+                  <input type="text" id="modalBackgroundColorHex" class="color-hex-input" value="#12121a" maxlength="7" placeholder="#12121a">
+                </div>
+              </div>
+              <div id="modalGradientWrap" class="form-group" style="display: none;">
+                <label>Gradient colors</label>
+                <div class="color-picker-wrap">
+                  <input type="color" id="modalGradientColor1" value="#1a1a24" aria-label="Gradient color 1">
+                  <input type="text" id="modalGradientColor1Hex" class="color-hex-input" value="#1a1a24" maxlength="7">
+                </div>
+                <div class="color-picker-wrap">
+                  <input type="color" id="modalGradientColor2" value="#12121a" aria-label="Gradient color 2">
+                  <input type="text" id="modalGradientColor2Hex" class="color-hex-input" value="#12121a" maxlength="7">
+                </div>
+              </div>
+              <div class="form-group">
                 <label for="modalOpacity">Background opacity (%)</label>
                 <input type="range" id="modalOpacity" min="20" max="100" value="96" class="form-range">
                 <span id="modalOpacityValue" class="form-range-value">96%</span>
@@ -602,6 +628,14 @@
             <div class="form-group form-check">
               <input type="checkbox" id="premiumGlowBio" class="form-checkbox">
               <label for="premiumGlowBio">Bio text glow</label>
+            </div>
+            <div class="form-group">
+              <label for="premiumGlowColor">Glow color</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="premiumGlowColor" value="#7c6bb8" aria-label="Glow color">
+                <input type="text" id="premiumGlowColorHex" class="color-hex-input" value="#7c6bb8" maxlength="7" placeholder="#7c6bb8">
+              </div>
+              <p class="panel-desc">Color used for username, socials, badges, and bio glow. Leave default or pick a custom color.</p>
             </div>
           </div>
           <div class="panel-card">
