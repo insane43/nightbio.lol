@@ -548,6 +548,9 @@
             var info = (window.BIO_BADGES && window.BIO_BADGES[key]) ? window.BIO_BADGES[key] : null;
             var span = document.createElement('span');
             span.className = 'bio-badge bio-badge-' + key;
+            if (premium && data.badgeColors && data.badgeColors[key] && /^#[0-9A-Fa-f]{6}$/.test(String(data.badgeColors[key]))) {
+              span.style.color = String(data.badgeColors[key]);
+            }
             var tip = info ? ((info.label || (labels[key] || key)) + (info.desc ? ' — ' + info.desc : '')) : (labels[key] || key);
             span.setAttribute('data-tooltip', tip);
             span.setAttribute('tabindex', '0');

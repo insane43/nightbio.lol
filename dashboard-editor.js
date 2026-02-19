@@ -260,13 +260,16 @@
       }).catch(function() { el.textContent = '0'; });
     }
 
-    function renderBadgesList(badges, badgeVisibility) {
+    var BADGE_DEFAULT_COLORS = { community: '#7c6bb8', verified: '#22c55e', staff: '#a855f7', owner: '#ef4444', og: '#eab308', premium: '#eab308' };
+    function renderBadgesList(badges, badgeVisibility, badgeColors) {
       var grid = document.getElementById('badgesList');
       if (!grid || typeof window.BIO_BADGES === 'undefined') return;
       var icons = window.BADGE_ICONS || {};
       var vis = badgeVisibility || {};
+      var colors = badgeColors || {};
       grid.innerHTML = '';
       var b = badges || {};
+      var hasPremium = !!(b && b.premium);
       Object.keys(window.BIO_BADGES).forEach(function(key) {
         var info = window.BIO_BADGES[key];
         var hasBadge = !!b[key];
@@ -286,7 +289,12 @@
         } else {
           action = '<span class="badge-card-action badge-card-action-status">Granted by admin</span>';
         }
-        card.innerHTML = iconHtml + '<div class="badge-card-body">' + title + desc + '</div><div class="badge-card-action-wrap">' + action + '</div>';
+        var colorRow = '';
+        if (hasPremium) {
+          var defColor = (colors[key] && /^#[0-9A-Fa-f]{6}$/.test(colors[key])) ? colors[key] : (BADGE_DEFAULT_COLORS[key] || '#7c6bb8');
+          colorRow = '<div class="badge-card-color-wrap"><label class="badge-card-color-label">Color</label><div class="color-picker-wrap"><input type="color" class="badge-color-input" data-badge="' + key + '" value="' + defColor + '" aria-label="' + escapeHtml(info.label) + ' color"><input type="text" class="badge-color-hex form-input" data-badge="' + key + '" value="' + defColor + '" maxlength="7" placeholder="#000000"></div></div>';
+        }
+        card.innerHTML = iconHtml + '<div class="badge-card-body">' + title + desc + '</div><div class="badge-card-action-wrap">' + action + '</div>' + (colorRow ? '<div class="badge-card-color-row">' + colorRow + '</div>' : '');
         grid.appendChild(card);
         var toggle = card.querySelector('.badge-toggle');
         if (toggle) {
@@ -303,6 +311,26 @@
             card.classList.toggle('badge-card-owned', !!window._editorCurrentData.badges[key]);
             updatePreview();
           });
+        }
+        if (hasPremium) {
+          var colorInput = card.querySelector('.badge-color-input');
+          var hexInput = card.querySelector('.badge-color-hex');
+          if (colorInput && hexInput) {
+            window._editorCurrentData.badgeColors = window._editorCurrentData.badgeColors || {};
+            colorInput.addEventListener('input', function() {
+              hexInput.value = colorInput.value;
+              window._editorCurrentData.badgeColors[key] = colorInput.value;
+              updatePreview();
+            });
+            hexInput.addEventListener('input', function() {
+              var v = hexInput.value.trim();
+              if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+                colorInput.value = v;
+                window._editorCurrentData.badgeColors[key] = v;
+                updatePreview();
+              }
+            });
+          }
         }
       });
       var filterSel = document.getElementById('badgesFilter');
@@ -426,7 +454,8 @@
 
       window._editorCurrentData.badges = d.badges || { community: true, og: false, owner: false, staff: false, verified: false, premium: false };
       window._editorCurrentData.badgeVisibility = d.badgeVisibility || {};
-      renderBadgesList(window._editorCurrentData.badges, window._editorCurrentData.badgeVisibility);
+      window._editorCurrentData.badgeColors = d.badgeColors && typeof d.badgeColors === 'object' ? d.badgeColors : {};
+      renderBadgesList(window._editorCurrentData.badges, window._editorCurrentData.badgeVisibility, window._editorCurrentData.badgeColors);
 
       var showViewsCb = document.getElementById('showViewsOnBio');
       if (showViewsCb) showViewsCb.checked = !!d.showViewsOnBio;
@@ -1225,6 +1254,7 @@
         clickToEnter: (function() { var el = document.getElementById('clickToEnter'); return el ? el.checked : false; })(),
         badges: window._editorCurrentData.badges || { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
         badgeVisibility: window._editorCurrentData.badgeVisibility || {},
+        badgeColors: (window._editorCurrentData && window._editorCurrentData.badgeColors) || {},
           links: getLinksFromList()
         };
       if (window._editorCurrentData && window._editorCurrentData.badges && window._editorCurrentData.badges.premium) {

@@ -101,6 +101,7 @@ function loadBioForUid(uid) {
       showViewsOnBio: !!d.showViewsOnBio,
       stats: { views: views },
       badges: visibleBadges,
+      badgeColors: sanitizeBadgeColors(d.badgeColors),
       premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
       premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
       premiumLinkFontSize: d.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumLinkFontSize, 10) || 16)) : null,
@@ -140,6 +141,18 @@ function mergeBadges(loaded) {
     verified: !!loaded.verified,
     premium: !!loaded.premium
   };
+}
+
+function sanitizeBadgeColors(colors) {
+  if (!colors || typeof colors !== 'object') return {};
+  var keys = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
+  var out = {};
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    var v = colors[k];
+    if (v && typeof v === 'string' && /^#[0-9A-Fa-f]{6}$/.test(v.trim())) out[k] = v.trim();
+  }
+  return out;
 }
 
 // Apply visibility: only show badges that are granted AND not hidden (badgeVisibility[key] !== false).
@@ -220,6 +233,7 @@ function getCurrentUserBio(uid) {
       stats: d.stats || { views: 0 },
       badges: mergeBadges(d.badges),
       badgeVisibility: d.badgeVisibility && typeof d.badgeVisibility === 'object' ? d.badgeVisibility : {},
+      badgeColors: sanitizeBadgeColors(d.badgeColors),
       premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
       premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
       premiumLinkFontSize: d.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumLinkFontSize, 10) || 16)) : null,
@@ -288,6 +302,9 @@ function saveBio(uid, data) {
       var vk = visKeys[j];
       if (data.badgeVisibility[vk] !== undefined) updates['badgeVisibility/' + vk] = !!data.badgeVisibility[vk];
     }
+  }
+  if (data.badgeColors !== undefined && data.badges && data.badges.premium) {
+    updates.badgeColors = sanitizeBadgeColors(data.badgeColors);
   }
   if (Array.isArray(data.links)) {
     updates.links = data.links.slice(0, 20).map(function(l) {
