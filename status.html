@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status — nightbio.lol</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .status-page { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .status-hero { margin-bottom: 2rem; }
+    .status-hero h1 { font-size: 1.85rem; font-weight: 700; margin-bottom: 0.35rem; letter-spacing: -0.02em; }
+    .status-hero p { color: var(--text-muted); font-size: 0.95rem; }
+    .status-updated { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+    .status-list { display: flex; flex-direction: column; gap: 0; }
+    .status-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); margin-bottom: 0.5rem; }
+    .status-item:last-child { margin-bottom: 0; }
+    .status-dot-wrap { position: relative; flex-shrink: 0; }
+    .status-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.operational { background: var(--success); box-shadow: 0 0 12px rgba(107, 184, 124, 0.5); }
+    .status-dot.degraded { background: #e6b84d; box-shadow: 0 0 12px rgba(230, 184, 77, 0.4); }
+    .status-dot.outage { background: var(--error); box-shadow: 0 0 12px rgba(184, 107, 107, 0.5); }
+    .status-dot.checking { background: var(--text-muted); animation: status-pulse 1s ease-in-out infinite; }
+    @keyframes status-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .status-label { font-weight: 600; color: var(--text-primary); }
+    .status-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .status-tooltip { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 8px); padding: 0.5rem 0.75rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-primary); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .status-dot-wrap:hover .status-tooltip { opacity: 1; }
+    .status-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-top-color: var(--border-subtle); }
+    .status-overview { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-subtle); }
+    .status-overview-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .status-overview-dot.operational { background: var(--success); }
+    .status-overview-dot.degraded { background: #e6b84d; }
+    .status-overview-dot.outage { background: var(--error); }
+    .status-overview-dot.checking { background: var(--text-muted); animation: status-pulse 1s ease-in-out infinite; }
+    .status-overview-text { font-size: 0.9rem; color: var(--text-muted); }
+    .status-refresh { margin-top: 1.5rem; }
+    .status-refresh button { font-size: 0.85rem; padding: 0.4rem 0.75rem; color: var(--purple-accent); background: transparent; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer; }
+    .status-refresh button:hover { background: rgba(124, 107, 184, 0.1); }
+  </style>
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-logo" href="/">
+        <img alt="nightbio.lol logo" src="/nightbio-logo-pfp.png">
+        <h1>nightbio<span>.</span>lol</h1>
+      </a>
+      <div class="site-nav-links">
+        <a href="help">Help Center</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        <a href="login">Login</a>
+        <a href="signup" class="site-nav-cta">Sign up</a>
+      </div>
+      <button type="button" class="site-nav-hamburger" id="navHamburger" aria-label="Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+      </button>
+      <div class="site-nav-drawer" id="navDrawer">
+        <a href="help">Help Center</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        <a href="login">Login</a>
+        <a href="signup" class="site-nav-cta">Sign up</a>
+      </div>
+    </div>
+  </nav>
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <main class="status-page">
+    <header class="status-hero">
+      <h1>System status</h1>
+      <p>Real-time status of nightbio.lol services.</p>
+      <p class="status-updated" id="statusUpdated">Last checked: —</p>
+    </header>
+
+    <div class="status-overview" id="statusOverview">
+      <span class="status-overview-dot checking" id="overviewDot"></span>
+      <span class="status-overview-text" id="overviewText">Checking all systems…</span>
+    </div>
+
+    <div class="status-list">
+      <div class="status-item">
+        <div class="status-dot-wrap">
+          <span class="status-dot checking" id="dotWebsite" aria-label="Website status"></span>
+          <span class="status-tooltip" id="tooltipWebsite">Checking…</span>
+        </div>
+        <div>
+          <div class="status-label">Website</div>
+          <div class="status-desc">nightbio.lol homepage and pages</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-dot-wrap">
+          <span class="status-dot checking" id="dotApi" aria-label="API status"></span>
+          <span class="status-tooltip" id="tooltipApi">Checking…</span>
+        </div>
+        <div>
+          <div class="status-label">API</div>
+          <div class="status-desc">Firebase Auth & backend services</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-dot-wrap">
+          <span class="status-dot checking" id="dotDb" aria-label="Database status"></span>
+          <span class="status-tooltip" id="tooltipDb">Checking…</span>
+        </div>
+        <div>
+          <div class="status-label">Database</div>
+          <div class="status-desc">Firebase Realtime Database</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-refresh">
+      <button type="button" id="statusRefresh">Refresh status</button>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    (function() {
+      if (window.location.pathname.endsWith('status.html')) {
+        window.location.replace('/status' + (window.location.hash || ''));
+        return;
+      }
+      var TOOLTIPS = {
+        operational: 'Operational — All systems normal.',
+        degraded: 'Degraded — Slow or partial outage. We\'re looking into it.',
+        outage: 'Outage — Service unavailable. We\'re working on a fix.',
+        checking: 'Checking…'
+      };
+      function setDot(id, state, tooltipId) {
+        var dot = document.getElementById(id);
+        var tip = document.getElementById(tooltipId);
+        if (!dot || !tip) return;
+        dot.className = 'status-dot ' + state;
+        dot.setAttribute('aria-label', state);
+        tip.textContent = TOOLTIPS[state] || TOOLTIPS.checking;
+      }
+      function setOverview(allOk, anyDegraded, anyDown) {
+        var dot = document.getElementById('overviewDot');
+        var text = document.getElementById('overviewText');
+        if (!dot || !text) return;
+        dot.className = 'status-overview-dot';
+        if (anyDown) { dot.classList.add('outage'); text.textContent = 'Some systems are down.'; }
+        else if (anyDegraded) { dot.classList.add('degraded'); text.textContent = 'Some systems are degraded.'; }
+        else if (allOk) { dot.classList.add('operational'); text.textContent = 'All systems operational.'; }
+        else { dot.classList.add('checking'); text.textContent = 'Checking all systems…'; }
+      }
+      function runChecks() {
+        var updatedEl = document.getElementById('statusUpdated');
+        if (updatedEl) updatedEl.textContent = 'Last checked: ' + new Date().toLocaleTimeString();
+
+        setDot('dotWebsite', 'checking', 'tooltipWebsite');
+        setDot('dotApi', 'checking', 'tooltipApi');
+        setDot('dotDb', 'checking', 'tooltipDb');
+        setOverview(false, false, false);
+
+        var websiteOk = false;
+        var apiOk = false;
+        var dbOk = false;
+        var websiteDegraded = false;
+        var apiDegraded = false;
+        var dbDegraded = false;
+        var done = { w: false, a: false, d: false };
+
+        function finish() {
+          if (!done.w || !done.a || !done.d) return;
+          setDot('dotWebsite', websiteDegraded ? 'degraded' : (websiteOk ? 'operational' : 'outage'), 'tooltipWebsite');
+          setDot('dotApi', apiDegraded ? 'degraded' : (apiOk ? 'operational' : 'outage'), 'tooltipApi');
+          setDot('dotDb', dbDegraded ? 'degraded' : (dbOk ? 'operational' : 'outage'), 'tooltipDb');
+          setOverview(websiteOk && apiOk && dbOk, websiteDegraded || apiDegraded || dbDegraded, !websiteOk || !apiOk || !dbOk);
+        }
+
+        fetch(window.location.origin + '/', { method: 'HEAD', cache: 'no-store' })
+          .then(function(r) { websiteOk = r.ok; })
+          .catch(function() { websiteOk = false; })
+          .finally(function() { done.w = true; finish(); });
+
+        if (typeof initFirebase === 'function') initFirebase();
+        var db = window.firebaseDb || (typeof firebase !== 'undefined' && firebase.database ? firebase.database() : null);
+        var auth = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth() : null;
+
+        if (auth) {
+          var t = setTimeout(function() { if (!done.a) { apiDegraded = true; apiOk = true; done.a = true; finish(); } }, 6000);
+          auth.getRedirectResult().then(function() { apiOk = true; done.a = true; clearTimeout(t); finish(); }).catch(function() { apiOk = false; done.a = true; clearTimeout(t); finish(); });
+        } else { apiOk = false; done.a = true; finish(); }
+
+        if (db) {
+          db.ref('siteConfig').limitToFirst(1).once('value')
+            .then(function() { dbOk = true; done.d = true; finish(); })
+            .catch(function() { dbOk = false; done.d = true; finish(); });
+        } else { dbOk = false; done.d = true; finish(); }
+      }
+
+      var refreshIntervalMs = 60000;
+      runChecks();
+      var refreshTimer = setInterval(runChecks, refreshIntervalMs);
+      document.getElementById('statusRefresh').addEventListener('click', runChecks);
+
+      var drawer = document.getElementById('navDrawer');
+      var hamburger = document.getElementById('navHamburger');
+      if (drawer && hamburger) hamburger.addEventListener('click', function() { drawer.classList.toggle('open'); });
+    })();
+  </script>
+</body>
+</html>
