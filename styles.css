@@ -1402,6 +1402,51 @@ textarea.form-input {
   color: var(--text-muted);
   font-weight: 600;
 }
+.preview-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: center;
+  margin: 0.4rem 0 0.3rem;
+}
+.preview-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: rgba(124, 107, 184, 0.2);
+  color: var(--preview-accent);
+  border: 1px solid rgba(124, 107, 184, 0.4);
+}
+.preview-views {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+.preview-song-wrap {
+  margin-bottom: 0.75rem;
+}
+.preview-song-wrap iframe { border-radius: 8px; }
+.preview-song-wrap audio { width: 100%; height: 36px; }
+.preview-layout-minimal .preview-banner { display: none !important; }
+.preview-display-card .preview-screen {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  border: 1px solid var(--border-subtle);
+}
+.preview-align-left .preview-profile { text-align: left; }
+.preview-align-left .preview-avatar-wrap { margin-left: 0; margin-right: auto; }
+.preview-align-left .preview-badges { justify-content: flex-start; }
+.preview-align-right .preview-profile { text-align: right; }
+.preview-align-right .preview-avatar-wrap { margin-left: auto; margin-right: 0; }
+.preview-align-right .preview-badges { justify-content: flex-end; }
+.preview-btn-outline .preview-link-btn {
+  background: transparent;
+  border: 2px solid var(--preview-accent);
+  color: var(--preview-accent);
+}
 
 /* ========== Public bio page ========== */
 html { scrollbar-gutter: stable; }
