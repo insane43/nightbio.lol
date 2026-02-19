@@ -328,7 +328,16 @@
         if (glowColor) content.style.setProperty('--bio-glow-color', glowColor);
         else content.style.removeProperty('--bio-glow-color');
         var glowStrength = (premium && data.premiumGlowStrength != null) ? Math.min(200, Math.max(25, Number(data.premiumGlowStrength) || 100)) : 100;
-        content.style.setProperty('--bio-glow-strength', String(glowStrength / 100));
+        var glowS = glowStrength / 100;
+        function setGlowBlur(name, basePx) { var v = (basePx * glowS) + 'px'; document.body.style.setProperty('--bio-glow-' + name, v); content.style.setProperty('--bio-glow-' + name, v); }
+        setGlowBlur('sm', 4);
+        setGlowBlur('md', 6);
+        setGlowBlur('lg', 8);
+        setGlowBlur('xl', 10);
+        setGlowBlur('2xl', 12);
+        setGlowBlur('3xl', 14);
+        setGlowBlur('4xl', 18);
+        setGlowBlur('5xl', 24);
         if (premium) {
           if (data.premiumLinkFontSize != null) content.style.setProperty('--bio-link-font-size', Math.min(24, Math.max(12, data.premiumLinkFontSize)) + 'px');
           if (data.premiumLinkBorderRadius != null) content.style.setProperty('--bio-link-radius', Math.min(50, Math.max(0, data.premiumLinkBorderRadius)) + 'px');

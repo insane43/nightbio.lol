@@ -2100,21 +2100,32 @@ html { scrollbar-gutter: stable; }
 .bio-particle:nth-child(3n) { animation-duration: 4.2s; }
 .bio-particle:nth-child(5n) { animation-duration: 3.4s; }
 
-/* Premium: glow settings (use --bio-glow-color when set, else accent; --bio-glow-strength scales blur) */
+/* Premium: glow settings (--bio-glow-* blur radii set in JS from strength slider; --bio-glow-color for color) */
 .bio-content-wrap.bio-glow-username .bio-name {
-  text-shadow: 0 0 calc(12px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(24px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(8px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
+  text-shadow: 0 0 var(--bio-glow-2xl, 12px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-5xl, 24px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-lg, 8px) var(--bio-glow-color, var(--purple-accent));
 }
 .bio-content-wrap.bio-glow-socials .bio-link-btn {
-  box-shadow: 0 0 calc(12px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(6px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
+  box-shadow: 0 0 var(--bio-glow-2xl, 12px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-md, 6px) var(--bio-glow-color, var(--purple-accent));
 }
 .bio-content-wrap.bio-glow-socials .bio-link-btn:hover {
-  box-shadow: 0 0 calc(18px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(10px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
+  box-shadow: 0 0 var(--bio-glow-4xl, 18px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-xl, 10px) var(--bio-glow-color, var(--purple-accent));
 }
 .bio-content-wrap.bio-glow-badges .bio-badge {
-  box-shadow: 0 0 calc(10px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(4px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
+  box-shadow:
+    inset 0 0 var(--bio-glow-3xl, 14px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 42%, transparent),
+    0 0 var(--bio-glow-xl, 10px) var(--bio-glow-color, var(--purple-accent)),
+    0 0 var(--bio-glow-sm, 4px) var(--bio-glow-color, var(--purple-accent));
+}
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .bio-content-wrap.bio-glow-badges .bio-badge {
+    box-shadow:
+      inset 0 0 var(--bio-glow-3xl, 14px) rgba(124,107,184,0.42),
+      0 0 var(--bio-glow-xl, 10px) var(--bio-glow-color, var(--purple-accent)),
+      0 0 var(--bio-glow-sm, 4px) var(--bio-glow-color, var(--purple-accent));
+  }
 }
 .bio-content-wrap.bio-glow-bio .bio-bio-text {
-  text-shadow: 0 0 calc(10px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(6px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
+  text-shadow: 0 0 var(--bio-glow-xl, 10px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-md, 6px) var(--bio-glow-color, var(--purple-accent));
 }
 
 /* Premium: video background — content above video */
