@@ -101,6 +101,7 @@ function loadBioForUid(uid) {
       showViewsOnBio: !!d.showViewsOnBio,
       stats: { views: views },
       badges: visibleBadges,
+      hasPremium: !!(merged && merged.premium),
       badgeColors: sanitizeBadgeColors(d.badgeColors),
       premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
       premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
@@ -116,6 +117,7 @@ function loadBioForUid(uid) {
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumBackgroundEffect: (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '',
+      premiumBackgroundEffectColor: (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '',
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
       premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
       premiumAvatarBorder: (d.premiumAvatarBorder || '').trim().slice(0, 100),
@@ -248,6 +250,7 @@ function getCurrentUserBio(uid) {
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumBackgroundEffect: (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '',
+      premiumBackgroundEffectColor: (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '',
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
       premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
       premiumAvatarBorder: (d.premiumAvatarBorder || '').trim().slice(0, 100),
@@ -334,6 +337,7 @@ function saveBio(uid, data) {
   if (data.premiumNameGradient !== undefined) updates.premiumNameGradient = String(data.premiumNameGradient || '').trim().slice(0, 200);
   if (data.premiumBioFontSize !== undefined) updates.premiumBioFontSize = data.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(data.premiumBioFontSize, 10) || 15)) : null;
   if (data.premiumBackgroundEffect !== undefined) updates.premiumBackgroundEffect = (data.premiumBackgroundEffect === 'blurred' || data.premiumBackgroundEffect === 'snowflakes' || data.premiumBackgroundEffect === 'rain') ? data.premiumBackgroundEffect : '';
+  if (data.premiumBackgroundEffectColor !== undefined) updates.premiumBackgroundEffectColor = (data.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(data.premiumBackgroundEffectColor)) ? data.premiumBackgroundEffectColor : '';
   if (data.premiumVideoBackground !== undefined) updates.premiumVideoBackground = String(data.premiumVideoBackground || '').trim().slice(0, 500);
   if (data.premiumBannerBlur !== undefined) updates.premiumBannerBlur = data.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(data.premiumBannerBlur, 10) || 0)) : 0;
   if (data.premiumAvatarBorder !== undefined) updates.premiumAvatarBorder = String(data.premiumAvatarBorder || '').trim().slice(0, 100);

@@ -710,6 +710,14 @@
                 <option value="rain">Rain</option>
               </select>
               <p class="panel-desc">Atmospheric effect behind your profile. Blurred softens the background; snowflakes or rain add falling particles.</p>
+              <div id="premiumBgEffectColorWrap" class="form-group" style="display:none;">
+                <label>Effect color</label>
+                <div class="color-picker-wrap">
+                  <input type="color" id="premiumBackgroundEffectColor" value="#ffffff" aria-label="Background effect color">
+                  <input type="text" id="premiumBackgroundEffectColorHex" class="form-input" value="#ffffff" maxlength="7" placeholder="#ffffff" style="width:5rem;font-size:0.875rem;">
+                </div>
+                <p class="panel-desc">Color of snowflakes or rain. Ignored for blurred.</p>
+              </div>
             </div>
             <div class="form-group">
               <label for="premiumVideoBackground">Video background URL</label>
