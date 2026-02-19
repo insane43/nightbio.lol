@@ -3,7 +3,7 @@
     "usernames": {
       ".read": true,
       "$normalized": {
-        ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.exists() && data.val() === auth.uid && (!newData.exists() || newData.val() === auth.uid)))"
+        ".write": "auth != null && ((root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true) || ((!data.exists() && newData.val() === auth.uid) || (data.exists() && data.val() === auth.uid && (!newData.exists() || newData.val() === auth.uid))))"
       }
     },
     "adminUids": {
@@ -44,7 +44,7 @@
       ".read": true,
       "$uid": {
         ".read": true,
-        ".write": "newData.isNumber() && newData.val() >= 0"
+        ".write": "(newData.isNumber() && newData.val() >= 0) || (auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true))"
       }
     },
     "users": {

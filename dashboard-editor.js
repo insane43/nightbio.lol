@@ -557,6 +557,7 @@
           actions += '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Ban">⊗</button>';
           if (typeof hardBanUser === 'function') actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Hard ban (account + IP)">⊛</button>';
         }
+        actions += '<button type="button" class="btn-icon danger-outline delete-account-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Delete account">⌫</button>';
         var tr = document.createElement('tr');
         tr.title = uidTitle;
         tr.innerHTML =
@@ -609,6 +610,16 @@
             showDashboardAdminToast('IP ban removed.');
             loadDashboardAdmin();
           }).catch(function() { showDashboardAdminToast('Failed to remove IP ban.', 'error'); });
+        });
+      });
+      tbody.querySelectorAll('.delete-account-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (!confirm('Permanently delete this user\'s bio and data? Their link will stop working. Their login account will still exist but they will have no profile.')) return;
+          if (typeof deleteUserAccount !== 'function') return;
+          deleteUserAccount(btn.dataset.uid).then(function() {
+            showDashboardAdminToast('User account data deleted.');
+            loadDashboardAdmin();
+          }).catch(function() { showDashboardAdminToast('Failed to delete account.', 'error'); });
         });
       });
       tbody.querySelectorAll('.admin-email-reveal').forEach(function(btn) {

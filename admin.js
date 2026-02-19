@@ -158,6 +158,24 @@ function removeIPBan(uid) {
   });
 }
 
+// Delete user's bio and all related DB data (username index, bans, profileViews). Does not remove Firebase Auth account.
+function deleteUserAccount(uid) {
+  var db = getDb();
+  if (!db || !uid) return Promise.reject(new Error('Invalid'));
+  return db.ref('users/' + uid + '/username').once('value').then(function(snap) {
+    var username = snap.val();
+    var normalized = (typeof username === 'string' && username.trim()) ? username.trim().toLowerCase() : '';
+    var updates = {
+      ['users/' + uid]: null,
+      ['bannedUids/' + uid]: null,
+      ['hardBannedUids/' + uid]: null,
+      ['profileViews/' + uid]: null
+    };
+    if (normalized) updates['usernames/' + normalized] = null;
+    return db.ref().update(updates);
+  });
+}
+
 function setUserBadge(uid, badgeId, value) {
   var db = getDb();
   if (!db) return Promise.reject(new Error('Database not ready'));

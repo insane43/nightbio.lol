@@ -732,6 +732,7 @@
             actions += '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtml(u.uid) + '" title="Ban">⊗</button>';
             actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtml(u.uid) + '" title="Hard ban (ban account + IP)">⊛</button>';
           }
+          actions += '<button type="button" class="btn-icon danger-outline delete-account-btn" data-uid="' + escapeHtml(u.uid) + '" title="Delete account">⌫</button>';
           var tr = document.createElement('tr');
           tr.title = uidTitle;
           tr.innerHTML =
@@ -808,6 +809,16 @@
               btn.setAttribute('aria-label', 'Hide email');
               btn.setAttribute('title', 'Hide email');
             }
+          });
+        });
+        tbody.querySelectorAll('.delete-account-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            if (!confirm('Permanently delete this user\'s bio and data? Their link will stop working. Their login account will still exist but they will have no profile.')) return;
+            deleteUserAccount(btn.dataset.uid).then(function() {
+              showToast('User account data deleted.');
+              loadUsers();
+              loadOverview();
+            }).catch(function() { showToast('Failed to delete account.', 'error'); });
           });
         });
       }
