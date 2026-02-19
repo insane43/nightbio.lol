@@ -7,9 +7,6 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="admin-entry-wrap">
-    <button type="button" class="admin-entry-btn" id="adminDashboardBtn">Admin dashboard</button>
-  </div>
   <div class="translate-wrapper" aria-label="Translate page">
     <span class="translate-label">Language</span>
     <select class="lang-select" id="customLangSelect" aria-label="Select language">
@@ -70,7 +67,6 @@
   <script src="auth.js"></script>
   <script src="site-config.js"></script>
   <script src="maintenance.js"></script>
-  <script src="admin-entry.js"></script>
   <script>
     if ((new URLSearchParams(window.location.search)).get('banned') === '1') {
       var b = document.getElementById('bannedBanner');
