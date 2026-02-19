@@ -17,6 +17,32 @@ function isUserBanned(uid) {
   });
 }
 
+// Get client IP (for ban enforcement and saving). Uses public API.
+function getClientIP() {
+  return fetch('https://api.ipify.org?format=json').then(function(r) { return r.json(); }).then(function(d) { return (d && d.ip) ? String(d.ip).trim() : ''; }).catch(function() { return ''; });
+}
+
+// Save current IP to user profile (call after login/signup so admin can hard-ban later).
+function saveUserIP(uid) {
+  var db = getDb();
+  if (!db || !uid) return Promise.resolve();
+  return getClientIP().then(function(ip) {
+    if (!ip) return;
+    var updates = { lastKnownIP: ip, lastKnownIPAt: firebase.database.ServerValue.TIMESTAMP };
+    return db.ref('users/' + uid).update(updates);
+  }).catch(function() {});
+}
+
+// Check if current IP is banned (readable by anyone so login/signup can block). Call before allowing signup/login.
+function isIPBanned() {
+  var db = getDb();
+  if (!db) return Promise.resolve(false);
+  return getClientIP().then(function(ip) {
+    if (!ip) return false;
+    return db.ref('bannedIPs/' + ip).once('value').then(function(snap) { return snap.val() === true; });
+  });
+}
+
 // Check if username is already taken (Realtime Database)
 function isUsernameTaken(username) {
   const db = getDb();

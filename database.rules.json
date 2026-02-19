@@ -27,6 +27,19 @@
         ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
       }
     },
+    "bannedIPs": {
+      ".read": true,
+      "$ip": {
+        ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
+      }
+    },
+    "hardBannedUids": {
+      ".read": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)",
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
+      }
+    },
     "profileViews": {
       ".read": true,
       "$uid": {

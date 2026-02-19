@@ -313,6 +313,7 @@
       var loading = document.getElementById('adminLoading');
       var content = document.getElementById('adminContent');
       var bannedSet = {};
+      var hardBannedSet = {};
       var allUsers = [];
       var BADGE_KEYS = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
 
@@ -500,8 +501,8 @@
           }).catch(function() { showToast('Failed to save.', 'error'); });
         });
 
-        document.getElementById('userSearch').addEventListener('input', function() { renderUserTable(allUsers, bannedSet); });
-        document.getElementById('userFilter').addEventListener('change', function() { renderUserTable(allUsers, bannedSet); });
+        document.getElementById('userSearch').addEventListener('input', function() { renderUserTable(allUsers, bannedSet, hardBannedSet); });
+        document.getElementById('userFilter').addEventListener('change', function() { renderUserTable(allUsers, bannedSet, hardBannedSet); });
 
         document.getElementById('editUserCancel').addEventListener('click', function() {
           document.getElementById('editUserModal').classList.remove('on');
@@ -527,11 +528,13 @@
       }
 
       function loadOverview() {
-        Promise.all([getAllUsers(), getBannedUids().catch(function() { return {}; })]).then(function(res) {
+        Promise.all([getAllUsers(), getBannedUids().catch(function() { return {}; }), getHardBannedUids().catch(function() { return {}; })]).then(function(res) {
           var users = res[0];
           var banned = res[1] || {};
+          var hardBanned = res[2] || {};
           allUsers = users;
           bannedSet = banned;
+          hardBannedSet = hardBanned;
           var bannedCount = Object.keys(banned).filter(function(k) { return banned[k]; }).length;
           document.getElementById('adminUserCount').textContent = users.length.toLocaleString();
           var totalViews = 0;
@@ -541,13 +544,13 @@
           document.getElementById('adminActiveCount').textContent = (users.length - bannedCount).toLocaleString();
           var metaEl = document.getElementById('overviewLastUpdated');
           if (metaEl) metaEl.textContent = 'Last updated: ' + new Date().toLocaleString();
-          renderUserTable(users, banned);
+          renderUserTable(users, banned, hardBanned);
           renderOverviewTopUsers(users);
           renderAnalyticsTopUsers();
           renderBannedList();
         }).catch(function(err) {
           console.error(err);
-          renderUserTable([], {});
+          renderUserTable([], {}, {});
           var msg = (err && err.message) ? ('Failed to load users: ' + err.message) : 'Failed to load users.';
           var uid = auth.currentUser && auth.currentUser.uid;
           if (uid) msg += '\n\nYour UID: ' + uid + '\nAdd adminUids/' + uid + ' = true in Realtime Database, then run: firebase deploy --only database';
@@ -569,14 +572,14 @@
       }
 
       function loadUsers() {
-        getBannedUids().then(function(b) {
-          bannedSet = b || {};
-          return allUsers.length ? Promise.resolve(allUsers) : getAllUsers();
-        }).then(function(users) {
-          if (allUsers.length === 0) allUsers = users;
-          renderUserTable(users, bannedSet);
+        Promise.all([getBannedUids().catch(function() { return {}; }), getHardBannedUids().catch(function() { return {}; })]).then(function(res) {
+          bannedSet = res[0] || {};
+          hardBannedSet = res[1] || {};
+          var users = allUsers.length ? allUsers : [];
+          if (!users.length) return getAllUsers().then(function(u) { allUsers = u; renderUserTable(u, bannedSet, hardBannedSet); });
+          renderUserTable(users, bannedSet, hardBannedSet);
         }).catch(function() {
-          if (allUsers.length) renderUserTable(allUsers, bannedSet);
+          if (allUsers.length) renderUserTable(allUsers, bannedSet, hardBannedSet);
         });
       }
 
@@ -666,8 +669,10 @@
         });
       }
 
-      function renderUserTable(users, banned) {
-        var list = getFilteredList(users || [], banned || {});
+      function renderUserTable(users, banned, hardBanned) {
+        banned = banned || {};
+        hardBanned = hardBanned || {};
+        var list = getFilteredList(users || [], banned);
         var total = (users || []).length;
         var countLine = document.getElementById('usersCountLine');
         if (countLine) {
@@ -688,8 +693,18 @@
             return '<span class="badge-pill ' + (badges[k] ? 'on' : '') + '" title="' + k + '">' + k.charAt(0).toUpperCase() + '</span>';
           }).join('');
           var isBanned = !!(banned && banned[u.uid]);
+          var isHardBanned = !!(hardBanned && hardBanned[u.uid]);
           var profileUrl = base ? base + 'bio?u=' + encodeURIComponent(u.username) : '#';
           var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
+          var actions = '<button type="button" class="btn-icon edit-user-btn" data-uid="' + escapeHtml(u.uid) + '" title="Edit">✎</button>' +
+            '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>';
+          if (isBanned) {
+            actions += '<button type="button" class="btn-icon unban-btn" data-uid="' + escapeHtml(u.uid) + '" title="Unban">↩</button>';
+            if (isHardBanned) actions += '<button type="button" class="btn-icon danger-outline remove-ip-ban-btn" data-uid="' + escapeHtml(u.uid) + '" title="Remove IP ban">IP</button>';
+          } else {
+            actions += '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtml(u.uid) + '" title="Ban">⊗</button>';
+            actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtml(u.uid) + '" title="Hard ban (ban account + IP)">⊛</button>';
+          }
           var tr = document.createElement('tr');
           tr.title = uidTitle;
           tr.innerHTML =
@@ -698,14 +713,8 @@
             '<td>' + escapeHtml((u.email || '').slice(0, 40)) + (u.email && u.email.length > 40 ? '…' : '') + '</td>' +
             '<td>' + ((u.stats && u.stats.views) || 0).toLocaleString() + '</td>' +
             '<td>' + badgeHtml + '</td>' +
-            '<td>' + (isBanned ? '<span class="badge-pill badge-banned">Banned</span>' : '<span class="badge-pill">Active</span>') + '</td>' +
-            '<td class="actions">' +
-              '<button type="button" class="btn-icon edit-user-btn" data-uid="' + escapeHtml(u.uid) + '" title="Edit">✎</button>' +
-              '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>' +
-              (isBanned
-                ? '<button type="button" class="btn-icon unban-btn" data-uid="' + escapeHtml(u.uid) + '" title="Unban">↩</button>'
-                : '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtml(u.uid) + '" title="Ban">⊗</button>') +
-            '</td>';
+            '<td>' + (isBanned ? '<span class="badge-pill badge-banned">' + (isHardBanned ? 'Hard banned' : 'Banned') + '</span>' : '<span class="badge-pill">Active</span>') + '</td>' +
+            '<td class="actions">' + actions + '</td>';
           tbody.appendChild(tr);
         });
         tbody.querySelectorAll('.edit-user-btn').forEach(function(btn) {
@@ -721,6 +730,18 @@
             }).catch(function() { showToast('Failed to ban.', 'error'); });
           });
         });
+        tbody.querySelectorAll('.hard-ban-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            if (!confirm('Hard ban: ban this user AND their IP so they cannot create new accounts. Continue?')) return;
+            hardBanUser(btn.dataset.uid).then(function() {
+              showToast('User and IP banned.');
+              loadUsers();
+              loadOverview();
+            }).catch(function(err) {
+              showToast(err && err.message ? err.message : 'Failed to hard ban (user may have no IP on file).', 'error');
+            });
+          });
+        });
         tbody.querySelectorAll('.unban-btn').forEach(function(btn) {
           btn.addEventListener('click', function() {
             unbanUser(btn.dataset.uid).then(function() {
@@ -728,6 +749,16 @@
               loadUsers();
               loadOverview();
             }).catch(function() { showToast('Failed to unban.', 'error'); });
+          });
+        });
+        tbody.querySelectorAll('.remove-ip-ban-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            if (!confirm('Remove IP ban for this user? They will be able to create new accounts from this IP again. Account ban is unchanged.')) return;
+            removeIPBan(btn.dataset.uid).then(function() {
+              showToast('IP ban removed.');
+              loadUsers();
+              loadOverview();
+            }).catch(function() { showToast('Failed to remove IP ban.', 'error'); });
           });
         });
       }

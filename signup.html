@@ -90,6 +90,9 @@
   <script>
     (function() {
       initFirebase();
+      if (typeof isIPBanned === 'function') {
+        isIPBanned().then(function(b) { if (b) window.location.replace('/banned?type=ip'); });
+      }
       var form = document.getElementById('signupForm');
       var signupDisabledEl = document.getElementById('signupDisabled');
       function applySignupConfig(config) {
@@ -179,6 +182,7 @@
           auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(result) {
             var user = result.user;
             return ensureOAuthUserProfile(user).then(function() {
+              if (typeof saveUserIP === 'function') saveUserIP(user.uid).catch(function() {});
               showMsg('Account created. Redirecting…', 'success');
               setTimeout(function() { window.location.href = 'dashboard'; }, 600);
             });
@@ -251,6 +255,7 @@
 
           await user.sendEmailVerification();
           await saveUserProfile(user.uid, username, email);
+          if (typeof saveUserIP === 'function') saveUserIP(user.uid).catch(function() {});
 
           showMsg('Account created. We sent a verification link to ' + email + '. Check your inbox (and spam) and click the link before logging in.', 'success');
           form.reset();

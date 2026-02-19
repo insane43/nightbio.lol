@@ -725,7 +725,7 @@
           isUserBanned(user.uid).then(function(banned) {
             if (banned) {
               auth.signOut();
-              window.location.href = 'index?banned=1';
+              window.location.href = '/banned?type=account';
               return;
             }
             window.dashboardEditor && window.dashboardEditor.init(user.uid);

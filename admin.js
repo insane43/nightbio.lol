@@ -119,6 +119,43 @@ function unbanUser(uid) {
   return db.ref('bannedUids/' + uid).remove();
 }
 
+function getHardBannedUids() {
+  var db = getDb();
+  if (!db) return Promise.reject(new Error('Database not ready'));
+  return db.ref('hardBannedUids').once('value').then(function(snap) {
+    var val = snap.val();
+    if (!val || typeof val !== 'object') return {};
+    return val;
+  });
+}
+
+function hardBanUser(uid) {
+  var db = getDb();
+  if (!db || !uid) return Promise.reject(new Error('Invalid'));
+  return db.ref('users/' + uid + '/lastKnownIP').once('value').then(function(snap) {
+    var ip = snap.val();
+    if (typeof ip !== 'string' || !ip.trim()) return Promise.reject(new Error('No IP on file'));
+    ip = ip.trim();
+    var updates = {
+      ['bannedUids/' + uid]: true,
+      ['bannedIPs/' + ip]: true,
+      ['hardBannedUids/' + uid]: true
+    };
+    return db.ref().update(updates);
+  });
+}
+
+function removeIPBan(uid) {
+  var db = getDb();
+  if (!db || !uid) return Promise.reject(new Error('Invalid'));
+  return db.ref('users/' + uid + '/lastKnownIP').once('value').then(function(snap) {
+    var ip = snap.val();
+    var updates = { ['hardBannedUids/' + uid]: null };
+    if (typeof ip === 'string' && ip.trim()) updates['bannedIPs/' + ip.trim()] = null;
+    return db.ref().update(updates);
+  });
+}
+
 function setUserBadge(uid, badgeId, value) {
   var db = getDb();
   if (!db) return Promise.reject(new Error('Database not ready'));

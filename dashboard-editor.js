@@ -465,6 +465,7 @@
 
     var dashboardAdminAllUsers = [];
     var dashboardAdminBanned = {};
+    var dashboardAdminHardBanned = {};
     var dashboardAdminWired = false;
     var DASHBOARD_BADGE_KEYS = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
 
@@ -504,8 +505,10 @@
       return list;
     }
 
-    function renderDashboardAdminTable(users, banned) {
-      var list = getDashboardAdminFilteredList(users || [], banned || {});
+    function renderDashboardAdminTable(users, banned, hardBanned) {
+      banned = banned || {};
+      hardBanned = hardBanned || {};
+      var list = getDashboardAdminFilteredList(users || [], banned);
       var total = (users || []).length;
       var countLine = document.getElementById('dashboardAdminUsersCountLine');
       if (countLine) {
@@ -526,8 +529,18 @@
           return '<span class="badge-pill ' + (badges[k] ? 'on' : '') + '" title="' + k + '">' + k.charAt(0).toUpperCase() + '</span>';
         }).join('');
         var isBanned = !!(banned && banned[u.uid]);
+        var isHardBanned = !!(hardBanned && hardBanned[u.uid]);
         var profileUrl = base ? base + 'bio?u=' + encodeURIComponent(u.username) : '#';
         var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
+        var actions = '<button type="button" class="btn-icon edit-user-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Edit">✎</button>' +
+          '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>';
+        if (isBanned) {
+          actions += '<button type="button" class="btn-icon unban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Unban">↩</button>';
+          if (isHardBanned && typeof removeIPBan === 'function') actions += '<button type="button" class="btn-icon danger-outline remove-ip-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Remove IP ban">IP</button>';
+        } else {
+          actions += '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Ban">⊗</button>';
+          if (typeof hardBanUser === 'function') actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Hard ban (account + IP)">⊛</button>';
+        }
         var tr = document.createElement('tr');
         tr.title = uidTitle;
         tr.innerHTML =
@@ -536,14 +549,8 @@
           '<td>' + escapeHtmlDashboard((u.email || '').slice(0, 40)) + (u.email && u.email.length > 40 ? '…' : '') + '</td>' +
           '<td>' + ((u.stats && u.stats.views) || 0).toLocaleString() + '</td>' +
           '<td>' + badgeHtml + '</td>' +
-          '<td>' + (isBanned ? '<span class="badge-pill badge-banned">Banned</span>' : '<span class="badge-pill">Active</span>') + '</td>' +
-          '<td class="actions">' +
-            '<button type="button" class="btn-icon edit-user-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Edit">✎</button>' +
-            '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>' +
-            (isBanned
-              ? '<button type="button" class="btn-icon unban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Unban">↩</button>'
-              : '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Ban">⊗</button>') +
-          '</td>';
+          '<td>' + (isBanned ? '<span class="badge-pill badge-banned">' + (isHardBanned ? 'Hard banned' : 'Banned') + '</span>' : '<span class="badge-pill">Active</span>') + '</td>' +
+          '<td class="actions">' + actions + '</td>';
         tbody.appendChild(tr);
       });
       tbody.querySelectorAll('.edit-user-btn').forEach(function(btn) {
@@ -559,6 +566,16 @@
           }).catch(function() { showDashboardAdminToast('Failed to ban.', 'error'); });
         });
       });
+      tbody.querySelectorAll('.hard-ban-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (!confirm('Hard ban: ban this user AND their IP so they cannot create new accounts. Continue?')) return;
+          if (typeof hardBanUser !== 'function') return;
+          hardBanUser(btn.dataset.uid).then(function() {
+            showDashboardAdminToast('User and IP banned.');
+            loadDashboardAdmin();
+          }).catch(function(err) { showDashboardAdminToast(err && err.message ? err.message : 'Failed to hard ban (no IP on file).', 'error'); });
+        });
+      });
       tbody.querySelectorAll('.unban-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
           if (typeof unbanUser !== 'function') return;
@@ -566,6 +583,16 @@
             showDashboardAdminToast('User unbanned.');
             loadDashboardAdmin();
           }).catch(function() { showDashboardAdminToast('Failed to unban.', 'error'); });
+        });
+      });
+      tbody.querySelectorAll('.remove-ip-ban-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (!confirm('Remove IP ban? They can create new accounts from this IP again.')) return;
+          if (typeof removeIPBan !== 'function') return;
+          removeIPBan(btn.dataset.uid).then(function() {
+            showDashboardAdminToast('IP ban removed.');
+            loadDashboardAdmin();
+          }).catch(function() { showDashboardAdminToast('Failed to remove IP ban.', 'error'); });
         });
       });
     }
@@ -809,20 +836,23 @@
       if (typeof getAllUsers !== 'function' || typeof getBannedUids !== 'function') return;
       getAllUsers().then(function(users) {
         dashboardAdminAllUsers = users || [];
-        return getBannedUids().catch(function() { return {}; });
-      }).then(function(banned) {
-        dashboardAdminBanned = banned || {};
+        return Promise.all([getBannedUids().catch(function() { return {}; }), typeof getHardBannedUids === 'function' ? getHardBannedUids().catch(function() { return {}; }) : Promise.resolve({})]);
+      }).then(function(res) {
+        var banned = res[0] || {};
+        var hardBanned = res[1] || {};
+        dashboardAdminBanned = banned;
+        dashboardAdminHardBanned = hardBanned;
         renderDaOverviewStats(dashboardAdminAllUsers, dashboardAdminBanned);
         renderDaOverviewTopUsers(dashboardAdminAllUsers);
         renderDaAnalyticsTopUsers(dashboardAdminAllUsers);
         renderDaActivityRecentSignups(dashboardAdminAllUsers);
         renderDaBannedList(dashboardAdminAllUsers, dashboardAdminBanned);
-        renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned);
+        renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned, dashboardAdminHardBanned);
         loadDaMaintenance();
         loadDaSettings();
       }).catch(function(err) {
         console.error(err);
-        renderDashboardAdminTable([], {});
+        renderDashboardAdminTable([], {}, {});
         renderDaOverviewStats([], {});
         showDashboardAdminToast('Failed to load users.', 'error');
       });
@@ -834,8 +864,8 @@
       var searchEl = document.getElementById('dashboardAdminUserSearch');
       var filterEl = document.getElementById('dashboardAdminUserFilter');
       var refreshBtn = document.getElementById('dashboardAdminRefresh');
-      if (searchEl) searchEl.addEventListener('input', function() { renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned); });
-      if (filterEl) filterEl.addEventListener('change', function() { renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned); });
+      if (searchEl) searchEl.addEventListener('input', function() { renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned, dashboardAdminHardBanned); });
+      if (filterEl) filterEl.addEventListener('change', function() { renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned, dashboardAdminHardBanned); });
       if (refreshBtn) refreshBtn.addEventListener('click', function() { loadDashboardAdmin(); showDashboardAdminToast('Data refreshed.'); });
       document.querySelectorAll('.da-nav-item').forEach(function(btn) {
         btn.addEventListener('click', function() { switchDaSection(btn.dataset.section); });

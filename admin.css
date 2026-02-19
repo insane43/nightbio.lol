@@ -201,6 +201,9 @@
 .admin-table .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-subtle); background: var(--bg-elevated); color: var(--text-primary); cursor: pointer; transition: border-color 0.2s, background 0.2s; }
 .admin-table .btn-icon:hover { border-color: var(--purple-accent); background: rgba(124,107,184,0.15); }
 .admin-table .btn-icon.danger:hover { border-color: var(--error); background: rgba(184,107,107,0.15); color: var(--error); }
+.admin-table .btn-icon.danger-outline { border-color: rgba(184,107,107,0.4); color: var(--error); }
+.admin-table .btn-icon.danger-outline:hover { border-color: var(--error); background: rgba(184,107,107,0.15); }
+.admin-table .btn-icon.hard-ban-btn:hover { border-color: var(--error); background: rgba(184,107,107,0.15); color: var(--error); }
 .admin-table .badge-pill { display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.7rem; border-radius: 999px; background: var(--bg-elevated); margin: 0.15rem 0.15rem 0 0; }
 .admin-table .badge-pill.on { background: var(--purple-mid); color: #fff; }
 .admin-table .badge-banned { background: rgba(184,107,107,0.2); color: var(--error); }

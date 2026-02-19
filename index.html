@@ -157,8 +157,7 @@
   <script src="maintenance.js"></script>
   <script>
     if ((new URLSearchParams(window.location.search)).get('banned') === '1') {
-      var b = document.getElementById('bannedBanner');
-      if (b) b.style.display = 'block';
+      window.location.replace('/banned?type=account');
     }
     (function() {
       var drawer = document.getElementById('navDrawer');

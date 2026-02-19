@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access restricted — nightbio.lol</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .banned-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; overflow: hidden; }
+    .banned-page::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(184, 107, 107, 0.15), transparent 50%), radial-gradient(ellipse 60% 40% at 80% 60%, rgba(184, 107, 107, 0.08), transparent 45%); pointer-events: none; z-index: 0; }
+    .banned-card { position: relative; z-index: 1; max-width: 440px; width: 100%; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 2.5rem; box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03); text-align: center; }
+    .banned-icon { width: 72px; height: 72px; margin: 0 auto 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(184, 107, 107, 0.15); border: 2px solid rgba(184, 107, 107, 0.4); }
+    .banned-icon svg { width: 36px; height: 36px; stroke: var(--error); }
+    .banned-icon.hard { background: rgba(120, 80, 80, 0.2); border-color: rgba(184, 107, 107, 0.5); }
+    .banned-card h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.02em; color: var(--text-primary); }
+    .banned-card .banned-type { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--error); margin-bottom: 1rem; font-weight: 600; }
+    .banned-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .banned-card a { color: var(--purple-accent); text-decoration: none; }
+    .banned-card a:hover { text-decoration: underline; }
+    .banned-footer { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <main class="banned-page" id="bannedPage">
+    <div class="banned-card">
+      <div class="banned-icon hard" id="bannedIcon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+      </div>
+      <p class="banned-type" id="bannedType">Account suspended</p>
+      <h1 id="bannedTitle">Access restricted</h1>
+      <p id="bannedMessage">Your account has been suspended. You cannot sign in or use nightbio.lol with this account. If you believe this is an error, contact support.</p>
+      <div class="banned-footer">
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Contact support (Discord)</a> · <a href="/">Return home</a>
+      </div>
+    </div>
+  </main>
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var type = (params.get('type') || 'account').toLowerCase();
+      var isIP = type === 'ip' || type === 'hard';
+      var icon = document.getElementById('bannedIcon');
+      var typeEl = document.getElementById('bannedType');
+      var title = document.getElementById('bannedTitle');
+      var msg = document.getElementById('bannedMessage');
+      if (isIP) {
+        if (typeEl) typeEl.textContent = 'IP restricted';
+        if (title) title.textContent = 'Access blocked';
+        if (msg) msg.textContent = 'This network or device is not allowed to create or use accounts on nightbio.lol. Creating new accounts from this connection is blocked. If you believe this is an error, contact support.';
+        if (icon) icon.classList.add('hard');
+      } else {
+        if (typeEl) typeEl.textContent = 'Account suspended';
+        if (title) title.textContent = 'Access restricted';
+        if (msg) msg.textContent = 'Your account has been suspended. You cannot sign in or use nightbio.lol with this account. If you believe this is an error, contact support.';
+      }
+    })();
+  </script>
+</body>
+</html>
