@@ -51,12 +51,8 @@
       ".read": true,
       "$uid": {
         ".read": true,
-        ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
+        ".write": "(newData.isNumber() && newData.val() >= 0) || (auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true))"
       }
-    },
-    "profileViewRecords": {
-      ".read": false,
-      ".write": false
     },
     "users": {
       ".read": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)",

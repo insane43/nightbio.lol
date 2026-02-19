@@ -168,30 +168,27 @@ function applyBadgeVisibility(badges, visibility) {
   return out;
 }
 
-// Record a profile view via Cloud Function (server throttles by IP: one view per visitor per profile per 24h).
-// Client-side localStorage throttle kept as backup; direct DB write removed (only server can write profileViews).
+// One view per visitor per profile per 24h (throttle via localStorage so refresh doesn't inflate).
 var VIEW_THROTTLE_MS = 24 * 60 * 60 * 1000;
 var VIEW_STORAGE_KEY_PREFIX = 'nb_pv_';
 
 function recordProfileView(uid) {
-  if (!uid) return Promise.resolve();
+  var db = getDb();
+  if (!db || !uid) return Promise.resolve();
   try {
     var key = VIEW_STORAGE_KEY_PREFIX + uid;
     var raw = typeof localStorage !== 'undefined' && localStorage.getItem(key);
     var last = raw ? parseInt(raw, 10) : 0;
     if (last && (Date.now() - last) < VIEW_THROTTLE_MS) return Promise.resolve();
   } catch (e) {}
-  var fn = typeof window !== 'undefined' && window.firebaseFunctions;
-  if (fn && typeof fn.httpsCallable === 'function') {
-    return fn.httpsCallable('recordProfileView')({ uid: uid }).then(function(res) {
-      if (res && res.data && res.data.counted) {
-        try {
-          if (typeof localStorage !== 'undefined') localStorage.setItem(VIEW_STORAGE_KEY_PREFIX + uid, String(Date.now()));
-        } catch (e) {}
-      }
-    }).catch(function() {});
-  }
-  return Promise.resolve();
+  var ref = db.ref('profileViews/' + uid);
+  return ref.transaction(function(current) {
+    return (current || 0) + 1;
+  }).then(function() {
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.setItem(VIEW_STORAGE_KEY_PREFIX + uid, String(Date.now()));
+    } catch (e) {}
+  }).catch(function() {});
 }
 
 // Get profile view count (dashboard, admin, or public bio when showViewsOnBio).
