@@ -275,7 +275,12 @@
           (premium && data.premiumButtonShape ? ' bio-premium-btn-' + data.premiumButtonShape : '') +
           (premium && data.premiumLinkHoverEffect ? ' bio-premium-hover-' + data.premiumLinkHoverEffect : '') +
           (premium && data.premiumLayoutPreset ? ' bio-premium-layout-' + data.premiumLayoutPreset : '') +
-          (premium && data.premiumProfileAnimation ? ' bio-premium-anim-' + data.premiumProfileAnimation : '');
+          (premium && data.premiumProfileAnimation ? ' bio-premium-anim-' + data.premiumProfileAnimation : '') +
+          (premium && data.premiumUsernameEffect ? ' bio-username-effect-' + data.premiumUsernameEffect : '') +
+          (premium && data.premiumGlowUsername ? ' bio-glow-username' : '') +
+          (premium && data.premiumGlowSocials ? ' bio-glow-socials' : '') +
+          (premium && data.premiumGlowBadges ? ' bio-glow-badges' : '') +
+          (premium && data.premiumGlowBio ? ' bio-glow-bio' : '');
         document.body.classList.remove('bio-bg-none', 'bio-bg-gradient', 'bio-bg-pattern');
         document.body.classList.add('bio-bg-' + (bgEffect === 'none' ? 'none' : bgEffect));
         if (premium && data.premiumVideoBackground && data.premiumVideoBackground.trim()) {
@@ -395,7 +400,14 @@
           };
         }
 
-        nameEl.textContent = data.displayName || data.username || '';
+        var nameText = data.displayName || data.username || '';
+        if (premium && data.premiumUsernameEffect === 'typewriter') {
+          nameEl.textContent = '';
+          nameEl.style.display = 'block';
+          typewriterEffect(nameEl, nameText, 80);
+        } else {
+          nameEl.textContent = nameText;
+        }
         if (premium && data.premiumNameGradient && data.premiumNameGradient.trim()) {
           nameEl.style.background = data.premiumNameGradient.trim();
           nameEl.style.webkitBackgroundClip = 'text';

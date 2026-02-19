@@ -412,6 +412,7 @@
         set('premiumLinkHoverEffect', d.premiumLinkHoverEffect);
         set('premiumLinkFontSize', d.premiumLinkFontSize != null ? d.premiumLinkFontSize : '');
         set('premiumLinkBorderRadius', d.premiumLinkBorderRadius != null ? d.premiumLinkBorderRadius : '');
+        set('premiumUsernameEffect', d.premiumUsernameEffect || '');
         set('premiumNameGradient', d.premiumNameGradient);
         set('premiumBioFontSize', d.premiumBioFontSize != null ? d.premiumBioFontSize : '');
         set('premiumCustomFontFamily', d.premiumCustomFontFamily);
@@ -423,6 +424,14 @@
         set('premiumBannerBlur', d.premiumBannerBlur != null ? d.premiumBannerBlur : '');
         set('premiumAvatarBorder', d.premiumAvatarBorder);
         document.getElementById('premiumHideBranding').checked = !!d.premiumHideBranding;
+        var gU = document.getElementById('premiumGlowUsername');
+        if (gU) gU.checked = !!d.premiumGlowUsername;
+        var gS = document.getElementById('premiumGlowSocials');
+        if (gS) gS.checked = !!d.premiumGlowSocials;
+        var gB = document.getElementById('premiumGlowBadges');
+        if (gB) gB.checked = !!d.premiumGlowBadges;
+        var gBio = document.getElementById('premiumGlowBio');
+        if (gBio) gBio.checked = !!d.premiumGlowBio;
         set('premiumCustomCSS', d.premiumCustomCSS);
       }
 
@@ -1042,16 +1051,26 @@
         var pLayoutPreset = document.getElementById('premiumLayoutPreset');
         var pAnim = document.getElementById('premiumProfileAnimation');
         var pParallax = document.getElementById('premiumParallax');
+        var pUsernameEffect = document.getElementById('premiumUsernameEffect');
+        var pGlowUser = document.getElementById('premiumGlowUsername');
+        var pGlowSocials = document.getElementById('premiumGlowSocials');
+        var pGlowBadges = document.getElementById('premiumGlowBadges');
+        var pGlowBio = document.getElementById('premiumGlowBio');
         payload.premiumButtonShape = pBtnShape ? pBtnShape.value.trim() : '';
         payload.premiumLinkHoverEffect = pLinkHover ? pLinkHover.value.trim() : '';
         payload.premiumLinkFontSize = pLinkFs && pLinkFs.value.trim() !== '' ? parseInt(pLinkFs.value, 10) : null;
         payload.premiumLinkBorderRadius = pLinkBr && pLinkBr.value.trim() !== '' ? parseInt(pLinkBr.value, 10) : null;
+        payload.premiumUsernameEffect = pUsernameEffect ? pUsernameEffect.value.trim() : '';
         payload.premiumNameGradient = pNameGrad ? pNameGrad.value.trim() : '';
         payload.premiumBioFontSize = pBioFs && pBioFs.value.trim() !== '' ? parseInt(pBioFs.value, 10) : null;
         payload.premiumVideoBackground = pVidBg ? pVidBg.value.trim() : '';
         payload.premiumBannerBlur = pBannerBlur && pBannerBlur.value.trim() !== '' ? parseInt(pBannerBlur.value, 10) : 0;
         payload.premiumAvatarBorder = pAvatarBorder ? pAvatarBorder.value.trim() : '';
         payload.premiumHideBranding = pHideBrand ? pHideBrand.checked : false;
+        payload.premiumGlowUsername = pGlowUser ? !!pGlowUser.checked : false;
+        payload.premiumGlowSocials = pGlowSocials ? !!pGlowSocials.checked : false;
+        payload.premiumGlowBadges = pGlowBadges ? !!pGlowBadges.checked : false;
+        payload.premiumGlowBio = pGlowBio ? !!pGlowBio.checked : false;
         payload.premiumCustomCSS = pCustomCSS ? pCustomCSS.value.trim() : '';
         payload.premiumCustomFontFamily = pCustomFont ? pCustomFont.value.trim() : '';
         payload.premiumLayoutPreset = pLayoutPreset ? pLayoutPreset.value.trim() : '';

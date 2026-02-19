@@ -81,6 +81,11 @@ function getBioByUsername(username) {
         premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
         premiumLinkFontSize: d.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumLinkFontSize, 10) || 16)) : null,
         premiumLinkBorderRadius: d.premiumLinkBorderRadius != null ? Math.min(50, Math.max(0, parseInt(d.premiumLinkBorderRadius, 10) || 8)) : null,
+        premiumUsernameEffect: (d.premiumUsernameEffect || '').trim().slice(0, 30),
+        premiumGlowUsername: !!d.premiumGlowUsername,
+        premiumGlowSocials: !!d.premiumGlowSocials,
+        premiumGlowBadges: !!d.premiumGlowBadges,
+        premiumGlowBio: !!d.premiumGlowBio,
         premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
         premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
         premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
@@ -174,6 +179,11 @@ function getCurrentUserBio(uid) {
       premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
       premiumLinkFontSize: d.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumLinkFontSize, 10) || 16)) : null,
       premiumLinkBorderRadius: d.premiumLinkBorderRadius != null ? Math.min(50, Math.max(0, parseInt(d.premiumLinkBorderRadius, 10) || 8)) : null,
+      premiumUsernameEffect: (d.premiumUsernameEffect || '').trim().slice(0, 30),
+      premiumGlowUsername: !!d.premiumGlowUsername,
+      premiumGlowSocials: !!d.premiumGlowSocials,
+      premiumGlowBadges: !!d.premiumGlowBadges,
+      premiumGlowBio: !!d.premiumGlowBio,
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
@@ -241,6 +251,11 @@ function saveBio(uid, data) {
   if (data.premiumLinkHoverEffect !== undefined) updates.premiumLinkHoverEffect = String(data.premiumLinkHoverEffect || '').trim().slice(0, 20);
   if (data.premiumLinkFontSize !== undefined) updates.premiumLinkFontSize = data.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(data.premiumLinkFontSize, 10) || 16)) : null;
   if (data.premiumLinkBorderRadius !== undefined) updates.premiumLinkBorderRadius = data.premiumLinkBorderRadius != null ? Math.min(50, Math.max(0, parseInt(data.premiumLinkBorderRadius, 10) || 8)) : null;
+  if (data.premiumUsernameEffect !== undefined) updates.premiumUsernameEffect = String(data.premiumUsernameEffect || '').trim().slice(0, 30);
+  if (data.premiumGlowUsername !== undefined) updates.premiumGlowUsername = !!data.premiumGlowUsername;
+  if (data.premiumGlowSocials !== undefined) updates.premiumGlowSocials = !!data.premiumGlowSocials;
+  if (data.premiumGlowBadges !== undefined) updates.premiumGlowBadges = !!data.premiumGlowBadges;
+  if (data.premiumGlowBio !== undefined) updates.premiumGlowBio = !!data.premiumGlowBio;
   if (data.premiumNameGradient !== undefined) updates.premiumNameGradient = String(data.premiumNameGradient || '').trim().slice(0, 200);
   if (data.premiumBioFontSize !== undefined) updates.premiumBioFontSize = data.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(data.premiumBioFontSize, 10) || 15)) : null;
   if (data.premiumVideoBackground !== undefined) updates.premiumVideoBackground = String(data.premiumVideoBackground || '').trim().slice(0, 500);

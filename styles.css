@@ -1738,6 +1738,124 @@ html { scrollbar-gutter: stable; }
 .bio-content-wrap.bio-premium-anim-fadeUp .bio-links { animation-delay: 180ms; }
 .bio-content-wrap.bio-premium-anim-glowPulse .bio-avatar { animation: nbGlowPulse 2.4s ease-in-out infinite; }
 
+/* Premium: username effects */
+@keyframes nbRainbow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+.bio-content-wrap.bio-username-effect-rainbow .bio-name {
+  animation: nbRainbow 4s linear infinite;
+  color: var(--purple-accent);
+}
+.bio-content-wrap.bio-username-effect-fuzzy .bio-name {
+  text-shadow: 0 0 8px currentColor, 0 0 12px currentColor, 0 0 4px currentColor;
+  filter: blur(0.5px);
+}
+.bio-content-wrap.bio-username-effect-shuffle .bio-name {
+  display: inline-block;
+  animation: nbShuffle 0.15s ease-in-out infinite;
+}
+@keyframes nbShuffle {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(1px) translateY(-1px); }
+  50% { transform: translateX(-1px) translateY(1px); }
+  75% { transform: translateX(1px) translateY(1px); }
+}
+.bio-content-wrap.bio-username-effect-white-particles .bio-name {
+  position: relative;
+  text-shadow: 0 0 6px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.5);
+}
+.bio-content-wrap.bio-username-effect-white-particles .bio-name::before,
+.bio-content-wrap.bio-username-effect-white-particles .bio-name::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(255,255,255,0.8);
+  border-radius: 50%;
+  animation: nbParticleFloat 3s ease-in-out infinite;
+}
+.bio-content-wrap.bio-username-effect-white-particles .bio-name::before {
+  left: -8px;
+  top: 50%;
+  animation-delay: 0s;
+}
+.bio-content-wrap.bio-username-effect-white-particles .bio-name::after {
+  right: -8px;
+  top: 50%;
+  animation-delay: 1.5s;
+}
+.bio-content-wrap.bio-username-effect-black-particles .bio-name {
+  position: relative;
+  text-shadow: 0 0 6px rgba(0,0,0,0.4), 0 0 10px rgba(0,0,0,0.2);
+}
+.bio-content-wrap.bio-username-effect-black-particles .bio-name::before,
+.bio-content-wrap.bio-username-effect-black-particles .bio-name::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  animation: nbParticleFloat 3s ease-in-out infinite;
+}
+.bio-content-wrap.bio-username-effect-black-particles .bio-name::before {
+  left: -8px;
+  top: 50%;
+  animation-delay: 0s;
+}
+.bio-content-wrap.bio-username-effect-black-particles .bio-name::after {
+  right: -8px;
+  top: 50%;
+  animation-delay: 1.5s;
+}
+.bio-content-wrap.bio-username-effect-blue-particles .bio-name {
+  position: relative;
+  color: #7dd3fc;
+  text-shadow: 0 0 8px rgba(125,211,252,0.6), 0 0 14px rgba(56,189,248,0.4);
+}
+.bio-content-wrap.bio-username-effect-blue-particles .bio-name::before,
+.bio-content-wrap.bio-username-effect-blue-particles .bio-name::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(125,211,252,0.9);
+  border-radius: 50%;
+  animation: nbParticleFloat 3s ease-in-out infinite;
+}
+.bio-content-wrap.bio-username-effect-blue-particles .bio-name::before {
+  left: -8px;
+  top: 50%;
+  animation-delay: 0s;
+}
+.bio-content-wrap.bio-username-effect-blue-particles .bio-name::after {
+  right: -8px;
+  top: 50%;
+  animation-delay: 1.5s;
+}
+@keyframes nbParticleFloat {
+  0%, 100% { opacity: 0.6; transform: translateY(0) scale(1); }
+  50% { opacity: 1; transform: translateY(-6px) scale(1.2); }
+}
+
+/* Premium: glow settings */
+.bio-content-wrap.bio-glow-username .bio-name {
+  text-shadow: 0 0 12px var(--purple-accent), 0 0 24px rgba(124,107,184,0.4), 0 0 8px rgba(124,107,184,0.3);
+}
+.bio-content-wrap.bio-glow-socials .bio-link-btn {
+  box-shadow: 0 0 12px rgba(124,107,184,0.35), 0 0 6px rgba(124,107,184,0.2);
+}
+.bio-content-wrap.bio-glow-socials .bio-link-btn:hover {
+  box-shadow: 0 0 18px rgba(124,107,184,0.5), 0 0 10px rgba(124,107,184,0.3);
+}
+.bio-content-wrap.bio-glow-badges .bio-badge {
+  box-shadow: 0 0 10px rgba(124,107,184,0.3), 0 0 4px rgba(124,107,184,0.2);
+}
+.bio-content-wrap.bio-glow-bio .bio-bio-text {
+  text-shadow: 0 0 10px rgba(124,107,184,0.25), 0 0 6px rgba(124,107,184,0.15);
+}
+
 /* Premium: video background — content above video */
 .bio-page.bio-premium-video-bg .page,
 .bio-page.bio-premium-video-bg #bioMain {
