@@ -79,44 +79,22 @@
 
   function updatePreview(data) {
     data = data || getEditorData();
-    var screen = document.getElementById('previewScreen');
     var banner = document.getElementById('previewBanner');
-    var profile = document.getElementById('previewProfile');
     var avatarImg = document.getElementById('previewAvatar');
     var avatarPlace = document.getElementById('previewAvatarPlaceholder');
     var nameEl = document.getElementById('previewName');
-    var badgesEl = document.getElementById('previewBadges');
     var bioEl = document.getElementById('previewBio');
-    var viewsEl = document.getElementById('previewViews');
-    var songWrap = document.getElementById('previewSongWrap');
     var linksEl = document.getElementById('previewLinks');
 
-    if (screen) {
-      screen.style.setProperty('--preview-accent', data.accentColor || '#7c6bb8');
-      screen.style.setProperty('font-family', (data.fontFamily || 'Outfit') + ', sans-serif');
-      screen.style.setProperty('font-size', (data.fontSize || 16) + 'px');
-      screen.style.setProperty('letter-spacing', (data.letterSpacing != null ? data.letterSpacing : 0) + 'px');
-      screen.classList.toggle('preview-layout-minimal', data.layout === 'minimal');
-      screen.classList.toggle('preview-display-card', data.displayStyle === 'card');
-      screen.classList.toggle('preview-btn-outline', data.buttonStyle === 'outline');
-      screen.classList.remove('preview-align-left', 'preview-align-right', 'preview-align-center');
-      screen.classList.add('preview-align-' + (data.profileAlignment === 'left' || data.profileAlignment === 'right' ? data.profileAlignment : 'center'));
-    }
-
     if (banner) {
-      banner.style.display = data.layout === 'minimal' ? 'none' : '';
-      if (data.layout !== 'minimal') {
-        if (data.bannerURL) {
-          banner.style.backgroundImage = 'url(' + escapeHtml(data.bannerURL) + ')';
-          banner.style.backgroundSize = 'cover';
-          banner.style.backgroundPosition = 'center';
-        } else {
-          banner.style.backgroundImage = 'none';
-        }
+      if (data.bannerURL) {
+        banner.style.backgroundImage = 'url(' + escapeHtml(data.bannerURL) + ')';
+        banner.style.backgroundSize = 'cover';
+        banner.style.backgroundPosition = 'center';
+      } else {
+        banner.style.backgroundImage = 'none';
       }
     }
-
-    if (profile) profile.style.marginTop = data.layout === 'minimal' ? '0' : '';
 
     if (avatarImg && avatarPlace) {
       if (data.avatarURL) {
@@ -134,67 +112,6 @@
     if (nameEl) nameEl.textContent = data.displayName || 'Your name';
     if (bioEl) bioEl.textContent = data.bio || 'Your bio appears here.';
 
-    if (badgesEl) {
-      badgesEl.innerHTML = '';
-      var badges = data.badges || {};
-      var badgeKeys = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
-      badgeKeys.forEach(function(k) {
-        if (!badges[k]) return;
-        var pill = document.createElement('span');
-        pill.className = 'preview-badge-pill';
-        pill.textContent = (window.BIO_BADGES && window.BIO_BADGES[k]) ? (window.BIO_BADGES[k].label || k).charAt(0) : k.charAt(0).toUpperCase();
-        pill.title = (window.BIO_BADGES && window.BIO_BADGES[k]) ? window.BIO_BADGES[k].label : k;
-        badgesEl.appendChild(pill);
-      });
-    }
-
-    if (viewsEl) {
-      if (data.showViewsOnBio) {
-        viewsEl.style.display = 'block';
-        viewsEl.textContent = '0 profile views';
-      } else {
-        viewsEl.style.display = 'none';
-      }
-    }
-
-    if (songWrap) {
-      if (data.songURL && data.songURL.trim()) {
-        var url = data.songURL.trim();
-        var spotifyMatch = url.match(/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
-        songWrap.style.display = 'block';
-        songWrap.innerHTML = '';
-        if (spotifyMatch) {
-          var embedUrl = 'https://open.spotify.com/embed/' + spotifyMatch[1] + '/' + spotifyMatch[2] + '?utm_source=generator';
-          var iframe = document.createElement('iframe');
-          iframe.style.display = 'block';
-          iframe.style.width = '100%';
-          iframe.style.maxWidth = '280px';
-          iframe.style.height = '80px';
-          iframe.style.border = '0';
-          iframe.style.borderRadius = '12px';
-          iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-          iframe.loading = 'lazy';
-          iframe.title = 'Spotify';
-          iframe.src = embedUrl;
-          songWrap.appendChild(iframe);
-        } else {
-          var audio = document.createElement('audio');
-          audio.controls = true;
-          audio.preload = 'metadata';
-          audio.style.width = '100%';
-          audio.style.height = '36px';
-          var src = document.createElement('source');
-          src.src = url;
-          src.type = 'audio/mpeg';
-          audio.appendChild(src);
-          songWrap.appendChild(audio);
-        }
-      } else {
-        songWrap.style.display = 'none';
-        songWrap.innerHTML = '';
-      }
-    }
-
     if (linksEl) {
       linksEl.innerHTML = '';
       var links = data.links || [];
@@ -206,6 +123,9 @@
         linksEl.appendChild(btn);
       });
     }
+
+    var screen = document.getElementById('previewScreen');
+    if (screen && data.accentColor) screen.style.setProperty('--preview-accent', data.accentColor);
   }
 
   function buildIconSelectOptions(selected) {
