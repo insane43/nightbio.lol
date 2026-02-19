@@ -46,6 +46,8 @@ function getBioByUsername(username) {
       if (!d) return null;
       var views = (viewsSnap && viewsSnap.val()) || 0;
       var links = Array.isArray(d.links) ? d.links : [];
+      var merged = mergeBadges(d.badges);
+      var visibleBadges = applyBadgeVisibility(merged, d.badgeVisibility);
       return {
         uid: uid,
         userId: d.userId != null ? d.userId : null,
@@ -76,7 +78,7 @@ function getBioByUsername(username) {
         metaImageURL: d.metaImageURL || '',
         showViewsOnBio: !!d.showViewsOnBio,
         stats: { views: views },
-        badges: mergeBadges(d.badges),
+        badges: visibleBadges,
         premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
         premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
         premiumLinkFontSize: d.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumLinkFontSize, 10) || 16)) : null,
@@ -113,6 +115,17 @@ function mergeBadges(loaded) {
     verified: !!loaded.verified,
     premium: !!loaded.premium
   };
+}
+
+// Apply visibility: only show badges that are granted AND not hidden (badgeVisibility[key] !== false).
+function applyBadgeVisibility(badges, visibility) {
+  var out = {};
+  var keys = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    if (!!badges[k] && (visibility == null || visibility[k] !== false)) out[k] = true;
+  }
+  return out;
 }
 
 // Record a profile view (call from bio.html when profile is displayed).
@@ -175,6 +188,7 @@ function getCurrentUserBio(uid) {
       showViewsOnBio: !!d.showViewsOnBio,
       stats: d.stats || { views: 0 },
       badges: mergeBadges(d.badges),
+      badgeVisibility: d.badgeVisibility && typeof d.badgeVisibility === 'object' ? d.badgeVisibility : {},
       premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
       premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
       premiumLinkFontSize: d.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumLinkFontSize, 10) || 16)) : null,
@@ -231,10 +245,13 @@ function saveBio(uid, data) {
     updatedAt: firebase.database.ServerValue.TIMESTAMP
   };
   if (data.badges && typeof data.badges === 'object') {
-    var badgeKeys = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
-    for (var i = 0; i < badgeKeys.length; i++) {
-      var bk = badgeKeys[i];
-      if (data.badges[bk] !== undefined) updates['badges/' + bk] = !!data.badges[bk];
+    if (data.badges.community !== undefined) updates['badges/community'] = !!data.badges.community;
+  }
+  if (data.badgeVisibility && typeof data.badgeVisibility === 'object') {
+    var visKeys = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
+    for (var j = 0; j < visKeys.length; j++) {
+      var vk = visKeys[j];
+      if (data.badgeVisibility[vk] !== undefined) updates['badgeVisibility/' + vk] = !!data.badgeVisibility[vk];
     }
   }
   if (Array.isArray(data.links)) {
