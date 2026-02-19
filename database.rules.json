@@ -2,7 +2,9 @@
   "rules": {
     "usernames": {
       ".read": true,
-      ".write": "auth != null"
+      "$normalized": {
+        ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.exists() && data.val() === auth.uid && (!newData.exists() || newData.val() === auth.uid)))"
+      }
     },
     "adminUids": {
       ".read": "auth != null",

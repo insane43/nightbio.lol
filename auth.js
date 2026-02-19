@@ -74,6 +74,47 @@ function slugToUsername(s) {
   return out.length >= 3 ? out : 'user';
 }
 
+// Change username (handle) — once every 7 days, new handle must not be taken.
+// Resolves with new username; rejects with Error message.
+function changeUsername(uid, newUsername) {
+  const db = getDb();
+  if (!db) return Promise.reject(new Error('Database not ready'));
+  const trimmed = String(newUsername || '').trim();
+  if (!isValidUsername(trimmed)) return Promise.reject(new Error('Handle must be 3–20 characters, letters, numbers and underscores only.'));
+  const newNormalized = trimmed.toLowerCase();
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+  return db.ref('users/' + uid).once('value').then(function(snap) {
+    const d = snap.val();
+    const currentUsername = (d && d.username) ? String(d.username).trim() : '';
+    const oldNormalized = currentUsername.toLowerCase();
+    const lastChange = (d && d.lastUsernameChangeAt != null) ? (typeof d.lastUsernameChangeAt === 'number' ? d.lastUsernameChangeAt : 0) : 0;
+
+    if (oldNormalized === newNormalized) {
+      // Only case change — allow without cooldown; update users/uid/username for display
+      return db.ref('users/' + uid + '/username').set(trimmed).then(function() { return trimmed; });
+    }
+
+    if (lastChange && (Date.now() - lastChange) < SEVEN_DAYS_MS) {
+      return Promise.reject(new Error('You can only change your handle once every 7 days. Try again later.'));
+    }
+
+    return db.ref('usernames/' + newNormalized).once('value').then(function(snap2) {
+      const existingUid = snap2.val();
+      if (existingUid && existingUid !== uid) {
+        return Promise.reject(new Error('That handle is already in use.'));
+      }
+      const updates = {
+        ['users/' + uid + '/username']: trimmed,
+        ['users/' + uid + '/lastUsernameChangeAt']: firebase.database.ServerValue.TIMESTAMP,
+        ['usernames/' + newNormalized]: uid
+      };
+      if (oldNormalized) updates['usernames/' + oldNormalized] = null;
+      return db.ref().update(updates).then(function() { return trimmed; });
+    });
+  });
+}
+
 // Ensure OAuth user has a profile in Realtime DB (username + email + userId). Creates one if missing.
 function ensureOAuthUserProfile(user) {
   const db = getDb();

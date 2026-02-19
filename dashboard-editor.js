@@ -317,6 +317,19 @@
       window._editorCurrentData = d;
 
       if (d.username) setBioUrl(d.username);
+      var currentHandleEl = document.getElementById('currentHandleDisplay');
+      if (currentHandleEl) currentHandleEl.textContent = d.username || '—';
+      var cooldownEl = document.getElementById('handleCooldownMsg');
+      if (cooldownEl) {
+        var lastChange = d.lastUsernameChangeAt;
+        var sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        if (lastChange && (Date.now() - lastChange) < sevenDaysMs) {
+          var nextAt = new Date(lastChange + sevenDaysMs);
+          cooldownEl.textContent = 'Next change available: ' + nextAt.toLocaleDateString(undefined, { dateStyle: 'medium' }) + ' at ' + nextAt.toLocaleTimeString(undefined, { timeStyle: 'short' });
+        } else {
+          cooldownEl.textContent = 'You can change your handle now.';
+        }
+      }
       if (displayName) displayName.value = d.displayName || '';
       if (bioText) {
         bioText.value = d.bio || '';
@@ -906,6 +919,40 @@
       displayName.addEventListener('input', function() { updatePreview(); });
       displayName.addEventListener('change', function() { updatePreview(); });
     }
+
+    var changeHandleBtn = document.getElementById('changeHandleBtn');
+    var newHandleInput = document.getElementById('newHandleInput');
+    var handleChangeMsg = document.getElementById('handleChangeMsg');
+    if (changeHandleBtn && newHandleInput && typeof changeUsername === 'function' && typeof isValidUsername === 'function') {
+      changeHandleBtn.addEventListener('click', function() {
+        var raw = newHandleInput.value.trim();
+        if (!raw) {
+          if (handleChangeMsg) { handleChangeMsg.textContent = 'Enter a new handle.'; handleChangeMsg.style.color = ''; }
+          return;
+        }
+        if (!isValidUsername(raw)) {
+          if (handleChangeMsg) { handleChangeMsg.textContent = 'Handle must be 3–20 characters, letters, numbers and underscores only.'; handleChangeMsg.style.color = 'var(--text-error, #e11)'; }
+          return;
+        }
+        if (handleChangeMsg) handleChangeMsg.textContent = '';
+        changeHandleBtn.disabled = true;
+        changeUsername(uid, raw).then(function(newUsername) {
+          if (handleChangeMsg) { handleChangeMsg.textContent = 'Handle updated to @' + newUsername + '.'; handleChangeMsg.style.color = 'var(--success, #0a0)'; }
+          newHandleInput.value = '';
+          var currentHandleEl = document.getElementById('currentHandleDisplay');
+          if (currentHandleEl) currentHandleEl.textContent = newUsername;
+          setBioUrl(newUsername);
+          window._editorCurrentData.username = newUsername;
+          var cooldownEl = document.getElementById('handleCooldownMsg');
+          if (cooldownEl) cooldownEl.textContent = 'Next change available in 7 days.';
+          changeHandleBtn.disabled = false;
+        }).catch(function(err) {
+          if (handleChangeMsg) { handleChangeMsg.textContent = err && err.message ? err.message : 'Could not change handle.'; handleChangeMsg.style.color = 'var(--text-error, #e11)'; }
+          changeHandleBtn.disabled = false;
+        });
+      });
+    }
+
     if (bioText) {
       bioText.addEventListener('input', function() {
         if (bioCharCount) bioCharCount.textContent = bioText.value.length;

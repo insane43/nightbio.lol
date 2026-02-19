@@ -103,6 +103,19 @@
             </div>
           </div>
           <div class="panel-card">
+            <h2 class="panel-title">Handle</h2>
+            <p class="panel-desc">Your profile URL is nightbio.lol/bio?u=<strong id="currentHandleDisplay">—</strong>. You can change your handle once every 7 days, and the new handle must not already be in use.</p>
+            <div class="form-group">
+              <label for="newHandleInput">New handle</label>
+              <div class="handle-change-row">
+                <input type="text" id="newHandleInput" class="form-input" placeholder="e.g. myname" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+" autocomplete="username">
+                <button type="button" class="btn btn-primary" id="changeHandleBtn">Change handle</button>
+              </div>
+              <p id="handleChangeMsg" class="form-hint" aria-live="polite" style="margin-top: 0.35rem;"></p>
+              <p id="handleCooldownMsg" class="panel-desc" style="margin-top: 0.5rem; font-size: 0.85rem;"></p>
+            </div>
+          </div>
+          <div class="panel-card">
             <h2 class="panel-title">Display info</h2>
             <div class="form-group">
               <label for="displayName">Display name</label>

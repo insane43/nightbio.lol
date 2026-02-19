@@ -140,6 +140,7 @@ function getCurrentUserBio(uid) {
     var links = Array.isArray(d.links) ? d.links.slice() : [];
     return {
       username: d.username || '',
+      lastUsernameChangeAt: d.lastUsernameChangeAt != null ? d.lastUsernameChangeAt : null,
       email: d.email || '',
       displayName: d.displayName || '',
       bio: d.bio || '',

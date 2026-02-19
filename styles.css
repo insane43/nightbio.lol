@@ -289,6 +289,16 @@ body.toplander .skiptranslate { display: none !important; }
   border-color: var(--purple-accent);
   box-shadow: 0 0 0 3px var(--purple-glow);
 }
+.handle-change-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.handle-change-row .form-input {
+  flex: 1;
+  min-width: 0;
+}
+.handle-change-row .btn { flex-shrink: 0; }
 
 .forgot-link {
   display: inline-block;
