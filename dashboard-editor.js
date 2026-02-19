@@ -466,9 +466,12 @@
         set('premiumProfileAnimation', d.premiumProfileAnimation);
         var pPar = document.getElementById('premiumParallax');
         if (pPar) pPar.checked = !!d.premiumParallax;
+        set('premiumBackgroundEffect', (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '');
         set('premiumVideoBackground', d.premiumVideoBackground);
         set('premiumBannerBlur', d.premiumBannerBlur != null ? d.premiumBannerBlur : '');
         set('premiumAvatarBorder', d.premiumAvatarBorder);
+        var pMonochromeBadges = document.getElementById('premiumMonochromeBadges');
+        if (pMonochromeBadges) pMonochromeBadges.checked = !!d.premiumMonochromeBadges;
         document.getElementById('premiumHideBranding').checked = !!d.premiumHideBranding;
         var gU = document.getElementById('premiumGlowUsername');
         if (gU) gU.checked = !!d.premiumGlowUsername;
@@ -1252,9 +1255,13 @@
         payload.premiumUsernameEffect = pUsernameEffect ? pUsernameEffect.value.trim() : '';
         payload.premiumNameGradient = pNameGrad ? pNameGrad.value.trim() : '';
         payload.premiumBioFontSize = pBioFs && pBioFs.value.trim() !== '' ? parseInt(pBioFs.value, 10) : null;
+        var pBgEffect = document.getElementById('premiumBackgroundEffect');
+        payload.premiumBackgroundEffect = (pBgEffect && (pBgEffect.value === 'blurred' || pBgEffect.value === 'snowflakes' || pBgEffect.value === 'rain')) ? pBgEffect.value : '';
         payload.premiumVideoBackground = pVidBg ? pVidBg.value.trim() : '';
         payload.premiumBannerBlur = pBannerBlur && pBannerBlur.value.trim() !== '' ? parseInt(pBannerBlur.value, 10) : 0;
         payload.premiumAvatarBorder = pAvatarBorder ? pAvatarBorder.value.trim() : '';
+        var pMonochromeBadges = document.getElementById('premiumMonochromeBadges');
+        payload.premiumMonochromeBadges = pMonochromeBadges ? !!pMonochromeBadges.checked : false;
         payload.premiumHideBranding = pHideBrand ? pHideBrand.checked : false;
         payload.premiumGlowUsername = pGlowUser ? !!pGlowUser.checked : false;
         payload.premiumGlowSocials = pGlowSocials ? !!pGlowSocials.checked : false;

@@ -294,9 +294,51 @@
           (premium && data.premiumGlowUsername ? ' bio-glow-username' : '') +
           (premium && data.premiumGlowSocials ? ' bio-glow-socials' : '') +
           (premium && data.premiumGlowBadges ? ' bio-glow-badges' : '') +
-          (premium && data.premiumGlowBio ? ' bio-glow-bio' : '');
+          (premium && data.premiumGlowBio ? ' bio-glow-bio' : '') +
+          (premium && data.premiumMonochromeBadges ? ' bio-badges-monochrome' : '');
         document.body.classList.remove('bio-bg-none', 'bio-bg-gradient', 'bio-bg-pattern');
         document.body.classList.add('bio-bg-' + (bgEffect === 'none' ? 'none' : bgEffect));
+        document.body.classList.remove('bio-bg-effect-blurred', 'bio-bg-effect-snowflakes', 'bio-bg-effect-rain');
+        var bgEffectPremium = (premium && data.premiumBackgroundEffect) ? data.premiumBackgroundEffect : '';
+        if (bgEffectPremium === 'blurred' || bgEffectPremium === 'snowflakes' || bgEffectPremium === 'rain') {
+          document.body.classList.add('bio-bg-effect-' + bgEffectPremium);
+        }
+        if (bgEffectPremium === 'snowflakes' || bgEffectPremium === 'rain') {
+          var particleContainer = document.getElementById('bioParticleEffect');
+          if (!particleContainer) {
+            particleContainer = document.createElement('div');
+            particleContainer.id = 'bioParticleEffect';
+            particleContainer.className = 'bio-particle-effect';
+            particleContainer.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(particleContainer);
+          }
+          particleContainer.className = 'bio-particle-effect bio-particle-' + bgEffectPremium;
+          particleContainer.innerHTML = '';
+          if (bgEffectPremium === 'snowflakes') {
+            for (var i = 0; i < 50; i++) {
+              var flake = document.createElement('div');
+              flake.className = 'bio-snowflake';
+              flake.style.left = Math.random() * 100 + '%';
+              flake.style.animationDelay = Math.random() * 5 + 's';
+              flake.style.animationDuration = (4 + Math.random() * 4) + 's';
+              flake.style.opacity = 0.4 + Math.random() * 0.6;
+              flake.style.fontSize = (8 + Math.random() * 12) + 'px';
+              particleContainer.appendChild(flake);
+            }
+          } else {
+            for (var j = 0; j < 80; j++) {
+              var drop = document.createElement('div');
+              drop.className = 'bio-raindrop';
+              drop.style.left = Math.random() * 100 + '%';
+              drop.style.animationDelay = Math.random() * 2 + 's';
+              drop.style.animationDuration = (0.4 + Math.random() * 0.3) + 's';
+              particleContainer.appendChild(drop);
+            }
+          }
+        } else {
+          var oldParticles = document.getElementById('bioParticleEffect');
+          if (oldParticles && oldParticles.parentNode) oldParticles.remove();
+        }
         if (premium && data.premiumVideoBackground && data.premiumVideoBackground.trim()) {
           document.body.classList.add('bio-premium-video-bg');
           var existingVideo = document.getElementById('bioPremiumVideoBg');

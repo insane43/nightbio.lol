@@ -626,6 +626,11 @@
               <label for="premiumGlowBadges">Badges glow</label>
             </div>
             <div class="form-group form-check">
+              <input type="checkbox" id="premiumMonochromeBadges" class="form-checkbox">
+              <label for="premiumMonochromeBadges">Monochrome badges</label>
+              <p class="panel-desc">Show badges in grayscale instead of colored.</p>
+            </div>
+            <div class="form-group form-check">
               <input type="checkbox" id="premiumGlowBio" class="form-checkbox">
               <label for="premiumGlowBio">Bio text glow</label>
             </div>
@@ -696,6 +701,16 @@
           </div>
           <div class="panel-card">
             <h2 class="panel-title">Background &amp; media</h2>
+            <div class="form-group">
+              <label for="premiumBackgroundEffect">Background effect</label>
+              <select id="premiumBackgroundEffect" class="form-select">
+                <option value="">None</option>
+                <option value="blurred">Blurred background</option>
+                <option value="snowflakes">Snowflakes</option>
+                <option value="rain">Rain</option>
+              </select>
+              <p class="panel-desc">Atmospheric effect behind your profile. Blurred softens the background; snowflakes or rain add falling particles.</p>
+            </div>
             <div class="form-group">
               <label for="premiumVideoBackground">Video background URL</label>
               <input type="url" id="premiumVideoBackground" placeholder="https://... (video URL)" class="form-input" maxlength="500">

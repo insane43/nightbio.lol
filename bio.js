@@ -114,9 +114,11 @@ function loadBioForUid(uid) {
       premiumGlowStrength: d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100,
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
+      premiumBackgroundEffect: (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '',
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
       premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
       premiumAvatarBorder: (d.premiumAvatarBorder || '').trim().slice(0, 100),
+      premiumMonochromeBadges: !!d.premiumMonochromeBadges,
       premiumHideBranding: !!d.premiumHideBranding,
       premiumCustomCSS: (d.premiumCustomCSS || '').trim().slice(0, 2000),
       premiumCustomFontFamily: (d.premiumCustomFontFamily || '').trim().slice(0, 80),
@@ -231,9 +233,11 @@ function getCurrentUserBio(uid) {
       premiumGlowStrength: d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100,
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
+      premiumBackgroundEffect: (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '',
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
       premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
       premiumAvatarBorder: (d.premiumAvatarBorder || '').trim().slice(0, 100),
+      premiumMonochromeBadges: !!d.premiumMonochromeBadges,
       premiumHideBranding: !!d.premiumHideBranding,
       premiumCustomCSS: (d.premiumCustomCSS || '').trim().slice(0, 2000),
       premiumCustomFontFamily: (d.premiumCustomFontFamily || '').trim().slice(0, 80),
@@ -312,9 +316,11 @@ function saveBio(uid, data) {
   if (data.modalGradientColor2 !== undefined) updates.modalGradientColor2 = (data.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(data.modalGradientColor2)) ? data.modalGradientColor2 : '';
   if (data.premiumNameGradient !== undefined) updates.premiumNameGradient = String(data.premiumNameGradient || '').trim().slice(0, 200);
   if (data.premiumBioFontSize !== undefined) updates.premiumBioFontSize = data.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(data.premiumBioFontSize, 10) || 15)) : null;
+  if (data.premiumBackgroundEffect !== undefined) updates.premiumBackgroundEffect = (data.premiumBackgroundEffect === 'blurred' || data.premiumBackgroundEffect === 'snowflakes' || data.premiumBackgroundEffect === 'rain') ? data.premiumBackgroundEffect : '';
   if (data.premiumVideoBackground !== undefined) updates.premiumVideoBackground = String(data.premiumVideoBackground || '').trim().slice(0, 500);
   if (data.premiumBannerBlur !== undefined) updates.premiumBannerBlur = data.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(data.premiumBannerBlur, 10) || 0)) : 0;
   if (data.premiumAvatarBorder !== undefined) updates.premiumAvatarBorder = String(data.premiumAvatarBorder || '').trim().slice(0, 100);
+  if (data.premiumMonochromeBadges !== undefined) updates.premiumMonochromeBadges = !!data.premiumMonochromeBadges;
   if (data.premiumHideBranding !== undefined) updates.premiumHideBranding = !!data.premiumHideBranding;
   if (data.premiumCustomCSS !== undefined) updates.premiumCustomCSS = String(data.premiumCustomCSS || '').trim().slice(0, 2000);
   if (data.premiumCustomFontFamily !== undefined) updates.premiumCustomFontFamily = String(data.premiumCustomFontFamily || '').trim().slice(0, 80);
