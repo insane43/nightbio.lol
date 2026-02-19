@@ -116,6 +116,19 @@
             </div>
           </div>
           <div class="panel-card">
+            <h2 class="panel-title">Alias</h2>
+            <p class="panel-desc">An alias works like a second link to your profile (e.g. nightbio.lol/<strong id="currentAliasDisplay">—</strong>). Visitors are redirected to your main handle. You can change it once every 7 days, and it must not be in use as a handle or by someone else.</p>
+            <div class="form-group">
+              <label for="newAliasInput">Alias</label>
+              <div class="handle-change-row">
+                <input type="text" id="newAliasInput" class="form-input" placeholder="e.g. myalias or leave empty to remove" minlength="0" maxlength="20" pattern="[a-zA-Z0-9_]*" autocomplete="off">
+                <button type="button" class="btn btn-primary" id="changeAliasBtn">Change alias</button>
+              </div>
+              <p id="aliasChangeMsg" class="form-hint" aria-live="polite" style="margin-top: 0.35rem;"></p>
+              <p id="aliasCooldownMsg" class="panel-desc" style="margin-top: 0.5rem; font-size: 0.85rem;"></p>
+            </div>
+          </div>
+          <div class="panel-card">
             <h2 class="panel-title">Display info</h2>
             <div class="form-group">
               <label for="displayName">Display name</label>

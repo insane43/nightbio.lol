@@ -1768,6 +1768,7 @@ html { scrollbar-gutter: stable; }
   letter-spacing: var(--bio-letter-spacing);
 }
 .bio-name { font-size: 1.5rem; font-weight: 700; margin-top: 0.75rem; margin-bottom: 0.25rem; }
+.bio-alias { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 0.5rem; font-weight: 400; }
 .bio-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.5rem 0 0.25rem; }
 .bio-badge {
   display: inline-flex;

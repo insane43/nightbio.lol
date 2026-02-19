@@ -105,6 +105,76 @@ function slugToUsername(s) {
   return out.length >= 3 ? out : 'user';
 }
 
+// Get uid for an alias (from aliases index). Returns null if not found.
+function getUidByAlias(alias) {
+  var db = getDb();
+  if (!db) return Promise.resolve(null);
+  var normalized = String(alias || '').trim().toLowerCase();
+  if (!normalized) return Promise.resolve(null);
+  return db.ref('aliases/' + normalized).once('value').then(function(snap) {
+    return snap.val();
+  });
+}
+
+// Check if alias is taken by someone else (usernames or another user's alias). Optional uid = current user (their own alias is not "taken").
+function isAliasTaken(alias, currentUid) {
+  var normalized = String(alias || '').trim().toLowerCase();
+  if (!normalized) return Promise.resolve(false);
+  return Promise.all([
+    isUsernameTaken(alias),
+    getUidByAlias(alias)
+  ]).then(function(res) {
+    var takenByHandle = res[0];
+    var ownerUid = res[1];
+    if (takenByHandle) return true;
+    if (ownerUid && ownerUid !== currentUid) return true;
+    return false;
+  });
+}
+
+// Change alias — once every 7 days. Alias must not be a handle or another user's alias. Resolves with new alias; use empty string to remove.
+function changeAlias(uid, newAlias) {
+  var db = getDb();
+  if (!db || !uid) return Promise.reject(new Error('Not ready'));
+  var trimmed = String(newAlias || '').trim();
+  var SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+  return db.ref('users/' + uid).once('value').then(function(snap) {
+    var d = snap.val();
+    var currentAlias = (d && d.alias) ? String(d.alias).trim() : '';
+    var oldNormalized = currentAlias.toLowerCase();
+    var lastChange = (d && d.lastAliasChangeAt != null) ? (typeof d.lastAliasChangeAt === 'number' ? d.lastAliasChangeAt : 0) : 0;
+
+    if (trimmed === '') {
+      var updates = { ['users/' + uid + '/alias']: null, ['users/' + uid + '/lastAliasChangeAt']: null };
+      if (oldNormalized) updates['aliases/' + oldNormalized] = null;
+      return db.ref().update(updates).then(function() { return ''; });
+    }
+
+    if (!isValidUsername(trimmed)) return Promise.reject(new Error('Alias must be 3–20 characters, letters, numbers and underscores only.'));
+    var newNormalized = trimmed.toLowerCase();
+
+    if (oldNormalized === newNormalized) {
+      return db.ref('users/' + uid + '/alias').set(trimmed).then(function() { return trimmed; });
+    }
+
+    if (lastChange && (Date.now() - lastChange) < SEVEN_DAYS_MS) {
+      return Promise.reject(new Error('You can only change your alias once every 7 days. Try again later.'));
+    }
+
+    return isAliasTaken(trimmed, uid).then(function(taken) {
+      if (taken) return Promise.reject(new Error('That alias is already in use.'));
+      var updates = {
+        ['users/' + uid + '/alias']: trimmed,
+        ['users/' + uid + '/lastAliasChangeAt']: firebase.database.ServerValue.TIMESTAMP,
+        ['aliases/' + newNormalized]: uid
+      };
+      if (oldNormalized) updates['aliases/' + oldNormalized] = null;
+      return db.ref().update(updates).then(function() { return trimmed; });
+    });
+  });
+}
+
 // Change username (handle) — once every 7 days, new handle must not be taken.
 // Resolves with new username; rejects with Error message.
 function changeUsername(uid, newUsername) {

@@ -339,6 +339,21 @@
           cooldownEl.textContent = 'You can change your handle now.';
         }
       }
+      var currentAliasEl = document.getElementById('currentAliasDisplay');
+      if (currentAliasEl) currentAliasEl.textContent = (d.alias && d.alias.trim()) ? d.alias.trim() : '—';
+      var aliasCooldownEl = document.getElementById('aliasCooldownMsg');
+      if (aliasCooldownEl) {
+        var lastAliasChange = d.lastAliasChangeAt;
+        var sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        if (lastAliasChange && (Date.now() - lastAliasChange) < sevenDaysMs) {
+          var nextAt = new Date(lastAliasChange + sevenDaysMs);
+          aliasCooldownEl.textContent = 'Next change available: ' + nextAt.toLocaleDateString(undefined, { dateStyle: 'medium' }) + ' at ' + nextAt.toLocaleTimeString(undefined, { timeStyle: 'short' });
+        } else {
+          aliasCooldownEl.textContent = 'You can change your alias now.';
+        }
+      }
+      var newAliasInput = document.getElementById('newAliasInput');
+      if (newAliasInput) newAliasInput.value = (d.alias && d.alias.trim()) ? d.alias.trim() : '';
       if (displayName) displayName.value = d.displayName || '';
       if (bioText) {
         bioText.value = d.bio || '';
@@ -1071,6 +1086,33 @@
         }).catch(function(err) {
           if (handleChangeMsg) { handleChangeMsg.textContent = err && err.message ? err.message : 'Could not change handle.'; handleChangeMsg.style.color = 'var(--text-error, #e11)'; }
           changeHandleBtn.disabled = false;
+        });
+      });
+    }
+
+    var changeAliasBtn = document.getElementById('changeAliasBtn');
+    var newAliasInput = document.getElementById('newAliasInput');
+    var aliasChangeMsg = document.getElementById('aliasChangeMsg');
+    if (changeAliasBtn && newAliasInput && typeof changeAlias === 'function' && typeof isValidUsername === 'function') {
+      changeAliasBtn.addEventListener('click', function() {
+        var raw = newAliasInput.value.trim();
+        if (aliasChangeMsg) aliasChangeMsg.textContent = '';
+        changeAliasBtn.disabled = true;
+        changeAlias(uid, raw).then(function(newAlias) {
+          if (aliasChangeMsg) {
+            aliasChangeMsg.textContent = newAlias ? ('Alias updated to @' + newAlias + '.') : 'Alias removed.';
+            aliasChangeMsg.style.color = 'var(--success, #0a0)';
+          }
+          newAliasInput.value = newAlias;
+          var currentAliasEl = document.getElementById('currentAliasDisplay');
+          if (currentAliasEl) currentAliasEl.textContent = newAlias || '—';
+          window._editorCurrentData.alias = newAlias || '';
+          var aliasCooldownEl = document.getElementById('aliasCooldownMsg');
+          if (aliasCooldownEl) aliasCooldownEl.textContent = raw ? 'Next change available in 7 days.' : 'You can change your alias now.';
+          changeAliasBtn.disabled = false;
+        }).catch(function(err) {
+          if (aliasChangeMsg) { aliasChangeMsg.textContent = err && err.message ? err.message : 'Could not change alias.'; aliasChangeMsg.style.color = 'var(--text-error, #e11)'; }
+          changeAliasBtn.disabled = false;
         });
       });
     }

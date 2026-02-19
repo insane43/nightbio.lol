@@ -26,6 +26,7 @@
       <div class="bio-profile">
         <img id="bioAvatar" class="bio-avatar" src="" alt="" style="display: none;">
         <h1 id="bioName" class="bio-name"></h1>
+        <p id="bioAlsoKnownAs" class="bio-alias" style="display: none;"></p>
         <div id="bioBadges" class="bio-badges"></div>
         <p id="bioBio" class="bio-bio-text"></p>
         <p id="bioViews" class="bio-views" style="display: none;"></p>
@@ -408,6 +409,16 @@
         } else {
           nameEl.textContent = nameText;
         }
+        var alsoKnownEl = document.getElementById('bioAlsoKnownAs');
+        if (alsoKnownEl) {
+          if (data.alias && data.alias.trim()) {
+            alsoKnownEl.textContent = 'also known as @' + data.alias.trim();
+            alsoKnownEl.style.display = '';
+          } else {
+            alsoKnownEl.textContent = '';
+            alsoKnownEl.style.display = 'none';
+          }
+        }
         if (premium && data.premiumNameGradient && data.premiumNameGradient.trim()) {
           nameEl.style.background = data.premiumNameGradient.trim();
           nameEl.style.webkitBackgroundClip = 'text';
@@ -568,11 +579,15 @@
 
       showLoading();
       getBioByUsername(username.trim()).then(function(data) {
-        if (data) {
-          showBio(data);
-        } else {
+        if (!data) {
           showNotFound();
+          return;
         }
+        if (data.redirect) {
+          window.location.replace('/' + encodeURIComponent(data.redirect));
+          return;
+        }
+        showBio(data);
       }).catch(function() {
         showNotFound();
       });

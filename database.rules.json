@@ -6,6 +6,12 @@
         ".write": "auth != null && ((root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true) || ((!data.exists() && newData.val() === auth.uid) || (data.exists() && data.val() === auth.uid && (!newData.exists() || newData.val() === auth.uid))))"
       }
     },
+    "aliases": {
+      ".read": true,
+      "$normalized": {
+        ".write": "auth != null && (newData.val() === auth.uid || data.val() === auth.uid)"
+      }
+    },
     "adminUids": {
       ".read": "auth != null",
       ".write": false

@@ -29,78 +29,95 @@ function getUidByUsername(username) {
   });
 }
 
-// Get public bio data by username (for bio.html?u=username).
-// Fetches profileViews/{uid} so stats.views is correct for public display.
+// Get public bio data by username or alias (for bio.html?u=...). If path is an alias, returns { redirect: mainUsername }. Otherwise returns full bio (with alias field for "also known as").
 function getBioByUsername(username) {
   var db = getDb();
   if (!db) return Promise.reject(new Error('Database not ready'));
-  return getUidByUsername(username).then(function(uid) {
-    if (!uid) return null;
-    return Promise.all([
-      db.ref('users/' + uid).once('value'),
-      db.ref('profileViews/' + uid).once('value')
-    ]).then(function(results) {
-      var snap = results[0];
-      var viewsSnap = results[1];
-      var d = snap.val();
-      if (!d) return null;
-      var views = (viewsSnap && viewsSnap.val()) || 0;
-      var links = Array.isArray(d.links) ? d.links : [];
-      var merged = mergeBadges(d.badges);
-      var visibleBadges = applyBadgeVisibility(merged, d.badgeVisibility);
-      return {
-        uid: uid,
-        userId: d.userId != null ? d.userId : null,
-        username: d.username,
-        displayName: d.displayName || d.username,
-        bio: d.bio || '',
-        avatarURL: d.avatarURL || '',
-        bannerURL: d.bannerURL || '',
-        songURL: d.songURL || '',
-        links: links.map(function(l) { return { label: l.label || '', url: l.url || '', icon: l.icon || '', iconURL: l.iconURL || '' }; }),
-        accentColor: d.accentColor || '',
-        layout: d.layout || 'classic',
-        profileAlignment: (/^(left|right|center)$/i.test(d.profileAlignment) ? d.profileAlignment.toLowerCase() : 'center'),
-        fontFamily: d.fontFamily || 'Outfit',
-        fontSize: d.fontSize != null ? d.fontSize : 16,
-        letterSpacing: d.letterSpacing != null ? d.letterSpacing : 0,
-        typewriterBio: !!d.typewriterBio,
-        backgroundEffect: d.backgroundEffect || 'none',
-        buttonStyle: d.buttonStyle || 'filled',
-        displayStyle: (d.displayStyle || 'default') === 'card' ? 'card' : 'default',
-        modalOpacity: d.modalOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalOpacity, 10) || 96)) : 96,
-        modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
-        modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
-        modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
-        clickToEnter: !!d.clickToEnter,
-        metaTitle: d.metaTitle || '',
-        metaDescription: d.metaDescription || '',
-        metaImageURL: d.metaImageURL || '',
-        showViewsOnBio: !!d.showViewsOnBio,
-        stats: { views: views },
-        badges: visibleBadges,
-        premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
-        premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
-        premiumLinkFontSize: d.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumLinkFontSize, 10) || 16)) : null,
-        premiumLinkBorderRadius: d.premiumLinkBorderRadius != null ? Math.min(50, Math.max(0, parseInt(d.premiumLinkBorderRadius, 10) || 8)) : null,
-        premiumUsernameEffect: (d.premiumUsernameEffect || '').trim().slice(0, 30),
-        premiumGlowUsername: !!d.premiumGlowUsername,
-        premiumGlowSocials: !!d.premiumGlowSocials,
-        premiumGlowBadges: !!d.premiumGlowBadges,
-        premiumGlowBio: !!d.premiumGlowBio,
-        premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
-        premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
-        premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
-        premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
-        premiumAvatarBorder: (d.premiumAvatarBorder || '').trim().slice(0, 100),
-        premiumHideBranding: !!d.premiumHideBranding,
-        premiumCustomCSS: (d.premiumCustomCSS || '').trim().slice(0, 2000),
-        premiumCustomFontFamily: (d.premiumCustomFontFamily || '').trim().slice(0, 80),
-        premiumLayoutPreset: (d.premiumLayoutPreset || '').trim().slice(0, 20),
-        premiumProfileAnimation: (d.premiumProfileAnimation || '').trim().slice(0, 20),
-        premiumParallax: !!d.premiumParallax
-      };
+  var path = String(username || '').trim();
+  if (!path) return Promise.resolve(null);
+
+  return getUidByUsername(path).then(function(uid) {
+    if (uid) return loadBioForUid(uid);
+    return getUidByAlias(path).then(function(aliasUid) {
+      if (!aliasUid) return null;
+      return db.ref('users/' + aliasUid + '/username').once('value').then(function(snap) {
+        var mainUsername = snap.val();
+        if (typeof mainUsername !== 'string' || !mainUsername.trim()) return null;
+        return { redirect: mainUsername.trim() };
+      });
     });
+  });
+}
+
+function loadBioForUid(uid) {
+  var db = getDb();
+  if (!db) return Promise.resolve(null);
+  return Promise.all([
+    db.ref('users/' + uid).once('value'),
+    db.ref('profileViews/' + uid).once('value')
+  ]).then(function(results) {
+    var snap = results[0];
+    var viewsSnap = results[1];
+    var d = snap.val();
+    if (!d) return null;
+    var views = (viewsSnap && viewsSnap.val()) || 0;
+    var links = Array.isArray(d.links) ? d.links : [];
+    var merged = mergeBadges(d.badges);
+    var visibleBadges = applyBadgeVisibility(merged, d.badgeVisibility);
+    var aliasStr = (d.alias && String(d.alias).trim()) ? String(d.alias).trim() : '';
+    return {
+      uid: uid,
+      userId: d.userId != null ? d.userId : null,
+      username: d.username,
+      alias: aliasStr,
+      displayName: d.displayName || d.username,
+      bio: d.bio || '',
+      avatarURL: d.avatarURL || '',
+      bannerURL: d.bannerURL || '',
+      songURL: d.songURL || '',
+      links: links.map(function(l) { return { label: l.label || '', url: l.url || '', icon: l.icon || '', iconURL: l.iconURL || '' }; }),
+      accentColor: d.accentColor || '',
+      layout: d.layout || 'classic',
+      profileAlignment: (/^(left|right|center)$/i.test(d.profileAlignment) ? d.profileAlignment.toLowerCase() : 'center'),
+      fontFamily: d.fontFamily || 'Outfit',
+      fontSize: d.fontSize != null ? d.fontSize : 16,
+      letterSpacing: d.letterSpacing != null ? d.letterSpacing : 0,
+      typewriterBio: !!d.typewriterBio,
+      backgroundEffect: d.backgroundEffect || 'none',
+      buttonStyle: d.buttonStyle || 'filled',
+      displayStyle: (d.displayStyle || 'default') === 'card' ? 'card' : 'default',
+      modalOpacity: d.modalOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalOpacity, 10) || 96)) : 96,
+      modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
+      modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
+      modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
+      clickToEnter: !!d.clickToEnter,
+      metaTitle: d.metaTitle || '',
+      metaDescription: d.metaDescription || '',
+      metaImageURL: d.metaImageURL || '',
+      showViewsOnBio: !!d.showViewsOnBio,
+      stats: { views: views },
+      badges: visibleBadges,
+      premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
+      premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
+      premiumLinkFontSize: d.premiumLinkFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumLinkFontSize, 10) || 16)) : null,
+      premiumLinkBorderRadius: d.premiumLinkBorderRadius != null ? Math.min(50, Math.max(0, parseInt(d.premiumLinkBorderRadius, 10) || 8)) : null,
+      premiumUsernameEffect: (d.premiumUsernameEffect || '').trim().slice(0, 30),
+      premiumGlowUsername: !!d.premiumGlowUsername,
+      premiumGlowSocials: !!d.premiumGlowSocials,
+      premiumGlowBadges: !!d.premiumGlowBadges,
+      premiumGlowBio: !!d.premiumGlowBio,
+      premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
+      premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
+      premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
+      premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
+      premiumAvatarBorder: (d.premiumAvatarBorder || '').trim().slice(0, 100),
+      premiumHideBranding: !!d.premiumHideBranding,
+      premiumCustomCSS: (d.premiumCustomCSS || '').trim().slice(0, 2000),
+      premiumCustomFontFamily: (d.premiumCustomFontFamily || '').trim().slice(0, 80),
+      premiumLayoutPreset: (d.premiumLayoutPreset || '').trim().slice(0, 20),
+      premiumProfileAnimation: (d.premiumProfileAnimation || '').trim().slice(0, 20),
+      premiumParallax: !!d.premiumParallax
+    };
   });
 }
 
@@ -159,6 +176,8 @@ function getCurrentUserBio(uid) {
     return {
       username: d.username || '',
       lastUsernameChangeAt: d.lastUsernameChangeAt != null ? d.lastUsernameChangeAt : null,
+      alias: (d.alias && String(d.alias).trim()) ? String(d.alias).trim() : '',
+      lastAliasChangeAt: d.lastAliasChangeAt != null ? d.lastAliasChangeAt : null,
       email: d.email || '',
       displayName: d.displayName || '',
       bio: d.bio || '',

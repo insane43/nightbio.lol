@@ -158,20 +158,24 @@ function removeIPBan(uid) {
   });
 }
 
-// Delete user's bio and all related DB data (username index, bans, profileViews). Does not remove Firebase Auth account.
+// Delete user's bio and all related DB data (username index, alias index, bans, profileViews). Does not remove Firebase Auth account.
 function deleteUserAccount(uid) {
   var db = getDb();
   if (!db || !uid) return Promise.reject(new Error('Invalid'));
-  return db.ref('users/' + uid + '/username').once('value').then(function(snap) {
-    var username = snap.val();
-    var normalized = (typeof username === 'string' && username.trim()) ? username.trim().toLowerCase() : '';
+  return db.ref('users/' + uid).once('value').then(function(snap) {
+    var d = snap.val();
+    var username = d && d.username ? String(d.username).trim() : '';
+    var alias = d && d.alias ? String(d.alias).trim() : '';
+    var normalizedUser = username ? username.toLowerCase() : '';
+    var normalizedAlias = alias ? alias.toLowerCase() : '';
     var updates = {
       ['users/' + uid]: null,
       ['bannedUids/' + uid]: null,
       ['hardBannedUids/' + uid]: null,
       ['profileViews/' + uid]: null
     };
-    if (normalized) updates['usernames/' + normalized] = null;
+    if (normalizedUser) updates['usernames/' + normalizedUser] = null;
+    if (normalizedAlias) updates['aliases/' + normalizedAlias] = null;
     return db.ref().update(updates);
   });
 }
