@@ -25,6 +25,15 @@ function initFirebase() {
   }
   window.firebaseAuth = firebase.auth();
   window.firebaseDb = firebase.database();
+  if (typeof firebase.functions !== 'undefined' && app) {
+    try {
+      window.firebaseFunctions = firebase.functions(app);
+    } catch (err) {
+      window.firebaseFunctions = null;
+    }
+  } else {
+    window.firebaseFunctions = null;
+  }
   if (typeof firebase.storage !== 'undefined' && app) {
     try {
       // Use app explicitly so the correct storageBucket from config is used
