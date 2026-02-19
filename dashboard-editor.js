@@ -476,6 +476,19 @@
       return div.innerHTML;
     }
 
+    function maskEmailDashboard(email) {
+      if (!email || typeof email !== 'string') return '';
+      var e = email.trim();
+      var at = e.indexOf('@');
+      if (at <= 0 || at >= e.length - 1) return '***';
+      var local = e.slice(0, at);
+      var domain = e.slice(at + 1);
+      var maskedLocal = local.length <= 2 ? (local.charAt(0) + '*') : (local.charAt(0) + '***' + local.charAt(local.length - 1));
+      var dot = domain.indexOf('.');
+      var maskedDomain = dot <= 0 ? '***' : (domain.charAt(0) + '***' + domain.slice(dot));
+      return maskedLocal + '@' + maskedDomain;
+    }
+
     function showDashboardAdminToast(msg, type) {
       type = type || 'success';
       var el = document.getElementById('dashboardAdminToast');
@@ -541,12 +554,14 @@
           actions += '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Ban">⊗</button>';
           if (typeof hardBanUser === 'function') actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Hard ban (account + IP)">⊛</button>';
         }
+        var rawEmail = u.email || '';
+        var emailDisplay = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span><button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>') : '—';
         var tr = document.createElement('tr');
         tr.title = uidTitle;
         tr.innerHTML =
           '<td><span class="user-name" title="' + escapeHtmlDashboard(uidTitle) + '">' + escapeHtmlDashboard(u.displayName || u.username || '—') + '</span></td>' +
           '<td><a href="' + profileUrl + '" target="_blank" rel="noopener" style="color: var(--purple-accent);" title="' + escapeHtmlDashboard(uidTitle) + '">' + escapeHtmlDashboard(u.username || '—') + '</a></td>' +
-          '<td>' + escapeHtmlDashboard((u.email || '').slice(0, 40)) + (u.email && u.email.length > 40 ? '…' : '') + '</td>' +
+          '<td class="admin-email-cell">' + emailDisplay + '</td>' +
           '<td>' + ((u.stats && u.stats.views) || 0).toLocaleString() + '</td>' +
           '<td>' + badgeHtml + '</td>' +
           '<td>' + (isBanned ? '<span class="badge-pill badge-banned">' + (isHardBanned ? 'Hard banned' : 'Banned') + '</span>' : '<span class="badge-pill">Active</span>') + '</td>' +
@@ -593,6 +608,28 @@
             showDashboardAdminToast('IP ban removed.');
             loadDashboardAdmin();
           }).catch(function() { showDashboardAdminToast('Failed to remove IP ban.', 'error'); });
+        });
+      });
+      tbody.querySelectorAll('.admin-email-reveal').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var cell = btn.closest('td');
+          if (!cell) return;
+          var span = cell.querySelector('.admin-email-text');
+          if (!span) return;
+          var full = span.dataset.email || '';
+          var masked = span.dataset.masked || '***';
+          var isRevealed = span.getAttribute('data-revealed') === '1';
+          if (isRevealed) {
+            span.textContent = masked;
+            span.setAttribute('data-revealed', '0');
+            btn.setAttribute('aria-label', 'Reveal email');
+            btn.setAttribute('title', 'Reveal email');
+          } else {
+            span.textContent = full;
+            span.setAttribute('data-revealed', '1');
+            btn.setAttribute('aria-label', 'Hide email');
+            btn.setAttribute('title', 'Hide email');
+          }
         });
       });
     }
@@ -753,7 +790,9 @@
       }
       if (empty) empty.style.display = 'none';
       ul.innerHTML = list.map(function(u) {
-        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + ' — ' + escapeHtmlDashboard(u.email || '') + '</span><button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
+        var rawEmail = u.email || '';
+        var emailPart = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span> <button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>') : '';
+        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + (emailPart ? ' — ' + emailPart : '') + '</span><button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
       }).join('');
       ul.querySelectorAll('.unban-list-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -762,6 +801,28 @@
             showDashboardAdminToast('User unbanned.');
             loadDashboardAdmin();
           }).catch(function() { showDashboardAdminToast('Failed to unban.', 'error'); });
+        });
+      });
+      ul.querySelectorAll('.admin-email-reveal').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var li = btn.closest('li');
+          if (!li) return;
+          var span = li.querySelector('.admin-email-text');
+          if (!span) return;
+          var full = span.dataset.email || '';
+          var masked = span.dataset.masked || '***';
+          var isRevealed = span.getAttribute('data-revealed') === '1';
+          if (isRevealed) {
+            span.textContent = masked;
+            span.setAttribute('data-revealed', '0');
+            btn.setAttribute('aria-label', 'Reveal email');
+            btn.setAttribute('title', 'Reveal email');
+          } else {
+            span.textContent = full;
+            span.setAttribute('data-revealed', '1');
+            btn.setAttribute('aria-label', 'Hide email');
+            btn.setAttribute('title', 'Hide email');
+          }
         });
       });
     }
