@@ -292,9 +292,9 @@
         var colorRow = '';
         if (hasPremium) {
           var defColor = (colors[key] && /^#[0-9A-Fa-f]{6}$/.test(colors[key])) ? colors[key] : (BADGE_DEFAULT_COLORS[key] || '#7c6bb8');
-          colorRow = '<div class="badge-card-color-wrap"><label class="badge-card-color-label">Color</label><div class="color-picker-wrap"><input type="color" class="badge-color-input" data-badge="' + key + '" value="' + defColor + '" aria-label="' + escapeHtml(info.label) + ' color"><input type="text" class="badge-color-hex form-input" data-badge="' + key + '" value="' + defColor + '" maxlength="7" placeholder="#000000"></div></div>';
+          colorRow = '<div class="badge-card-color-row"><div class="badge-card-color-wrap"><label class="badge-card-color-label">Color</label><div class="color-picker-wrap"><input type="color" class="badge-color-input" data-badge="' + key + '" value="' + defColor + '" aria-label="' + escapeHtml(info.label) + ' color"><input type="text" class="badge-color-hex form-input" data-badge="' + key + '" value="' + defColor + '" maxlength="7" placeholder="#000000"></div></div></div>';
         }
-        card.innerHTML = iconHtml + '<div class="badge-card-body">' + title + desc + '</div><div class="badge-card-action-wrap">' + action + '</div>' + (colorRow ? '<div class="badge-card-color-row">' + colorRow + '</div>' : '');
+        card.innerHTML = iconHtml + '<div class="badge-card-body">' + title + desc + (colorRow || '') + '</div><div class="badge-card-action-wrap">' + action + '</div>';
         grid.appendChild(card);
         var toggle = card.querySelector('.badge-toggle');
         if (toggle) {
