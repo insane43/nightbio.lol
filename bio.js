@@ -111,6 +111,7 @@ function loadBioForUid(uid) {
       premiumGlowBadges: !!d.premiumGlowBadges,
       premiumGlowBio: !!d.premiumGlowBio,
       premiumGlowColor: (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '',
+      premiumGlowStrength: d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100,
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
@@ -227,6 +228,7 @@ function getCurrentUserBio(uid) {
       premiumGlowBadges: !!d.premiumGlowBadges,
       premiumGlowBio: !!d.premiumGlowBio,
       premiumGlowColor: (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '',
+      premiumGlowStrength: d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100,
       premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
@@ -303,6 +305,7 @@ function saveBio(uid, data) {
   if (data.premiumGlowBadges !== undefined) updates.premiumGlowBadges = !!data.premiumGlowBadges;
   if (data.premiumGlowBio !== undefined) updates.premiumGlowBio = !!data.premiumGlowBio;
   if (data.premiumGlowColor !== undefined) updates.premiumGlowColor = (data.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(data.premiumGlowColor)) ? data.premiumGlowColor : '';
+  if (data.premiumGlowStrength !== undefined) updates.premiumGlowStrength = data.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(data.premiumGlowStrength, 10) || 100)) : 100;
   if (data.modalUseGradient !== undefined) updates.modalUseGradient = !!data.modalUseGradient;
   if (data.modalBackgroundColor !== undefined) updates.modalBackgroundColor = (data.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(data.modalBackgroundColor)) ? data.modalBackgroundColor : '';
   if (data.modalGradientColor1 !== undefined) updates.modalGradientColor1 = (data.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(data.modalGradientColor1)) ? data.modalGradientColor1 : '';

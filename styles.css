@@ -2100,21 +2100,21 @@ html { scrollbar-gutter: stable; }
 .bio-particle:nth-child(3n) { animation-duration: 4.2s; }
 .bio-particle:nth-child(5n) { animation-duration: 3.4s; }
 
-/* Premium: glow settings (use --bio-glow-color when set, else accent) */
+/* Premium: glow settings (use --bio-glow-color when set, else accent; --bio-glow-strength scales blur) */
 .bio-content-wrap.bio-glow-username .bio-name {
-  text-shadow: 0 0 12px var(--bio-glow-color, var(--purple-accent)), 0 0 24px var(--bio-glow-color, var(--purple-accent)), 0 0 8px var(--bio-glow-color, var(--purple-accent));
+  text-shadow: 0 0 calc(12px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(24px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(8px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
 }
 .bio-content-wrap.bio-glow-socials .bio-link-btn {
-  box-shadow: 0 0 12px var(--bio-glow-color, var(--purple-accent)), 0 0 6px var(--bio-glow-color, var(--purple-accent));
+  box-shadow: 0 0 calc(12px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(6px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
 }
 .bio-content-wrap.bio-glow-socials .bio-link-btn:hover {
-  box-shadow: 0 0 18px var(--bio-glow-color, var(--purple-accent)), 0 0 10px var(--bio-glow-color, var(--purple-accent));
+  box-shadow: 0 0 calc(18px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(10px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
 }
 .bio-content-wrap.bio-glow-badges .bio-badge {
-  box-shadow: 0 0 10px var(--bio-glow-color, var(--purple-accent)), 0 0 4px var(--bio-glow-color, var(--purple-accent));
+  box-shadow: 0 0 calc(10px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(4px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
 }
 .bio-content-wrap.bio-glow-bio .bio-bio-text {
-  text-shadow: 0 0 10px var(--bio-glow-color, var(--purple-accent)), 0 0 6px var(--bio-glow-color, var(--purple-accent));
+  text-shadow: 0 0 calc(10px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent)), 0 0 calc(6px * var(--bio-glow-strength, 1)) var(--bio-glow-color, var(--purple-accent));
 }
 
 /* Premium: video background — content above video */

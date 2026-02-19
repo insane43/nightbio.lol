@@ -370,7 +370,7 @@
       var modalSolidWrap = document.getElementById('modalSolidColorWrap');
       var modalGradWrap = document.getElementById('modalGradientWrap');
       if (modalBgMode) {
-        var mode = (d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2) ? 'gradient' : (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? 'solid' : 'default';
+        var mode = (d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2) ? 'gradient' : 'solid';
         modalBgMode.value = mode;
         if (modalSolidWrap) modalSolidWrap.style.display = mode === 'solid' ? '' : 'none';
         if (modalGradWrap) modalGradWrap.style.display = mode === 'gradient' ? '' : 'none';
@@ -482,6 +482,10 @@
         var glowColorHexEl = document.getElementById('premiumGlowColorHex');
         if (glowColorEl) glowColorEl.value = (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '#7c6bb8';
         if (glowColorHexEl) glowColorHexEl.value = (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '#7c6bb8';
+        var glowStrengthEl = document.getElementById('premiumGlowStrength');
+        var glowStrengthValEl = document.getElementById('premiumGlowStrengthValue');
+        if (glowStrengthEl) glowStrengthEl.value = d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100;
+        if (glowStrengthValEl) glowStrengthValEl.textContent = (d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100) + '%';
         set('premiumCustomCSS', d.premiumCustomCSS);
       }
 
@@ -1258,6 +1262,8 @@
         payload.premiumGlowBio = pGlowBio ? !!pGlowBio.checked : false;
         var pGlowColorEl = document.getElementById('premiumGlowColor');
         payload.premiumGlowColor = (pGlowColorEl && /^#[0-9A-Fa-f]{6}$/.test(pGlowColorEl.value)) ? pGlowColorEl.value : '';
+        var pGlowStrengthEl = document.getElementById('premiumGlowStrength');
+        payload.premiumGlowStrength = pGlowStrengthEl ? Math.min(200, Math.max(25, parseInt(pGlowStrengthEl.value, 10) || 100)) : 100;
         payload.premiumCustomCSS = pCustomCSS ? pCustomCSS.value.trim() : '';
         payload.premiumCustomFontFamily = pCustomFont ? pCustomFont.value.trim() : '';
         payload.premiumLayoutPreset = pLayoutPreset ? pLayoutPreset.value.trim() : '';
@@ -1372,6 +1378,7 @@
     bindModalRange('modalOpacity', 'modalOpacityValue', '%');
     bindModalRange('modalBlur', 'modalBlurValue', '');
     bindModalRange('modalBorderOpacity', 'modalBorderOpacityValue', '%');
+    bindModalRange('premiumGlowStrength', 'premiumGlowStrengthValue', '%');
 
     var metaDescIn = document.getElementById('metaDescription');
     if (metaDescIn) {

@@ -193,24 +193,24 @@
               <div class="form-group">
                 <label for="modalBackgroundMode">Card background</label>
                 <select id="modalBackgroundMode" class="form-select">
-                  <option value="default">Default (dark)</option>
                   <option value="solid">Solid color</option>
-                  <option value="gradient">Two-color gradient</option>
+                  <option value="gradient">2-color gradient</option>
                 </select>
               </div>
-              <div id="modalSolidColorWrap" class="form-group" style="display: none;">
+              <div id="modalSolidColorWrap" class="form-group">
                 <label for="modalBackgroundColor">Card color</label>
                 <div class="color-picker-wrap">
-                  <input type="color" id="modalBackgroundColor" value="#12121a" aria-label="Card background color">
+                  <input type="color" id="modalBackgroundColor" value="#12121a" aria-label="Card color">
                   <input type="text" id="modalBackgroundColorHex" class="color-hex-input" value="#12121a" maxlength="7" placeholder="#12121a">
                 </div>
               </div>
               <div id="modalGradientWrap" class="form-group" style="display: none;">
-                <label>Gradient colors</label>
+                <label for="modalGradientColor1">Gradient color 1</label>
                 <div class="color-picker-wrap">
                   <input type="color" id="modalGradientColor1" value="#1a1a24" aria-label="Gradient color 1">
                   <input type="text" id="modalGradientColor1Hex" class="color-hex-input" value="#1a1a24" maxlength="7">
                 </div>
+                <label for="modalGradientColor2">Gradient color 2</label>
                 <div class="color-picker-wrap">
                   <input type="color" id="modalGradientColor2" value="#12121a" aria-label="Gradient color 2">
                   <input type="text" id="modalGradientColor2Hex" class="color-hex-input" value="#12121a" maxlength="7">
@@ -636,6 +636,12 @@
                 <input type="text" id="premiumGlowColorHex" class="color-hex-input" value="#7c6bb8" maxlength="7" placeholder="#7c6bb8">
               </div>
               <p class="panel-desc">Color used for username, socials, badges, and bio glow. Leave default or pick a custom color.</p>
+            </div>
+            <div class="form-group">
+              <label for="premiumGlowStrength">Glow strength</label>
+              <input type="range" id="premiumGlowStrength" min="25" max="200" value="100" class="form-range" aria-label="Glow strength">
+              <span id="premiumGlowStrengthValue" class="form-range-value">100%</span>
+              <p class="panel-desc">How strong the glow appears. 100% is default; lower is subtler, higher is more intense.</p>
             </div>
           </div>
           <div class="panel-card">
