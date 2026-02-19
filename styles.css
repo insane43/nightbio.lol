@@ -1769,18 +1769,36 @@ html { scrollbar-gutter: stable; }
 }
 .bio-name { font-size: 1.5rem; font-weight: 700; margin-top: 0.75rem; margin-bottom: 0.25rem; }
 .bio-alias { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 0.5rem; font-weight: 400; }
-.bio-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.5rem 0 0.25rem; }
+/* Badges: single grouped capsule (modern style — one modal for all badges) */
+.bio-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0.5rem auto 0.25rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: rgba(18, 18, 26, 0.94);
+  border: 1px solid rgba(124, 107, 184, 0.3);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.3);
+  max-width: min(100%, 380px);
+}
+.bio-badges:empty { display: none; }
 .bio-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-  background: var(--purple-dim);
+  justify-content: center;
+  padding: 0.25rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
   color: var(--purple-accent);
-  border: 1px solid var(--border-subtle);
+  transition: color 0.2s, transform 0.15s;
+}
+.bio-badge:hover {
+  color: var(--purple-accent);
+  transform: scale(1.08);
 }
 .bio-badge-icon {
   display: inline-flex;
@@ -1788,28 +1806,32 @@ html { scrollbar-gutter: stable; }
   justify-content: center;
 }
 .bio-badge-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  stroke: currentColor;
+  filter: drop-shadow(0 0 6px currentColor);
 }
-.bio-badge-label { display: none; line-height: 1; }
-.bio-badge-community { color: var(--purple-accent); border-color: rgba(124,107,184,0.5); }
-.bio-badge-verified { color: #22c55e; border-color: rgba(34,197,94,0.5); }
-.bio-badge-verified .bio-badge-icon svg { stroke: #22c55e; }
-.bio-badge-premium { color: #eab308; border-color: rgba(234,179,8,0.5); }
-.bio-badge-premium .bio-badge-icon svg { stroke: #eab308; }
-.bio-badge-owner { color: #ef4444; border-color: rgba(239,68,68,0.5); }
-.bio-badge-owner .bio-badge-icon svg { stroke: #ef4444; }
-.bio-badge-staff { color: #a855f7; border-color: rgba(168,85,247,0.5); }
-.bio-badge-staff .bio-badge-icon svg { stroke: #a855f7; }
-.bio-badge-og { color: #eab308; border-color: rgba(234,179,8,0.5); }
-.bio-badge-og .bio-badge-icon svg { stroke: #eab308; }
+.bio-badge-label { display: none; }
+/* Single accent for all badges (modern unified look) */
+.bio-badge-community,
+.bio-badge-verified,
+.bio-badge-premium,
+.bio-badge-owner,
+.bio-badge-staff,
+.bio-badge-og { color: var(--purple-accent); }
+.bio-content-wrap.bio-badges-monochrome .bio-badges {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 4px 20px rgba(0, 0, 0, 0.25);
+}
 .bio-content-wrap.bio-badges-monochrome .bio-badge {
   filter: grayscale(1);
   color: var(--text-muted);
-  border-color: var(--border-subtle);
 }
-.bio-content-wrap.bio-badges-monochrome .bio-badge .bio-badge-icon svg { stroke: currentColor; }
+.bio-content-wrap.bio-badges-monochrome .bio-badge-icon svg {
+  stroke: currentColor;
+  filter: none;
+}
 .bio-bio-text {
   font-size: 0.95rem;
   color: var(--text-muted);
@@ -2128,19 +2150,21 @@ html { scrollbar-gutter: stable; }
     0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 18%, transparent),
     0 0 calc(var(--bio-glow-4xl, 18px) * 1.4) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 8%, transparent);
 }
-.bio-content-wrap.bio-glow-badges .bio-badge {
+.bio-content-wrap.bio-glow-badges .bio-badges {
   box-shadow:
-    inset 0 0 var(--bio-glow-3xl, 14px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 38%, transparent),
-    0 0 var(--bio-glow-sm, 4px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 45%, transparent),
-    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 22%, transparent);
+    0 0 0 1px color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 25%, transparent),
+    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 22%, transparent),
+    0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 12%, transparent),
+    0 4px 20px rgba(0, 0, 0, 0.25);
+}
+.bio-content-wrap.bio-glow-badges .bio-badge-icon svg {
+  filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 10px color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 40%, transparent));
 }
 @supports not (color: color-mix(in srgb, red 50%, blue)) {
-  .bio-content-wrap.bio-glow-badges .bio-badge {
-    box-shadow:
-      inset 0 0 var(--bio-glow-3xl, 14px) rgba(124,107,184,0.38),
-      0 0 var(--bio-glow-sm, 4px) var(--bio-glow-color, var(--purple-accent)),
-      0 0 var(--bio-glow-xl, 10px) var(--bio-glow-color, var(--purple-accent));
+  .bio-content-wrap.bio-glow-badges .bio-badges {
+    box-shadow: 0 0 0 1px rgba(124,107,184,0.25), 0 0 var(--bio-glow-xl, 10px) var(--bio-glow-color, var(--purple-accent)), 0 4px 20px rgba(0, 0, 0, 0.25);
   }
+  .bio-content-wrap.bio-glow-badges .bio-badge-icon svg { filter: drop-shadow(0 0 6px currentColor); }
 }
 .bio-content-wrap.bio-glow-bio .bio-bio-text {
   text-shadow:
