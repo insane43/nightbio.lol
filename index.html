@@ -4,31 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>nightbio.lol — One link for everything</title>
+  <meta name="description" content="Create your bio page. One link for your socials, music, and more. Free link-in-bio for creators.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <nav class="site-nav">
+<body class="index-page">
+  <nav class="site-nav site-nav-landing">
     <div class="site-nav-inner">
       <a class="site-nav-logo" href="/">
         <img alt="nightbio.lol logo" src="/nightbio-logo-pfp.png">
         <h1>nightbio<span>.</span>lol</h1>
       </a>
       <div class="site-nav-links">
-        <a href="help">Help Center</a>
-        <a href="status">System status</a>
+        <a href="help">Help</a>
+        <a href="status">Status</a>
         <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
-        <a href="login">Login</a>
-        <a href="signup" class="site-nav-cta">Sign up</a>
+        <a href="login">Log in</a>
+        <a href="signup" class="site-nav-cta">Get started</a>
       </div>
       <button type="button" class="site-nav-hamburger" id="navHamburger" aria-label="Menu">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
       </button>
       <div class="site-nav-drawer" id="navDrawer">
-        <a href="help">Help Center</a>
-        <a href="status">System status</a>
+        <a href="help">Help</a>
+        <a href="status">Status</a>
         <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
-        <a href="login">Login</a>
-        <a href="signup" class="site-nav-cta">Sign up</a>
+        <a href="login">Log in</a>
+        <a href="signup" class="site-nav-cta">Get started</a>
       </div>
     </div>
   </nav>
@@ -65,86 +69,219 @@
   </div>
   <div class="bg-gradient"></div>
   <div class="bg-grid"></div>
+  <div class="lp-bg" aria-hidden="true"></div>
 
   <div id="bannedBanner" class="banned-banner" style="display: none;">
     Your account has been suspended. Contact support if you believe this is an error.
   </div>
 
-  <main class="page">
-    <section class="landing-hero">
-      <h1>One link for everything</h1>
-      <p class="tagline">Create your bio page. Share one link. Stand out.</p>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
-        <a href="login" class="btn btn-ghost" style="text-decoration: none;">Log in</a>
-        <a href="signup" class="btn btn-primary" style="text-decoration: none;">Create account</a>
-      </div>
-    </section>
-
-    <section class="landing-section">
-      <h2>Your bio, one link</h2>
-      <div class="landing-preview-phone">
-        <div class="landing-preview-phone-inner">
-          <div class="preview-banner"></div>
-          <div class="preview-profile">
-            <div class="preview-avatar-wrap">NB</div>
-            <div class="preview-name">nightbio</div>
-            <div class="preview-bio">Your link in one place. Add socials, music, store.</div>
-            <a href="#" class="preview-link-btn">Instagram</a>
-            <a href="#" class="preview-link-btn">YouTube</a>
-            <a href="#" class="preview-link-btn">Link</a>
+  <main class="lp-main">
+    <!-- Hero: split layout -->
+    <header class="lp-hero">
+      <div class="lp-hero-inner">
+        <div class="lp-hero-content">
+          <p class="lp-hero-label">Free link-in-bio for creators</p>
+          <h1 class="lp-hero-title">
+            One link.<br>
+            <span class="lp-hero-title-accent">Everything you are.</span>
+          </h1>
+          <p class="lp-hero-desc">
+            Your bio, links, music, and store—on one page. Share a single link everywhere. No paywall, no catch.
+          </p>
+          <div class="lp-hero-buttons">
+            <a href="signup" class="lp-btn lp-btn-primary">Create your bio — free</a>
+            <a href="login" class="lp-btn lp-btn-outline">Log in</a>
+          </div>
+          <ul class="lp-hero-trust">
+            <li>Free forever</li>
+            <li>No credit card</li>
+            <li>2-minute setup</li>
+          </ul>
+        </div>
+        <div class="lp-hero-visual">
+          <div class="lp-phone">
+            <div class="lp-phone-screen">
+              <div class="lp-phone-banner"></div>
+              <div class="lp-phone-content">
+                <div class="lp-phone-avatar">NB</div>
+                <div class="lp-phone-name">nightbio</div>
+                <div class="lp-phone-bio">Your link in one place.</div>
+                <div class="lp-phone-links">
+                  <span class="lp-phone-link">Instagram</span>
+                  <span class="lp-phone-link">YouTube</span>
+                  <span class="lp-phone-link">Spotify</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+    </header>
+
+    <!-- Social proof strip -->
+    <section class="lp-strip">
+      <div class="lp-strip-inner">
+        <div class="lp-strip-stat">
+          <span class="lp-strip-value" id="statViews">—</span>
+          <span class="lp-strip-label">Profile views</span>
+        </div>
+        <div class="lp-strip-stat">
+          <span class="lp-strip-value" id="statUsers">—</span>
+          <span class="lp-strip-label">Creators</span>
+        </div>
+        <p class="lp-strip-join">Join them. Free forever.</p>
+      </div>
     </section>
 
-    <section class="landing-section">
-      <h2>Join creators on nightbio</h2>
-      <div class="landing-stats" id="landingStats">
-        <div class="landing-stat">
-          <div class="landing-stat-value" id="statViews">—</div>
-          <div class="landing-stat-label">Profile views</div>
+    <!-- Hook -->
+    <section class="lp-hook">
+      <div class="lp-hook-inner">
+        <p class="lp-hook-before">One link in your bio. Dozens of places to send people.</p>
+        <h2 class="lp-hook-headline">Put <em>everything</em> in one place.</h2>
+        <p class="lp-hook-after">One page. All your links. One URL. Share it everywhere.</p>
+      </div>
+    </section>
+
+    <!-- Features: big rows -->
+    <section class="lp-features">
+      <div class="lp-feature lp-feature-reverse">
+        <div class="lp-feature-visual">
+          <div class="lp-feature-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
         </div>
-        <div class="landing-stat">
-          <div class="landing-stat-value" id="statUsers">—</div>
-          <div class="landing-stat-label">Users</div>
+        <div class="lp-feature-content">
+          <h3>One link for everything</h3>
+          <p>One URL for Instagram, TikTok, YouTube, your store, your music—everything. Put it in your bio once. Update your page anytime. Your link never changes.</p>
+        </div>
+      </div>
+      <div class="lp-feature">
+        <div class="lp-feature-visual">
+          <div class="lp-feature-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+        </div>
+        <div class="lp-feature-content">
+          <h3>Your style. Your brand.</h3>
+          <p>Customize colors, fonts, layout, and effects. Minimal or bold—make it look like you. No coding. No templates that look like everyone else.</p>
+        </div>
+      </div>
+      <div class="lp-feature lp-feature-reverse">
+        <div class="lp-feature-visual">
+          <div class="lp-feature-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+        </div>
+        <div class="lp-feature-content">
+          <h3>Free. Really.</h3>
+          <p>Create your page at no cost. No trial that ends. No paywall. No “upgrade to unlock.” The core product is free, period.</p>
         </div>
       </div>
     </section>
 
-    <section class="landing-section">
-      <h2>FAQ</h2>
-      <div class="landing-faq">
-        <details>
+    <!-- How it works -->
+    <section class="lp-steps-wrap">
+      <span class="lp-eyebrow">How it works</span>
+      <h2 class="lp-heading">Three steps. One link.</h2>
+      <div class="lp-steps">
+        <div class="lp-step">
+          <span class="lp-step-num">1</span>
+          <h4>Sign up & choose your handle</h4>
+          <p>Free account. Pick a username. Your link is <strong>nightbio.lol/you</strong>.</p>
+        </div>
+        <div class="lp-step">
+          <span class="lp-step-num">2</span>
+          <h4>Add links & customize</h4>
+          <p>Drop in socials, music, store, anything. Style it your way.</p>
+        </div>
+        <div class="lp-step">
+          <span class="lp-step-num">3</span>
+          <h4>Share everywhere</h4>
+          <p>Put your one link in Instagram, TikTok, YouTube, Twitch. Done.</p>
+        </div>
+      </div>
+      <a href="signup" class="lp-btn lp-btn-primary lp-steps-cta">Get started — free</a>
+    </section>
+
+    <!-- Who it's for -->
+    <section class="lp-for">
+      <span class="lp-eyebrow">Perfect for</span>
+      <h2 class="lp-heading">Anyone with a link to share</h2>
+      <div class="lp-for-list">
+        <div class="lp-for-item"><span class="lp-for-emoji">🎵</span> Musicians</div>
+        <div class="lp-for-item"><span class="lp-for-emoji">📸</span> Content creators</div>
+        <div class="lp-for-item"><span class="lp-for-emoji">🎮</span> Streamers</div>
+        <div class="lp-for-item"><span class="lp-for-emoji">🛍</span> Sellers</div>
+        <div class="lp-for-item"><span class="lp-for-emoji">✍️</span> Writers & artists</div>
+        <div class="lp-for-item"><span class="lp-for-emoji">📱</span> Everyone else</div>
+      </div>
+    </section>
+
+    <!-- What's included -->
+    <section class="lp-included">
+      <span class="lp-eyebrow">What you get</span>
+      <h2 class="lp-heading">Everything you need</h2>
+      <ul class="lp-list">
+        <li>Custom link — nightbio.lol/you</li>
+        <li>Profile photo & cover image</li>
+        <li>Unlimited links</li>
+        <li>Custom colors, fonts, layout</li>
+        <li>Profile view count</li>
+        <li>Optional alias (second URL to same page)</li>
+        <li>SEO (custom title & description)</li>
+        <li>Mobile-first, fast, always free</li>
+      </ul>
+    </section>
+
+    <!-- FAQ -->
+    <section class="lp-faq-wrap">
+      <span class="lp-eyebrow">FAQ</span>
+      <h2 class="lp-heading">Questions? Answers.</h2>
+      <div class="lp-faq">
+        <details class="lp-faq-item">
           <summary>What is nightbio?</summary>
           <p>nightbio is a free link-in-bio tool. You get one short link (e.g. nightbio.lol/yourname) that leads to a page with your photo, bio, and all your links—socials, music, store, whatever you want.</p>
         </details>
-        <details>
-          <summary>Is it free?</summary>
-          <p>Yes. You can create an account and build your bio page at no cost. We may offer optional paid features in the future.</p>
+        <details class="lp-faq-item">
+          <summary>Is it really free?</summary>
+          <p>Yes. Create an account and build your bio page at no cost. We may offer optional paid features later; the core product stays free.</p>
         </details>
-        <details>
+        <details class="lp-faq-item">
           <summary>How do I get my link?</summary>
-          <p>After signing up, choose a username. Your link will be nightbio.lol/yourusername. You can share it anywhere—Instagram, TikTok, Twitter, etc.</p>
+          <p>After signing up, choose a username. Your link will be nightbio.lol/yourusername. Share it anywhere—Instagram, TikTok, YouTube, etc.</p>
         </details>
-        <details>
+        <details class="lp-faq-item">
           <summary>Can I change my username or links later?</summary>
-          <p>Yes. From your dashboard you can edit your profile, add or remove links, and update your bio anytime.</p>
+          <p>Yes. From your dashboard you can edit your profile, add or remove links, and update your bio anytime. Username changes have a 7-day cooldown.</p>
         </details>
-        <details>
+        <details class="lp-faq-item">
           <summary>Who can see my profile?</summary>
-          <p>Anyone with your link can view your public bio page. Only you can log in and edit your content.</p>
+          <p>Anyone with your link can view your public bio page. Only you can log in and edit. We don’t require visitors to sign up.</p>
         </details>
       </div>
     </section>
 
-    <footer class="landing-footer">
-      <p><strong>nightbio.lol</strong> — One link for everything.</p>
-      <p style="margin-top: 0.5rem;">
-        <a href="help">Help Center</a> · <a href="status">System status</a> · <a href="tos">Terms of Service</a> · <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
-      </p>
-      <p style="margin-top: 0.75rem; font-size: 0.8rem; opacity: 0.85;">
-        nightbio and the nightbio logo are trademarks. Use of this service is subject to our <a href="tos" style="color: var(--purple-accent);">terms</a> and acceptable use.
-      </p>
+    <!-- Final CTA band -->
+    <section class="lp-cta-band">
+      <div class="lp-cta-band-inner">
+        <h2 class="lp-cta-band-title">Ready? One link. One page.</h2>
+        <p class="lp-cta-band-sub">Create your bio in 2 minutes. Free forever.</p>
+        <a href="signup" class="lp-btn lp-btn-white lp-btn-large">Create your bio — free</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="lp-footer">
+      <div class="lp-footer-top">
+        <div class="lp-footer-brand"><strong>nightbio.lol</strong> — One link for everything.</div>
+        <nav class="lp-footer-nav">
+          <a href="help">Help</a>
+          <a href="status">Status</a>
+          <a href="tos">Terms</a>
+          <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+        </nav>
+      </div>
+      <p class="lp-footer-legal">nightbio and the nightbio logo are trademarks. Use of this service is subject to our <a href="tos">terms</a> and acceptable use.</p>
     </footer>
   </main>
 

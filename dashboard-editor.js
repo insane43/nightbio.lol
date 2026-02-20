@@ -213,6 +213,118 @@
     });
     if (tabId === 'analytics') refreshProfileViews();
     if (tabId === 'adminPanel' && typeof loadDashboardAdmin === 'function') loadDashboardAdmin();
+    if (tabId === 'status') {
+      runDashboardStatusChecks();
+      if (!window._dashboardStatusWired) {
+        window._dashboardStatusWired = true;
+        var refreshBtn = document.getElementById('dsStatusRefresh');
+        if (refreshBtn) refreshBtn.addEventListener('click', runDashboardStatusChecks);
+        window._dashboardStatusInterval = setInterval(function() {
+          var panel = document.getElementById('panelStatus');
+          if (panel && panel.classList.contains('active')) runDashboardStatusChecks();
+        }, 60000);
+      }
+    }
+  }
+
+  var DS_TOOLTIPS = { operational: 'Operational — All systems normal.', degraded: 'Degraded — Slow or partial issues. We\'re looking into it.', outage: 'Outage — Service unavailable. We\'re working on a fix.', checking: 'Checking…' };
+  function dsSetDot(id, state, tooltipId) {
+    var dot = document.getElementById(id);
+    var tip = document.getElementById(tooltipId);
+    if (!dot || !tip) return;
+    dot.className = (id === 'dsOverviewDot' ? 'status-overview-dot ' : 'status-dot ') + state;
+    dot.setAttribute('aria-label', state);
+    tip.textContent = DS_TOOLTIPS[state] || DS_TOOLTIPS.checking;
+  }
+  function dsSetMeta(id, text, ok) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove('latency-ok', 'latency-slow');
+    if (ok === true) el.classList.add('latency-ok');
+    if (ok === false) el.classList.add('latency-slow');
+  }
+  function dsSetOverview(allOk, anyDegraded, anyDown, detail) {
+    var dot = document.getElementById('dsOverviewDot');
+    var text = document.getElementById('dsOverviewText');
+    var detailEl = document.getElementById('dsOverviewDetail');
+    if (!dot || !text) return;
+    dot.className = 'status-overview-dot';
+    if (anyDown) { dot.classList.add('outage'); text.textContent = 'Some systems are down'; if (detailEl) detailEl.textContent = detail || 'One or more services are unavailable.'; }
+    else if (anyDegraded) { dot.classList.add('degraded'); text.textContent = 'Some systems degraded'; if (detailEl) detailEl.textContent = detail || 'Performance issues detected.'; }
+    else if (allOk) { dot.classList.add('operational'); text.textContent = 'All systems operational'; if (detailEl) detailEl.textContent = detail || 'All services are running normally.'; }
+    else { dot.classList.add('checking'); text.textContent = 'Checking all systems…'; if (detailEl) detailEl.textContent = 'Verifying website, authentication, and database'; }
+  }
+  function runDashboardStatusChecks() {
+    var updatedEl = document.getElementById('dsStatusUpdated');
+    if (updatedEl) updatedEl.textContent = 'Last checked: ' + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    var refreshBtn = document.getElementById('dsStatusRefresh');
+    if (refreshBtn) refreshBtn.disabled = true;
+
+    dsSetDot('dsDotWebsite', 'checking', 'dsTooltipWebsite');
+    dsSetDot('dsDotApi', 'checking', 'dsTooltipApi');
+    dsSetDot('dsDotDb', 'checking', 'dsTooltipDb');
+    dsSetMeta('dsMetaWebsite', '—');
+    dsSetMeta('dsMetaApi', '—');
+    dsSetMeta('dsMetaDb', '—');
+    dsSetOverview(false, false, false);
+
+    var websiteOk = false, apiOk = false, dbOk = false;
+    var websiteDegraded = false, apiDegraded = false, dbDegraded = false;
+    var websiteMs = null, apiMs = null, dbMs = null;
+    var done = { w: false, a: false, d: false };
+
+    function finish() {
+      if (!done.w || !done.a || !done.d) return;
+      dsSetDot('dsDotWebsite', websiteDegraded ? 'degraded' : (websiteOk ? 'operational' : 'outage'), 'dsTooltipWebsite');
+      dsSetDot('dsDotApi', apiDegraded ? 'degraded' : (apiOk ? 'operational' : 'outage'), 'dsTooltipApi');
+      dsSetDot('dsDotDb', dbDegraded ? 'degraded' : (dbOk ? 'operational' : 'outage'), 'dsTooltipDb');
+      dsSetMeta('dsMetaWebsite', websiteMs != null ? websiteMs + ' ms' : (websiteOk ? 'OK' : '—'), websiteOk && (websiteMs == null || websiteMs < 2000));
+      dsSetMeta('dsMetaApi', apiMs != null ? apiMs + ' ms' : (apiOk ? 'OK' : '—'), apiOk && (apiMs == null || apiMs < 2000));
+      dsSetMeta('dsMetaDb', dbMs != null ? dbMs + ' ms' : (dbOk ? 'OK' : '—'), dbOk && (dbMs == null || dbMs < 2000));
+      dsSetOverview(websiteOk && apiOk && dbOk, websiteDegraded || apiDegraded || dbDegraded, !websiteOk || !apiOk || !dbOk);
+      if (refreshBtn) refreshBtn.disabled = false;
+    }
+
+    var t0 = performance.now();
+    fetch(window.location.origin + '/', { method: 'HEAD', cache: 'no-store' })
+      .then(function(r) { websiteOk = r.ok; })
+      .catch(function() { websiteOk = false; })
+      .finally(function() {
+        websiteMs = Math.round(performance.now() - t0);
+        done.w = true;
+        finish();
+      });
+
+    if (typeof initFirebase === 'function') initFirebase();
+    var db = window.firebaseDb || (typeof firebase !== 'undefined' && firebase.database ? firebase.database() : null);
+    var auth = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth() : null;
+
+    if (auth) {
+      var tAuth = performance.now();
+      var timeoutAuth = setTimeout(function() {
+        if (!done.a) { apiDegraded = true; apiOk = true; apiMs = Math.round(performance.now() - tAuth); done.a = true; finish(); }
+      }, 8000);
+      auth.getRedirectResult().then(function() {
+        apiOk = true;
+        apiMs = Math.round(performance.now() - tAuth);
+        done.a = true;
+        clearTimeout(timeoutAuth);
+        finish();
+      }).catch(function() {
+        apiOk = false;
+        done.a = true;
+        clearTimeout(timeoutAuth);
+        finish();
+      });
+    } else { apiOk = false; done.a = true; finish(); }
+
+    if (db) {
+      var tDb = performance.now();
+      db.ref('siteConfig').limitToFirst(1).once('value')
+        .then(function() { dbOk = true; dbMs = Math.round(performance.now() - tDb); done.d = true; finish(); })
+        .catch(function() { dbOk = false; done.d = true; finish(); });
+    } else { dbOk = false; done.d = true; finish(); }
   }
 
   function init(uid) {

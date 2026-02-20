@@ -53,7 +53,6 @@
       <a href="#" class="editor-view-btn" id="viewBioBtn" target="_blank" rel="noopener">View profile</a>
     </div>
     <div class="editor-actions">
-      <a href="status" class="editor-status-link" style="margin-right: 0.5rem; font-size: 0.9rem; color: var(--text-muted); text-decoration: none;" title="View system status">System status</a>
       <span id="editorMessage" class="editor-msg empty"></span>
       <button type="button" class="btn btn-primary editor-save-btn" id="saveBioBtn">Save changes</button>
       <button type="button" class="btn btn-ghost editor-logout-btn" id="logoutBtn">Log out</button>
@@ -69,6 +68,7 @@
         <button type="button" class="editor-tab" role="tab" id="tabAnalytics" aria-selected="false" data-tab="analytics">Analytics</button>
         <button type="button" class="editor-tab" role="tab" id="tabSeo" aria-selected="false" data-tab="seo">SEO</button>
         <button type="button" class="editor-tab" role="tab" id="tabBadges" aria-selected="false" data-tab="badges">Badges</button>
+        <button type="button" class="editor-tab" role="tab" id="tabStatus" aria-selected="false" data-tab="status">Status</button>
         <button type="button" class="editor-tab editor-tab-premium" role="tab" id="tabPremium" aria-selected="false" data-tab="premium" style="display: none;">Premium</button>
         <button type="button" class="editor-tab editor-tab-staff" role="tab" id="tabAdminPanel" aria-selected="false" data-tab="adminPanel" style="display: none;">Admin panel</button>
       </nav>
@@ -361,6 +361,64 @@
         </section>
 
         <!-- Admin panel (only visible with staff badge) — full staff dashboard -->
+        <section class="editor-panel" id="panelStatus" role="tabpanel" aria-labelledby="tabStatus" hidden>
+          <div class="panel-card status-widget-card">
+            <h2 class="panel-title">System status</h2>
+            <p class="panel-desc">Live status and response times for nightbio.lol. Auto-refresh every 60s.</p>
+            <p class="status-widget-meta" id="dsStatusUpdated">Last checked: —</p>
+            <div class="status-overview-card" id="dsStatusOverview">
+              <div class="status-overview-left">
+                <span class="status-overview-dot checking" id="dsOverviewDot" aria-hidden="true"></span>
+                <div>
+                  <div class="status-overview-text" id="dsOverviewText">Checking all systems…</div>
+                  <div class="status-overview-detail" id="dsOverviewDetail">Verifying website, authentication, and database</div>
+                </div>
+              </div>
+              <button type="button" class="status-refresh-btn" id="dsStatusRefresh" aria-label="Refresh status">Refresh</button>
+            </div>
+            <h3 class="status-section-title">Services</h3>
+            <div class="status-list">
+              <div class="status-item">
+                <div class="status-dot-wrap">
+                  <span class="status-dot checking" id="dsDotWebsite" aria-label="Website status"></span>
+                  <span class="status-tooltip" id="dsTooltipWebsite">Checking…</span>
+                </div>
+                <div>
+                  <div class="status-item-label">Website</div>
+                  <div class="status-item-desc">Homepage, dashboard, login, signup, and bio pages</div>
+                </div>
+                <div class="status-item-meta" id="dsMetaWebsite">—</div>
+              </div>
+              <div class="status-item">
+                <div class="status-dot-wrap">
+                  <span class="status-dot checking" id="dsDotApi" aria-label="Authentication status"></span>
+                  <span class="status-tooltip" id="dsTooltipApi">Checking…</span>
+                </div>
+                <div>
+                  <div class="status-item-label">Authentication</div>
+                  <div class="status-item-desc">Firebase Auth — sign in, sign up, password reset</div>
+                </div>
+                <div class="status-item-meta" id="dsMetaApi">—</div>
+              </div>
+              <div class="status-item">
+                <div class="status-dot-wrap">
+                  <span class="status-dot checking" id="dsDotDb" aria-label="Database status"></span>
+                  <span class="status-tooltip" id="dsTooltipDb">Checking…</span>
+                </div>
+                <div>
+                  <div class="status-item-label">Database</div>
+                  <div class="status-item-desc">Firebase Realtime Database — profiles, links, settings</div>
+                </div>
+                <div class="status-item-meta" id="dsMetaDb">—</div>
+              </div>
+            </div>
+            <div class="status-legend">
+              <span class="status-legend-item"><span class="status-legend-dot op" aria-hidden="true"></span> Operational</span>
+              <span class="status-legend-item"><span class="status-legend-dot deg" aria-hidden="true"></span> Degraded</span>
+              <span class="status-legend-item"><span class="status-legend-dot out" aria-hidden="true"></span> Outage</span>
+            </div>
+          </div>
+        </section>
         <section class="editor-panel" id="panelAdminPanel" role="tabpanel" aria-labelledby="tabAdminPanel" hidden>
           <div class="da-wrap">
             <header class="da-header">

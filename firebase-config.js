@@ -1,6 +1,7 @@
 // Firebase config for nightbio.lol
 // If you use Realtime Database in another region, set databaseURL from Firebase Console.
-// If image uploads hang: Firebase Console → Build → Storage. Copy the bucket (e.g. nightbio.appspot.com or nightbio.firebasestorage.app) and set storageBucket below to match.
+// Storage: If you get CORS/404 on uploads, try the other bucket name. In Firebase Console → Build → Storage
+// you'll see the bucket (e.g. nightbio.appspot.com or nightbio.firebasestorage.app). Use that exact value.
 const firebaseConfig = {
   apiKey: "AIzaSyAhJyobGZR3Z07kzV6pFr3crHmOEF9aeiI",
   authDomain: "nightbio.firebaseapp.com",
