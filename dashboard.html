@@ -169,9 +169,15 @@
             </div>
             <p class="panel-desc">Add buttons that link to your socials, store, or anything else. Drag to reorder.</p>
             <ul class="link-list" id="linkList"></ul>
-            <button type="button" class="btn btn-ghost add-link-btn" id="addLinkBtn">
-              <span class="btn-icon-left">+</span> Add link
-            </button>
+            <div class="links-options-row">
+              <label class="links-icon-only-label">
+                <input type="checkbox" id="linksIconOnly" class="form-checkbox" aria-describedby="linksIconOnlyDesc">
+                <span id="linksIconOnlyDesc">Show only icons on profile</span>
+              </label>
+              <button type="button" class="btn btn-ghost add-link-btn" id="addLinkBtn">
+                <span class="btn-icon-left">+</span> Add link
+              </button>
+            </div>
           </div>
         </section>
 
@@ -258,11 +264,6 @@
                 <input type="number" id="cardHeight" min="0" max="1200" placeholder="auto" class="form-input-num" aria-describedby="cardHeightHint">
                 <span id="cardHeightHint" class="form-hint">Leave empty for auto (fits content).</span>
               </div>
-            </div>
-            <div class="form-group form-check" style="display: none;">
-              <input type="checkbox" id="clickToEnter" class="form-checkbox" aria-describedby="clickToEnterDesc">
-              <label for="clickToEnter" aria-hidden="true">Click to enter</label>
-              <p id="clickToEnterDesc" class="panel-desc">Visitors must click to see your bio (like guns.lol). Shows a full-screen “Enter” screen until they click.</p>
             </div>
           </div>
           <div class="panel-card">
@@ -693,7 +694,7 @@
 
         <!-- Premium tab (only visible with premium badge) -->
         <section class="editor-panel" id="panelPremium" role="tabpanel" aria-labelledby="tabPremium" hidden>
-          <div class="panel-card premium-card">
+’<div class="panel-card premium-card">
             <h2 class="panel-title">Premium features</h2>
             <p class="panel-desc">Unlock these options with the Premium badge. Customize your profile with advanced styling and effects.</p>
           </div>
@@ -730,8 +731,12 @@
             </div>
           </div>
           <div class="panel-card">
-            <h2 class="panel-title">Username effects</h2>
-            <p class="panel-desc">Animated effects on your display name (Premium).</p>
+            <h2 class="panel-title">Username effects
+              <span class="dashboard-tooltip-wrap" tabindex="0">
+                <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                <span class="dashboard-tooltip" role="tooltip">Animated effects on your display name (Premium).</span>
+              </span>
+            </h2>
             <div class="form-group">
               <label for="premiumUsernameEffect">Effect</label>
               <select id="premiumUsernameEffect" class="form-select">
@@ -743,8 +748,12 @@
             </div>
           </div>
           <div class="panel-card">
-            <h2 class="panel-title">Glow settings</h2>
-            <p class="panel-desc">Add a soft glow to elements on your profile.</p>
+            <h2 class="panel-title">Glow settings
+              <span class="dashboard-tooltip-wrap" tabindex="0">
+                <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                <span class="dashboard-tooltip" role="tooltip">Add a soft glow to elements on your profile.</span>
+              </span>
+            </h2>
             <div class="form-group form-check">
               <input type="checkbox" id="premiumGlowUsername" class="form-checkbox">
               <label for="premiumGlowUsername">Username glow</label>
@@ -759,45 +768,65 @@
             </div>
             <div class="form-group form-check">
               <input type="checkbox" id="premiumMonochromeBadges" class="form-checkbox">
-              <label for="premiumMonochromeBadges">Monochrome badges</label>
-              <p class="panel-desc">Show badges in grayscale instead of colored.</p>
+              <label for="premiumMonochromeBadges">Monochrome badges
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">Show badges in grayscale instead of colored.</span>
+                </span>
+              </label>
             </div>
             <div class="form-group form-check">
               <input type="checkbox" id="premiumGlowBio" class="form-checkbox">
               <label for="premiumGlowBio">Bio text glow</label>
             </div>
             <div class="form-group">
-              <label for="premiumGlowColor">Glow color</label>
+              <label for="premiumGlowColor">Glow color
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">Color used for username, socials, badges, and bio glow. Leave default or pick a custom color.</span>
+                </span>
+              </label>
               <div class="color-picker-wrap">
                 <input type="color" id="premiumGlowColor" value="#7c6bb8" aria-label="Glow color">
                 <input type="text" id="premiumGlowColorHex" class="color-hex-input" value="#7c6bb8" maxlength="7" placeholder="#7c6bb8">
               </div>
-              <p class="panel-desc">Color used for username, socials, badges, and bio glow. Leave default or pick a custom color.</p>
             </div>
             <div class="form-group">
-              <label for="premiumGlowStrength">Glow strength</label>
+              <label for="premiumGlowStrength">Glow strength
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">How strong the glow appears. 100% is default; lower is subtler, higher is more intense.</span>
+                </span>
+              </label>
               <input type="range" id="premiumGlowStrength" min="25" max="200" value="100" class="form-range" aria-label="Glow strength">
               <span id="premiumGlowStrengthValue" class="form-range-value">100%</span>
-              <p class="panel-desc">How strong the glow appears. 100% is default; lower is subtler, higher is more intense.</p>
             </div>
           </div>
           <div class="panel-card">
             <h2 class="panel-title">Name &amp; bio</h2>
             <div class="form-group">
-              <label for="premiumNameColor">Name color</label>
+              <label for="premiumNameColor">Name color
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">Color of your display name. Leave default (white) or pick any color.</span>
+                </span>
+              </label>
               <div class="color-picker-wrap">
                 <input type="color" id="premiumNameColor" value="#ffffff" aria-label="Display name color">
                 <input type="text" id="premiumNameColorHex" class="color-hex-input" value="#ffffff" maxlength="7" placeholder="#ffffff">
               </div>
-              <p class="panel-desc">Color of your display name. Leave default (white) or pick any color.</p>
             </div>
             <div class="form-group">
-              <label for="premiumBioColor">Bio text color</label>
+              <label for="premiumBioColor">Bio text color
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">Color of your bio paragraph. Leave default or pick any color.</span>
+                </span>
+              </label>
               <div class="color-picker-wrap">
                 <input type="color" id="premiumBioColor" value="#e2e8f0" aria-label="Bio text color">
                 <input type="text" id="premiumBioColorHex" class="color-hex-input" value="#e2e8f0" maxlength="7" placeholder="#e2e8f0">
               </div>
-              <p class="panel-desc">Color of your bio paragraph. Leave default or pick any color.</p>
             </div>
             <div class="form-group">
               <label for="premiumBioFontSize">Bio font size (px)</label>
@@ -808,14 +837,22 @@
               <label for="typewriterBio">Typewriter effect on bio (Premium)</label>
             </div>
             <div class="form-group">
-              <label for="premiumCustomFontFamily">Premium font (Google Font family name)</label>
+              <label for="premiumCustomFontFamily">Premium font (Google Font family name)
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">Optional. Overrides the font dropdown on your public bio.</span>
+                </span>
+              </label>
               <input type="text" id="premiumCustomFontFamily" placeholder="e.g. Sora" class="form-input" maxlength="80">
-              <p class="panel-desc">Optional. Overrides the font dropdown on your public bio.</p>
             </div>
           </div>
           <div class="panel-card">
-            <h2 class="panel-title">Layout presets</h2>
-            <p class="panel-desc">Extra premium looks. These stack on top of your normal Layout style.</p>
+            <h2 class="panel-title">Layout presets
+              <span class="dashboard-tooltip-wrap" tabindex="0">
+                <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                <span class="dashboard-tooltip" role="tooltip">Extra premium looks. These stack on top of your normal Layout style.</span>
+              </span>
+            </h2>
             <div class="form-group">
               <label for="premiumLayoutPreset">Preset</label>
               <select id="premiumLayoutPreset" class="form-select">
@@ -845,17 +882,27 @@
           <div class="panel-card">
             <h2 class="panel-title">Background &amp; media</h2>
             <div class="form-group">
-              <label for="premiumBackgroundEffect">Background effect</label>
+              <label for="premiumBackgroundEffect">Background effect
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">Blurred uses your cover/avatar as a soft background. Snowflakes and rain add particle effects.</span>
+                </span>
+              </label>
               <select id="premiumBackgroundEffect" class="form-select">
                 <option value="">None</option>
                 <option value="blurred">Blurred background</option>
+                <option value="snowflakes">Snowflakes</option>
+                <option value="rain">Rain</option>
               </select>
-              <p class="panel-desc">Blurred uses your cover/avatar as a soft background. No particle effects.</p>
             </div>
             <div class="form-group">
-              <label for="premiumVideoBackground">Video background URL</label>
+              <label for="premiumVideoBackground">Video background URL
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">Optional. A looping video behind your profile (e.g. MP4). Leave empty for static background.</span>
+                </span>
+              </label>
               <input type="url" id="premiumVideoBackground" placeholder="https://... (video URL)" class="form-input" maxlength="500">
-              <p class="panel-desc">Optional. A looping video behind your profile (e.g. MP4). Leave empty for static background.</p>
             </div>
             <div class="form-group">
               <label for="premiumBannerBlur">Cover image blur (0 = none)</label>
@@ -873,9 +920,13 @@
               <label for="premiumHideBranding">Hide “nightbio.lol” footer on profile</label>
             </div>
             <div class="form-group">
-              <label for="premiumCustomCSS">Custom CSS (snippet)</label>
+              <label for="premiumCustomCSS">Custom CSS
+                <span class="dashboard-tooltip-wrap" tabindex="0">
+                  <span class="dashboard-tooltip-icon" aria-hidden="true">?</span>
+                  <span class="dashboard-tooltip" role="tooltip">Optional. Applied only on your public bio. Keep it short and safe.</span>
+                </span>
+              </label>
               <textarea id="premiumCustomCSS" placeholder=".bio-name { letter-spacing: 0.1em; }" rows="4" class="form-input" maxlength="2000"></textarea>
-              <p class="panel-desc">Optional. Applied only on your public bio. Keep it short and safe.</p>
             </div>
           </div>
         </section>
@@ -912,6 +963,7 @@
   <script src="firebase-config.js"></script>
   <script src="auth.js"></script>
   <script src="badge-icons.js"></script>
+  <script src="link-icons.js"></script>
   <script src="link-platforms.js"></script>
   <script src="bio.js"></script>
   <script src="admin.js"></script>

@@ -75,7 +75,10 @@ function loadBioForUid(uid) {
       avatarURL: d.avatarURL || '',
       bannerURL: d.bannerURL || '',
       songURL: d.songURL || '',
-      links: links.map(function(l) { return { label: l.label || '', url: l.url || '', icon: l.icon || '', iconURL: l.iconURL || '' }; }),
+      links: links.map(function(l) {
+        var c = (l.color && /^#[0-9A-Fa-f]{6}$/.test(String(l.color).trim())) ? String(l.color).trim() : '';
+        return { label: l.label || '', url: l.url || '', icon: l.icon || '', iconURL: l.iconURL || '', iconOnly: !!l.iconOnly, color: c };
+      }),
       accentColor: d.accentColor || '',
       layout: d.layout || 'classic',
       profileAlignment: (/^(left|right|center)$/i.test(d.profileAlignment) ? d.profileAlignment.toLowerCase() : 'center'),
@@ -93,6 +96,10 @@ function loadBioForUid(uid) {
       cardWidth: (d.cardWidth != null && d.cardWidth >= 260 && d.cardWidth <= 800) ? d.cardWidth : null,
       cardHeight: (d.cardHeight != null && d.cardHeight >= 0 && d.cardHeight <= 1200) ? d.cardHeight : null,
       modalUseGradient: !!(d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2),
+      clickToEnter: !!d.clickToEnter,
+      clickToEnter: !!d.clickToEnter,
+      clickToEnter: !!d.clickToEnter,
+      clickToEnter: !!d.clickToEnter,
       modalBackgroundColor: (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '',
       modalGradientColor1: (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '',
       modalGradientColor2: (d.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor2)) ? d.modalGradientColor2 : '',
@@ -119,7 +126,7 @@ function loadBioForUid(uid) {
       premiumNameColor: (d.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumNameColor))) ? String(d.premiumNameColor).trim() : '',
       premiumBioColor: (d.premiumBioColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumBioColor))) ? String(d.premiumBioColor).trim() : '',
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
-      premiumBackgroundEffect: d.premiumBackgroundEffect === 'blurred' ? 'blurred' : '',
+      premiumBackgroundEffect: (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '',
       premiumBackgroundEffectColor: (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '',
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
       premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
@@ -130,7 +137,8 @@ function loadBioForUid(uid) {
       premiumCustomFontFamily: (d.premiumCustomFontFamily || '').trim().slice(0, 80),
       premiumLayoutPreset: (d.premiumLayoutPreset || '').trim().slice(0, 20),
       premiumProfileAnimation: (d.premiumProfileAnimation || '').trim().slice(0, 20),
-      premiumParallax: !!d.premiumParallax
+      premiumParallax: !!d.premiumParallax,
+      liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null
     };
   });
 }
@@ -223,7 +231,10 @@ function getCurrentUserBio(uid) {
       bannerURL: d.bannerURL || '',
       songURL: d.songURL || '',
       userId: d.userId != null ? d.userId : null,
-      links: links.map(function(l) { return { label: l.label || '', url: l.url || '', icon: l.icon || '', iconURL: l.iconURL || '' }; }),
+      links: links.map(function(l) {
+        var c = (l.color && /^#[0-9A-Fa-f]{6}$/.test(String(l.color).trim())) ? String(l.color).trim() : '';
+        return { label: l.label || '', url: l.url || '', icon: l.icon || '', iconURL: l.iconURL || '', iconOnly: !!l.iconOnly, color: c };
+      }),
       accentColor: d.accentColor || '',
       layout: d.layout || 'classic',
       profileAlignment: (/^(left|right|center)$/i.test(d.profileAlignment) ? d.profileAlignment.toLowerCase() : 'center'),
@@ -236,9 +247,13 @@ function getCurrentUserBio(uid) {
       displayStyle: (d.displayStyle || 'default') === 'card' ? 'card' : 'default',
       modalOpacity: d.modalOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalOpacity, 10) || 96)) : 96,
       modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
+      clickToEnter: !!d.clickToEnter,
       modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
+      clickToEnter: !!d.clickToEnter,
       modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
+      clickToEnter: !!d.clickToEnter,
       cardWidth: (d.cardWidth != null && d.cardWidth >= 260 && d.cardWidth <= 800) ? d.cardWidth : null,
+      clickToEnter: !!d.clickToEnter,
       cardHeight: (d.cardHeight != null && d.cardHeight >= 0 && d.cardHeight <= 1200) ? d.cardHeight : null,
       modalUseGradient: !!(d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2),
       modalBackgroundColor: (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '',
@@ -267,7 +282,7 @@ function getCurrentUserBio(uid) {
       premiumNameColor: (d.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumNameColor))) ? String(d.premiumNameColor).trim() : '',
       premiumBioColor: (d.premiumBioColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumBioColor))) ? String(d.premiumBioColor).trim() : '',
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
-      premiumBackgroundEffect: d.premiumBackgroundEffect === 'blurred' ? 'blurred' : '',
+      premiumBackgroundEffect: (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '',
       premiumBackgroundEffectColor: (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '',
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
       premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
@@ -278,7 +293,8 @@ function getCurrentUserBio(uid) {
       premiumCustomFontFamily: (d.premiumCustomFontFamily || '').trim().slice(0, 80),
       premiumLayoutPreset: (d.premiumLayoutPreset || '').trim().slice(0, 20),
       premiumProfileAnimation: (d.premiumProfileAnimation || '').trim().slice(0, 20),
-      premiumParallax: !!d.premiumParallax
+      premiumParallax: !!d.premiumParallax,
+      liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null
     };
   });
 }
@@ -298,12 +314,16 @@ function saveBio(uid, data) {
     profileAlignment: (/^(left|right|center)$/i.test(data.profileAlignment) ? data.profileAlignment.toLowerCase() : 'center'),
     fontFamily: String(data.fontFamily || 'Outfit').slice(0, 80),
     fontSize: Math.min(24, Math.max(12, parseInt(data.fontSize, 10) || 16)),
+    clickToEnter: !!data.clickToEnter,
     letterSpacing: Math.min(2, Math.max(-1, parseFloat(data.letterSpacing) || 0)),
     typewriterBio: !!data.typewriterBio,
+    clickToEnter: !!data.clickToEnter,
     backgroundEffect: String(data.backgroundEffect || 'none').slice(0, 20),
     buttonStyle: String(data.buttonStyle || 'filled').slice(0, 20),
+    clickToEnter: !!data.clickToEnter,
     displayStyle: (data.displayStyle || 'default') === 'card' ? 'card' : 'default',
     modalOpacity: data.modalOpacity != null ? Math.min(100, Math.max(0, parseInt(data.modalOpacity, 10) || 96)) : 96,
+    clickToEnter: !!data.clickToEnter,
     modalBlur: data.modalBlur != null ? Math.min(24, Math.max(0, parseInt(data.modalBlur, 10) || 0)) : 0,
     modalBorderOpacity: data.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(data.modalBorderOpacity, 10) || 20)) : 20,
     modalRadius: data.modalRadius != null ? Math.min(32, Math.max(8, parseInt(data.modalRadius, 10) || 24)) : 24,
@@ -331,12 +351,14 @@ function saveBio(uid, data) {
   }
   if (Array.isArray(data.links)) {
     updates.links = data.links.slice(0, 20).map(function(l) {
+      var linkColor = (l.color && /^#[0-9A-Fa-f]{6}$/.test(String(l.color).trim())) ? String(l.color).trim() : '';
       return {
         label: String(l.label || '').trim().slice(0, 50),
         url: String(l.url || '').trim().slice(0, 500),
         icon: String(l.icon || '').trim().slice(0, 30),
         iconURL: String(l.iconURL || '').trim().slice(0, 500),
-        iconOnly: !!l.iconOnly
+        iconOnly: !!l.iconOnly,
+        color: linkColor
       };
     }).filter(function(l) { return l.url; });
   }
@@ -370,6 +392,17 @@ function saveBio(uid, data) {
   if (data.premiumLayoutPreset !== undefined) updates.premiumLayoutPreset = String(data.premiumLayoutPreset || '').trim().slice(0, 20);
   if (data.premiumProfileAnimation !== undefined) updates.premiumProfileAnimation = String(data.premiumProfileAnimation || '').trim().slice(0, 20);
   if (data.premiumParallax !== undefined) updates.premiumParallax = !!data.premiumParallax;
+  if (data.liveEditPositions === null) {
+    updates.liveEditPositions = null;
+  } else if (data.liveEditPositions !== undefined && data.liveEditPositions && typeof data.liveEditPositions === 'object') {
+    var sanitizedPos = {};
+    ['avatar', 'name', 'badges', 'bio', 'profileViews', 'links'].forEach(function(k) {
+      if (data.liveEditPositions[k] && typeof data.liveEditPositions[k].x === 'number' && typeof data.liveEditPositions[k].y === 'number') {
+        sanitizedPos[k] = { x: Math.max(0, Math.min(100, data.liveEditPositions[k].x)), y: Math.max(0, Math.min(100, data.liveEditPositions[k].y)) };
+      }
+    });
+    updates.liveEditPositions = sanitizedPos;
+  }
   return db.ref('users/' + uid).update(updates);
 }
 

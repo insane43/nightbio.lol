@@ -25,22 +25,26 @@
   function getLinksFromList() {
     var list = document.getElementById('linkList');
     if (!list) return [];
+    var iconOnlyCb = document.getElementById('linksIconOnly');
+    var iconOnly = iconOnlyCb && iconOnlyCb.checked;
     var items = list.querySelectorAll('.link-item');
     var links = [];
     for (var i = 0; i < items.length; i++) {
       var labelIn = items[i].querySelector('.label-in');
       var urlIn = items[i].querySelector('.url-in');
       var iconSel = items[i].querySelector('.link-icon');
+      var colorIn = items[i].querySelector('.link-color-in');
       var url = urlIn && urlIn.value ? urlIn.value.trim() : '';
       if (url) {
         var icon = iconSel && iconSel.value ? iconSel.value.trim() : '';
         if (!icon && typeof detectPlatformFromUrl === 'function') icon = detectPlatformFromUrl(url);
-        var iconOnlyCb = items[i].querySelector('.link-icon-only-cb');
+        var linkColor = (colorIn && colorIn.value && /^#[0-9A-Fa-f]{6}$/.test(colorIn.value)) ? colorIn.value : '';
         links.push({
           label: (labelIn && labelIn.value ? labelIn.value.trim() : '') || url,
           url: url,
           icon: icon,
-          iconOnly: !!(iconOnlyCb && iconOnlyCb.checked)
+          iconOnly: iconOnly,
+          color: linkColor
         });
       }
     }
@@ -167,11 +171,30 @@
     if (linksEl) {
       linksEl.innerHTML = '';
       var links = data.links || [];
+      var allIconOnly = links.length > 0 && links.every(function(l) { return l.iconOnly; });
+      linksEl.classList.toggle('preview-links-icon-only', !!allIconOnly);
+      var iconMap = window.LINK_ICON_SVG || {};
       links.forEach(function(l) {
         if (!l.url) return;
         var btn = document.createElement('span');
-        btn.className = 'preview-link-btn';
-        btn.textContent = l.label || l.url;
+        btn.className = 'preview-link-btn' + (l.iconOnly ? ' preview-link-btn-icon-only' : '');
+        if (l.iconOnly) {
+          btn.title = l.label || l.url;
+          var iconKey = (l.icon && l.icon.trim()) ? l.icon.trim() : 'link';
+          var svg = iconMap[iconKey] || iconMap.link || '';
+          if (svg) {
+            var iconSpan = document.createElement('span');
+            iconSpan.className = 'preview-link-icon';
+            iconSpan.innerHTML = svg;
+            iconSpan.setAttribute('aria-hidden', 'true');
+            btn.appendChild(iconSpan);
+          } else {
+            btn.textContent = (l.label || l.url).charAt(0).toUpperCase();
+          }
+        } else {
+          btn.textContent = l.label || l.url;
+        }
+        if (l.color && /^#[0-9A-Fa-f]{6}$/.test(String(l.color).trim())) btn.style.color = l.color.trim();
         linksEl.appendChild(btn);
       });
     }
@@ -204,12 +227,17 @@
       '<select class="link-icon form-select-sm" aria-label="Platform icon">' + buildIconSelectOptions(iconVal) + '</select>' +
       '<input type="text" class="label-in" placeholder="Label" value="' + (link ? escapeHtml(link.label) : '') + '" maxlength="50">' +
       '<input type="url" class="url-in" placeholder="https://..." value="' + (link ? escapeHtml(link.url) : '') + '" maxlength="500">' +
-      '<label class="link-icon-only-wrap"><input type="checkbox" class="link-icon-only-cb" ' + (link && link.iconOnly ? 'checked' : '') + '> Icon only</label>' +
+      '<input type="color" class="link-color-in" aria-label="Link color" title="Link color">' +
       '<button type="button" class="btn-icon link-move-up" aria-label="Move up">↑</button>' +
       '<button type="button" class="btn-icon link-move-down" aria-label="Move down">↓</button>' +
       '<button type="button" class="btn-icon link-remove" aria-label="Remove">✕</button>';
     var list = document.getElementById('linkList');
     if (list) list.appendChild(li);
+    var colorIn = li.querySelector('.link-color-in');
+    if (colorIn) {
+      var hex = (link && link.color && /^#[0-9A-Fa-f]{6}$/.test(String(link.color).trim())) ? String(link.color).trim() : '#7c6bb8';
+      colorIn.value = hex;
+    }
 
     li.querySelector('.link-remove').addEventListener('click', function() {
       li.remove();
@@ -244,8 +272,6 @@
       inputs[j].addEventListener('change', updatePreview);
     }
     li.querySelector('.link-icon').addEventListener('change', updatePreview);
-    var iconOnlyCb = li.querySelector('.link-icon-only-cb');
-    if (iconOnlyCb) iconOnlyCb.addEventListener('change', updatePreview);
     return li;
   }
 
@@ -599,10 +625,6 @@
       if (modalBlurIn) { modalBlurIn.value = d.modalBlur != null ? d.modalBlur : 0; }
       if (modalBorderOpacityIn) { modalBorderOpacityIn.value = d.modalBorderOpacity != null ? d.modalBorderOpacity : 20; }
       if (modalRadiusIn) { modalRadiusIn.value = d.modalRadius != null ? d.modalRadius : 24; }
-      var cardWidthIn = document.getElementById('cardWidth');
-      var cardHeightIn = document.getElementById('cardHeight');
-      if (cardWidthIn) cardWidthIn.value = (d.cardWidth != null && d.cardWidth > 0) ? d.cardWidth : '';
-      if (cardHeightIn) cardHeightIn.value = (d.cardHeight != null && d.cardHeight > 0) ? d.cardHeight : '';
       var modalOpacityVal = document.getElementById('modalOpacityValue');
       var modalBlurVal = document.getElementById('modalBlurValue');
       var modalBorderVal = document.getElementById('modalBorderOpacityValue');
@@ -635,52 +657,39 @@
       window._editorCurrentData.badges = d.badges || { community: true, og: false, owner: false, staff: false, verified: false, premium: false };
       window._editorCurrentData.badgeVisibility = d.badgeVisibility || {};
       window._editorCurrentData.badgeColors = d.badgeColors && typeof d.badgeColors === 'object' ? d.badgeColors : {};
-      window._dashboardIsOwner = !!(d.badges && d.badges.owner);
       renderBadgesList(window._editorCurrentData.badges, window._editorCurrentData.badgeVisibility, window._editorCurrentData.badgeColors);
 
       var showViewsCb = document.getElementById('showViewsOnBio');
       if (showViewsCb) showViewsCb.checked = !!d.showViewsOnBio;
-      var showVerifiedCheckmarkWrap = document.getElementById('showVerifiedCheckmarkWrap');
-      var showVerifiedCheckmarkCb = document.getElementById('showVerifiedCheckmark');
-      if (showVerifiedCheckmarkWrap) showVerifiedCheckmarkWrap.style.display = (d.badges && d.badges.verified) ? '' : 'none';
-      if (showVerifiedCheckmarkCb) showVerifiedCheckmarkCb.checked = !!d.showVerifiedCheckmark;
       refreshProfileViews();
 
       if (avatarURLInput) avatarURLInput.value = d.avatarURL || '';
       if (bannerURLInput) bannerURLInput.value = d.bannerURL || '';
       if (songURLInput) songURLInput.value = d.songURL || '';
-      if (avatarPreview && avatarPlaceholder) {
-        if (d.avatarURL) {
-          avatarPreview.src = d.avatarURL;
-          avatarPreview.style.display = 'block';
-          avatarPlaceholder.style.display = 'none';
-        } else {
-          avatarPreview.style.display = 'none';
-          avatarPreview.removeAttribute('src');
-          avatarPlaceholder.style.display = 'flex';
-        }
-      }
-      if (bannerPreview && bannerPlaceholder) {
-        if (d.bannerURL) {
-          bannerPreview.src = d.bannerURL;
-          bannerPreview.style.display = 'block';
-          bannerPlaceholder.style.display = 'none';
-        } else {
-          bannerPreview.style.display = 'none';
-          bannerPreview.removeAttribute('src');
-          bannerPlaceholder.style.display = 'flex';
-        }
-      }
+      if (avatarPreview && d.avatarURL) {
+        avatarPreview.src = d.avatarURL;
+        avatarPreview.style.display = 'block';
+        if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
+      } else if (avatarPlaceholder) avatarPlaceholder.style.display = '';
+      if (bannerPreview && d.bannerURL) {
+        bannerPreview.src = d.bannerURL;
+        bannerPreview.style.display = 'block';
+        if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
+      } else if (bannerPlaceholder) bannerPlaceholder.style.display = '';
 
       var tabPremium = document.getElementById('tabPremium');
       if (tabPremium) tabPremium.style.display = (d.badges && d.badges.premium) ? '' : 'none';
       var tabAdminPanel = document.getElementById('tabAdminPanel');
       if (tabAdminPanel) tabAdminPanel.style.display = (d.badges && d.badges.staff) ? '' : 'none';
-      var isOwner = !!(d.badges && d.badges.owner);
+      window._dashboardIsOwner = !!(d.badges && d.badges.owner);
       document.querySelectorAll('.da-nav-item[data-section]').forEach(function(nav) {
         var section = nav.dataset.section;
-        if (['settings', 'maintenance', 'held', 'export', 'sitedata', 'security'].indexOf(section) !== -1 && !isOwner) nav.style.display = 'none';
-        else if (['settings', 'maintenance', 'held', 'export', 'sitedata', 'security'].indexOf(section) !== -1) nav.style.display = '';
+        var ownerOnly = ['settings', 'maintenance', 'held', 'export', 'sitedata', 'security'].indexOf(section) !== -1;
+        if (ownerOnly && !window._dashboardIsOwner) nav.style.display = 'none';
+        else if (ownerOnly) nav.style.display = '';
+      });
+      document.querySelectorAll('.da-quick[data-section="maintenance"]').forEach(function(btn) {
+        btn.style.display = window._dashboardIsOwner ? '' : 'none';
       });
       if (d.badges && d.badges.premium) {
         var set = function(id, val) { var el = document.getElementById(id); if (el) el.value = val != null && val !== '' ? val : ''; };
@@ -693,17 +702,13 @@
         set('premiumNameColor', nameColorVal);
         var pNameColorHex = document.getElementById('premiumNameColorHex');
         if (pNameColorHex) pNameColorHex.value = nameColorVal;
-        var bioColorVal = (d.premiumBioColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumBioColor))) ? d.premiumBioColor : '#e2e8f0';
-        set('premiumBioColor', bioColorVal);
-        var pBioColorHex = document.getElementById('premiumBioColorHex');
-        if (pBioColorHex) pBioColorHex.value = bioColorVal;
         set('premiumBioFontSize', d.premiumBioFontSize != null ? d.premiumBioFontSize : '');
         set('premiumCustomFontFamily', d.premiumCustomFontFamily);
         set('premiumLayoutPreset', d.premiumLayoutPreset);
         set('premiumProfileAnimation', d.premiumProfileAnimation);
         var pPar = document.getElementById('premiumParallax');
         if (pPar) pPar.checked = !!d.premiumParallax;
-        set('premiumBackgroundEffect', d.premiumBackgroundEffect === 'blurred' ? 'blurred' : '');
+        set('premiumBackgroundEffect', (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '');
         set('premiumVideoBackground', d.premiumVideoBackground);
         set('premiumBannerBlur', d.premiumBannerBlur != null ? d.premiumBannerBlur : '');
         set('premiumAvatarBorder', d.premiumAvatarBorder);
@@ -733,6 +738,12 @@
         linkList.innerHTML = '';
         (Array.isArray(d.links) ? d.links : []).forEach(function(l) { renderLinkItem(l); });
         updateLinkCount();
+      }
+      var linksIconOnlyCb = document.getElementById('linksIconOnly');
+      if (linksIconOnlyCb) {
+        var linkArr = Array.isArray(d.links) ? d.links : [];
+        var allIconOnly = linkArr.length > 0 && linkArr.every(function(l) { return l.iconOnly; });
+        linksIconOnlyCb.checked = !!allIconOnly;
       }
 
       updatePreview(getEditorData());
@@ -830,19 +841,20 @@
         var profileUrl = base ? base + 'bio?u=' + encodeURIComponent(u.username) : '#';
         var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
         var rawEmail = u.email || '';
+        var canRevealEmail = !!window._dashboardIsOwner;
         var emailDisplay = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span>') : '—';
-        var isOwner = !!window._dashboardIsOwner;
+        if (!canRevealEmail && rawEmail) emailDisplay = escapeHtmlDashboard(maskEmailDashboard(rawEmail));
         var actions = '<button type="button" class="btn-icon edit-user-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Edit">✎</button>' +
           '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>' +
-          (isOwner && rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '');
+          (canRevealEmail && rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '');
         if (isBanned) {
           actions += '<button type="button" class="btn-icon unban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Unban">↩</button>';
-          if (isOwner && isHardBanned && typeof removeIPBan === 'function') actions += '<button type="button" class="btn-icon danger-outline remove-ip-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Remove IP ban">IP</button>';
+          if (window._dashboardIsOwner && isHardBanned && typeof removeIPBan === 'function') actions += '<button type="button" class="btn-icon danger-outline remove-ip-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Remove IP ban">IP</button>';
         } else {
           actions += '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Ban">⊗</button>';
-          if (isOwner && typeof hardBanUser === 'function') actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Hard ban (account + IP)">⊛</button>';
+          if (window._dashboardIsOwner && typeof hardBanUser === 'function') actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Hard ban (account + IP)">⊛</button>';
         }
-        if (isOwner) actions += '<button type="button" class="btn-icon danger-outline delete-account-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Delete account">⌫</button>';
+        if (window._dashboardIsOwner) actions += '<button type="button" class="btn-icon danger-outline delete-account-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Delete account">⌫</button>';
         var tr = document.createElement('tr');
         tr.title = uidTitle;
         tr.innerHTML =
@@ -941,7 +953,6 @@
         var bio = document.getElementById('dashboardAdminEditBio');
         if (dn) dn.value = data.displayName || '';
         if (bio) bio.value = data.bio || '';
-        window._dashboardAdminEditOriginalBadges = data.badges || {};
         var listEl = document.getElementById('dashboardAdminEditBadgesList');
         if (listEl) {
           listEl.innerHTML = '';
@@ -950,8 +961,8 @@
           DASHBOARD_BADGE_KEYS.forEach(function(k) {
             var label = document.createElement('label');
             label.className = 'admin-edit-badge-label';
-            var disabled = (k === 'staff' && !isOwner) ? ' disabled' : '';
-            label.innerHTML = '<input type="checkbox" class="edit-badge-cb" data-badge="' + k + '" ' + (badges[k] ? 'checked' : '') + disabled + '> ' + k;
+            var staffDisabled = (k === 'staff' && !isOwner) ? ' disabled' : '';
+            label.innerHTML = '<input type="checkbox" class="edit-badge-cb" data-badge="' + k + '" ' + (badges[k] ? 'checked' : '') + staffDisabled + '> ' + k;
             listEl.appendChild(label);
           });
         }
@@ -974,9 +985,9 @@
         listEl.querySelectorAll('.edit-badge-cb').forEach(function(cb) {
           data.badges[cb.dataset.badge] = cb.checked;
         });
-        if (!window._dashboardIsOwner && window._dashboardAdminEditOriginalBadges) {
-          data.badges.staff = !!window._dashboardAdminEditOriginalBadges.staff;
-        }
+      }
+      if (!window._dashboardIsOwner && window._dashboardAdminEditOriginalBadges) {
+        data.badges.staff = !!window._dashboardAdminEditOriginalBadges.staff;
       }
       adminUpdateUserProfile(uid, data).then(function() {
         var modal = document.getElementById('dashboardAdminEditModal');
@@ -992,7 +1003,9 @@
         : '';
     }
 
+    var DASHBOARD_OWNER_ONLY_SECTIONS = ['settings', 'maintenance', 'held', 'export', 'sitedata', 'security'];
     function switchDaSection(section) {
+      if (DASHBOARD_OWNER_ONLY_SECTIONS.indexOf(section) !== -1 && !window._dashboardIsOwner) section = 'overview';
       document.querySelectorAll('.da-nav-item').forEach(function(n) {
         n.classList.toggle('active', n.dataset.section === section);
       });
@@ -1095,8 +1108,10 @@
       if (empty) empty.style.display = 'none';
       ul.innerHTML = list.map(function(u) {
         var rawEmail = u.email || '';
-        var emailPart = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span>') : '';
-        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + (emailPart ? ' — ' + emailPart : '') + '</span>' + (window._dashboardIsOwner && rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '') + '<button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
+        var canReveal = !!window._dashboardIsOwner;
+        var emailPart = rawEmail ? (canReveal ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span>') : escapeHtmlDashboard(maskEmailDashboard(rawEmail))) : '';
+        var emailBtn = (canReveal && rawEmail) ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '';
+        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + (emailPart ? ' — ' + emailPart : '') + '</span>' + emailBtn + '<button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
       }).join('');
       ul.querySelectorAll('.unban-list-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -1451,29 +1466,29 @@
     function syncMediaFromInputs() {
       if (avatarURLInput) {
         window._editorCurrentData.avatarURL = avatarURLInput.value.trim();
-        if (avatarPreview && avatarPlaceholder) {
+        if (avatarPreview) {
           if (window._editorCurrentData.avatarURL) {
             avatarPreview.src = window._editorCurrentData.avatarURL;
             avatarPreview.style.display = 'block';
-            avatarPlaceholder.style.display = 'none';
+            if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
           } else {
             avatarPreview.style.display = 'none';
             avatarPreview.removeAttribute('src');
-            avatarPlaceholder.style.display = 'flex';
+            if (avatarPlaceholder) avatarPlaceholder.style.display = '';
           }
         }
       }
       if (bannerURLInput) {
         window._editorCurrentData.bannerURL = bannerURLInput.value.trim();
-        if (bannerPreview && bannerPlaceholder) {
+          if (bannerPreview) {
           if (window._editorCurrentData.bannerURL) {
             bannerPreview.src = window._editorCurrentData.bannerURL;
             bannerPreview.style.display = 'block';
-            bannerPlaceholder.style.display = 'none';
+          if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
           } else {
             bannerPreview.style.display = 'none';
             bannerPreview.removeAttribute('src');
-            bannerPlaceholder.style.display = 'flex';
+            if (bannerPlaceholder) bannerPlaceholder.style.display = '';
           }
         }
       }
@@ -1588,6 +1603,10 @@
         updatePreview();
       });
     }
+    var linksIconOnlyCb = document.getElementById('linksIconOnly');
+    if (linksIconOnlyCb) {
+      linksIconOnlyCb.addEventListener('change', function() { updatePreview(); });
+    }
 
     function getEditorDataForSave() {
         var fontSel = document.getElementById('fontFamily');
@@ -1618,8 +1637,6 @@
         modalBlur: (function() { var el = document.getElementById('modalBlur'); return el ? parseInt(el.value, 10) : 0; })(),
         modalBorderOpacity: (function() { var el = document.getElementById('modalBorderOpacity'); return el ? parseInt(el.value, 10) : 20; })(),
         modalRadius: (function() { var el = document.getElementById('modalRadius'); return el ? parseInt(el.value, 10) : 24; })(),
-        cardWidth: (function() { var el = document.getElementById('cardWidth'); var v = el && el.value.trim() !== '' ? parseInt(el.value, 10) : null; return (v != null && v >= 260 && v <= 800) ? v : null; })(),
-        cardHeight: (function() { var el = document.getElementById('cardHeight'); var v = el && el.value.trim() !== '' ? parseInt(el.value, 10) : null; return (v != null && v >= 0 && v <= 1200) ? v : null; })(),
         modalUseGradient: (function() { var el = document.getElementById('modalBackgroundMode'); return el ? el.value === 'gradient' : false; })(),
         modalBackgroundColor: (function() { var el = document.getElementById('modalBackgroundColor'); return el && /^#[0-9A-Fa-f]{6}$/.test(el.value) ? el.value : ''; })(),
         modalGradientColor1: (function() { var el = document.getElementById('modalGradientColor1'); return el && /^#[0-9A-Fa-f]{6}$/.test(el.value) ? el.value : ''; })(),
@@ -1634,7 +1651,6 @@
           metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
           metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
         showViewsOnBio: showViewsCb ? showViewsCb.checked : false,
-        showVerifiedCheckmark: (function() { var el = document.getElementById('showVerifiedCheckmark'); return el ? el.checked : false; })(),
         badges: window._editorCurrentData.badges || { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
         badgeVisibility: window._editorCurrentData.badgeVisibility || {},
         badgeColors: (window._editorCurrentData && window._editorCurrentData.badgeColors) || {},
@@ -1668,12 +1684,9 @@
         payload.premiumLinkBorderRadius = pLinkBr && pLinkBr.value.trim() !== '' ? parseInt(pLinkBr.value, 10) : null;
         payload.premiumUsernameEffect = pUsernameEffect ? pUsernameEffect.value.trim() : '';
         payload.premiumNameColor = (pNameColor && /^#[0-9A-Fa-f]{6}$/.test(pNameColor.value)) ? pNameColor.value : (pNameColorHexEl && /^#[0-9A-Fa-f]{6}$/.test(pNameColorHexEl.value.trim()) ? pNameColorHexEl.value.trim() : '');
-        var pBioColor = document.getElementById('premiumBioColor');
-        var pBioColorHexEl = document.getElementById('premiumBioColorHex');
-        payload.premiumBioColor = (pBioColor && /^#[0-9A-Fa-f]{6}$/.test(pBioColor.value)) ? pBioColor.value : (pBioColorHexEl && /^#[0-9A-Fa-f]{6}$/.test(pBioColorHexEl.value.trim()) ? pBioColorHexEl.value.trim() : '';
         payload.premiumBioFontSize = pBioFs && pBioFs.value.trim() !== '' ? parseInt(pBioFs.value, 10) : null;
         var pBgEffect = document.getElementById('premiumBackgroundEffect');
-        payload.premiumBackgroundEffect = (pBgEffect && pBgEffect.value === 'blurred') ? 'blurred' : '';
+        payload.premiumBackgroundEffect = (pBgEffect && (pBgEffect.value === 'blurred' || pBgEffect.value === 'snowflakes' || pBgEffect.value === 'rain')) ? pBgEffect.value : '';
         payload.premiumVideoBackground = pVidBg ? pVidBg.value.trim() : '';
         payload.premiumBannerBlur = pBannerBlur && pBannerBlur.value.trim() !== '' ? parseInt(pBannerBlur.value, 10) : 0;
         payload.premiumAvatarBorder = pAvatarBorder ? pAvatarBorder.value.trim() : '';
@@ -1789,7 +1802,6 @@
     syncModalColorPicker('modalGradientColor1', 'modalGradientColor1Hex');
     syncModalColorPicker('modalGradientColor2', 'modalGradientColor2Hex');
     syncModalColorPicker('premiumNameColor', 'premiumNameColorHex');
-    syncModalColorPicker('premiumBioColor', 'premiumBioColorHex');
     var pBgEffectSelect = document.getElementById('premiumBackgroundEffect');
     if (pBgEffectSelect) pBgEffectSelect.addEventListener('change', updatePreview);
     var btnStyleEl = document.getElementById('buttonStyle');

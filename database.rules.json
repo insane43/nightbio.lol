@@ -25,12 +25,12 @@
     },
     "siteConfig": {
       ".read": true,
-      ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
+      ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('owner').val() === true)"
     },
     "heldUsernames": {
       ".read": true,
       "$normalized": {
-        ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
+        ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('owner').val() === true)"
       }
     },
     "bannedUids": {
@@ -50,7 +50,7 @@
       ".read": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)",
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)"
+        ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('owner').val() === true)"
       }
     },
     "profileViews": {
@@ -64,8 +64,11 @@
       ".read": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true)",
       "$uid": {
         ".read": true,
-        ".write": "auth != null && (auth.uid == $uid || (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true))",
+        ".write": "auth != null && (auth.uid == $uid || root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('owner').val() === true || (root.child('users').child(auth.uid).child('badges').child('staff').val() === true && newData.exists()))",
         "badges": {
+          "staff": {
+            ".write": "auth != null && (root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('owner').val() === true)"
+          },
           "$badgeKey": {
             ".write": "auth != null && ((root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true) || (auth.uid == $uid && ($badgeKey === 'community' || newData.val() === false || data.val() === true)))"
           }

@@ -510,7 +510,9 @@
             alsoKnownEl.style.display = 'none';
           }
         }
-        if (premium && data.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(data.premiumNameColor))) {
+        if (premium && data.premiumUsernameEffect === 'rainbow') {
+          nameEl.style.color = '';
+        } else if (premium && data.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(data.premiumNameColor))) {
           nameEl.style.color = String(data.premiumNameColor).trim();
         } else {
           nameEl.style.color = '';
@@ -626,6 +628,8 @@
 
         linksEl.innerHTML = '';
         var links = Array.isArray(data.links) ? data.links : [];
+        var allIconOnly = links.length > 0 && links.every(function(l) { return l.iconOnly; });
+        linksEl.classList.toggle('bio-links-icon-only', !!allIconOnly);
         links.forEach(function(l) {
           if (!l.url) return;
           var a = document.createElement('a');
@@ -634,6 +638,10 @@
           a.rel = 'noopener';
           a.className = 'bio-link-btn' + (l.iconOnly ? ' bio-link-icon-only' : '');
           a.setAttribute('data-tooltip', l.iconOnly ? (l.label || l.url) : '');
+          if (l.color && /^#[0-9A-Fa-f]{6}$/.test(String(l.color).trim())) {
+            a.style.color = l.color.trim();
+            a.style.setProperty('--bio-link-glow-color', l.color.trim());
+          }
           var iconKey = (l.icon && l.icon.trim()) ? l.icon.trim() : 'link';
           var iconSpan = document.createElement('span');
           iconSpan.className = 'bio-link-icon';
@@ -652,6 +660,47 @@
           a.appendChild(labelSpan);
           linksEl.appendChild(a);
         });
+
+        if (premium && data.liveEditPositions && typeof data.liveEditPositions === 'object') {
+          var profile = content && content.querySelector('.bio-profile');
+          if (profile) {
+            var defaultPos = { avatar: { x: 50, y: 12 }, name: { x: 50, y: 22 }, badges: { x: 50, y: 28 }, bio: { x: 50, y: 38 }, profileViews: { x: 50, y: 46 }, links: { x: 50, y: 58 } };
+            var pos = data.liveEditPositions;
+            profile.classList.add('bio-live-edit-layout');
+            profile.style.position = 'relative';
+            profile.style.minHeight = '100vh';
+            var applyPos = function(el, key) {
+              if (!el) return;
+              var p = (pos[key] && typeof pos[key].x === 'number' && typeof pos[key].y === 'number') ? pos[key] : (defaultPos[key] || { x: 50, y: 50 });
+              el.style.position = 'absolute';
+              el.style.left = Math.max(0, Math.min(100, p.x)) + '%';
+              el.style.top = Math.max(0, Math.min(100, p.y)) + '%';
+              el.style.transform = 'translate(-50%, -50%)';
+              el.style.margin = '0';
+            };
+            applyPos(avatar, 'avatar');
+            var nameWrap = document.getElementById('bioNameWrap');
+            applyPos(nameWrap || nameEl, 'name');
+            var badgesEl = document.getElementById('bioBadges');
+            applyPos(badgesEl, 'badges');
+            applyPos(bioEl, 'bio');
+            var viewsEl = document.getElementById('bioViews');
+            applyPos(viewsEl, 'profileViews');
+            applyPos(linksEl, 'links');
+            if (songWrap) songWrap.style.display = 'none';
+            var alsoKnownEl = document.getElementById('bioAlsoKnownAs');
+            if (alsoKnownEl) alsoKnownEl.style.display = 'none';
+          }
+        } else {
+          var profileNorm = content && content.querySelector('.bio-profile');
+          if (profileNorm) {
+            profileNorm.classList.remove('bio-live-edit-layout');
+            profileNorm.style.minHeight = '';
+            [avatar, nameEl, document.getElementById('bioNameWrap'), document.getElementById('bioBadges'), bioEl, document.getElementById('bioViews'), linksEl].forEach(function(el) {
+              if (el) { el.style.position = ''; el.style.left = ''; el.style.top = ''; el.style.transform = ''; el.style.margin = ''; }
+            });
+          }
+        }
 
         var footer = document.querySelector('.bio-footer');
         if (footer) footer.style.display = (premium && data.premiumHideBranding) ? 'none' : '';
