@@ -797,6 +797,7 @@
         s.classList.toggle('on', first + rest === section);
       });
       if (section === 'security' && typeof getAdminUids === 'function') loadDaSecurity();
+      if (section === 'held') loadDaHeld();
     }
 
     function renderDaOverviewStats(users, banned) {
@@ -966,6 +967,43 @@
       }).catch(function() { showDashboardAdminToast('Failed to load admins.', 'error'); });
     }
 
+    function loadDaHeld() {
+      var db = window.firebaseDb;
+      if (!db) return;
+      db.ref('heldUsernames').once('value').then(function(snap) {
+        var val = snap.val();
+        var keys = val && typeof val === 'object' ? Object.keys(val) : [];
+        renderDaHeldUsernameList(keys);
+      }).catch(function() { showDashboardAdminToast('Failed to load held usernames.', 'error'); });
+    }
+
+    function renderDaHeldUsernameList(normalizedList) {
+      var list = document.getElementById('daHeldUsernameList');
+      var empty = document.getElementById('daHeldUsernameEmpty');
+      if (!list) return;
+      if (!normalizedList || normalizedList.length === 0) {
+        list.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+      list.innerHTML = normalizedList.sort().map(function(normalized) {
+        return '<li><span class="name">' + escapeHtmlDashboard(normalized) + '</span> <button type="button" class="btn btn-ghost btn-sm da-held-remove" data-held="' + escapeHtmlDashboard(normalized) + '" style="font-size: 0.85rem;">Remove</button></li>';
+      }).join('');
+      list.querySelectorAll('.da-held-remove').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var n = this.getAttribute('data-held');
+          if (!n) return;
+          var db = window.firebaseDb;
+          if (!db) return;
+          db.ref('heldUsernames/' + n).remove().then(function() {
+            showDashboardAdminToast('Removed from holding.');
+            loadDaHeld();
+          }).catch(function() { showDashboardAdminToast('Failed to remove.', 'error'); });
+        });
+      });
+    }
+
     function exportDaCsv() {
       var rows = [['Username', 'Email', 'Display name', 'UID', 'Views', 'Joined']];
       (dashboardAdminAllUsers || []).forEach(function(u) {
@@ -1007,6 +1045,7 @@
         renderDashboardAdminTable(dashboardAdminAllUsers, dashboardAdminBanned, dashboardAdminHardBanned);
         loadDaMaintenance();
         loadDaSettings();
+        loadDaHeld();
       }).catch(function(err) {
         console.error(err);
         renderDashboardAdminTable([], {}, {});
@@ -1068,6 +1107,35 @@
       }
       var exportBtn = document.getElementById('daExportCsvBtn');
       if (exportBtn) exportBtn.addEventListener('click', exportDaCsv);
+      var heldAdd = document.getElementById('daHeldUsernameAdd');
+      var heldInput = document.getElementById('daHeldUsernameInput');
+      var heldMsg = document.getElementById('daHeldUsernameMsg');
+      if (heldAdd && heldInput) {
+        heldAdd.addEventListener('click', function() {
+          var raw = heldInput.value.trim();
+          if (heldMsg) heldMsg.textContent = '';
+          if (!raw) {
+            if (heldMsg) { heldMsg.textContent = 'Enter a username.'; heldMsg.style.color = ''; }
+            return;
+          }
+          if (typeof isValidUsername !== 'function' || !isValidUsername(raw)) {
+            if (heldMsg) { heldMsg.textContent = 'Username must be 3–20 characters, letters, numbers and underscores only.'; heldMsg.style.color = 'var(--text-error, #e11)'; }
+            return;
+          }
+          var normalized = raw.toLowerCase();
+          var db = window.firebaseDb;
+          if (!db) { if (heldMsg) heldMsg.textContent = 'Database not ready.'; return; }
+          heldAdd.disabled = true;
+          db.ref('heldUsernames/' + normalized).set(true).then(function() {
+            if (heldMsg) { heldMsg.textContent = 'Added.'; heldMsg.style.color = 'var(--success, #0a0)'; }
+            heldInput.value = '';
+            loadDaHeld();
+          }).catch(function() {
+            if (heldMsg) { heldMsg.textContent = 'Failed to add (check permissions).'; heldMsg.style.color = 'var(--text-error, #e11)'; }
+            showDashboardAdminToast('Failed to add.', 'error');
+          }).then(function() { heldAdd.disabled = false; });
+        });
+      }
       var editCancel = document.getElementById('dashboardAdminEditCancel');
       var editSave = document.getElementById('dashboardAdminEditSave');
       var editModal = document.getElementById('dashboardAdminEditModal');
@@ -1115,6 +1183,55 @@
     if (bannerURLInput) {
       bannerURLInput.addEventListener('input', syncMediaFromInputs);
       bannerURLInput.addEventListener('change', syncMediaFromInputs);
+    }
+    var avatarFileInput = document.getElementById('avatarFileInput');
+    var bannerFileInput = document.getElementById('bannerFileInput');
+    var avatarUploadBtn = document.getElementById('avatarUploadBtn');
+    var bannerUploadBtn = document.getElementById('bannerUploadBtn');
+    var avatarUploadProgress = document.getElementById('avatarUploadProgress');
+    var bannerUploadProgress = document.getElementById('bannerUploadProgress');
+    var avatarUploadPct = document.getElementById('avatarUploadPct');
+    var bannerUploadPct = document.getElementById('bannerUploadPct');
+    function doUpload(field, fileInput, progressEl, pctEl, urlInput, previewImg, placeholder) {
+      var file = fileInput && fileInput.files && fileInput.files[0];
+      if (!file) return;
+      var uploadFn = typeof window.uploadBioImage === 'function' ? window.uploadBioImage : null;
+      if (!uploadFn) {
+        if (msgEl) showMsg(msgEl, 'Upload not available. Refresh the page.', 'error');
+        return;
+      }
+      if (progressEl) progressEl.style.display = 'block';
+      if (pctEl) pctEl.textContent = '0';
+      if (avatarUploadBtn && field === 'avatar') avatarUploadBtn.disabled = true;
+      if (bannerUploadBtn && field === 'banner') bannerUploadBtn.disabled = true;
+      uploadFn(uid, file, field, function(pct) {
+        if (pctEl) pctEl.textContent = pct;
+        if (progressEl) progressEl.innerHTML = 'Uploading… <span id="' + (field === 'avatar' ? 'avatarUploadPct' : 'bannerUploadPct') + '">' + pct + '</span>%';
+      }).then(function(url) {
+        if (urlInput) { urlInput.value = url; urlInput.dispatchEvent(new Event('input', { bubbles: true })); }
+        if (progressEl) progressEl.style.display = 'none';
+        if (avatarUploadBtn && field === 'avatar') avatarUploadBtn.disabled = false;
+        if (bannerUploadBtn && field === 'banner') bannerUploadBtn.disabled = false;
+        fileInput.value = '';
+      }).catch(function(err) {
+        if (progressEl) progressEl.style.display = 'none';
+        if (avatarUploadBtn && field === 'avatar') avatarUploadBtn.disabled = false;
+        if (bannerUploadBtn && field === 'banner') bannerUploadBtn.disabled = false;
+        fileInput.value = '';
+        if (msgEl) showMsg(msgEl, (err && err.message) ? err.message : 'Upload failed', 'error');
+      });
+    }
+    if (avatarUploadBtn && avatarFileInput) {
+      avatarUploadBtn.addEventListener('click', function() { avatarFileInput.click(); });
+      avatarFileInput.addEventListener('change', function() {
+        doUpload('avatar', avatarFileInput, avatarUploadProgress, avatarUploadPct, avatarURLInput, avatarPreview, avatarPlaceholder);
+      });
+    }
+    if (bannerUploadBtn && bannerFileInput) {
+      bannerUploadBtn.addEventListener('click', function() { bannerFileInput.click(); });
+      bannerFileInput.addEventListener('change', function() {
+        doUpload('banner', bannerFileInput, bannerUploadProgress, bannerUploadPct, bannerURLInput, bannerPreview, bannerPlaceholder);
+      });
     }
     if (songURLInput) {
       songURLInput.addEventListener('input', function() { window._editorCurrentData.songURL = songURLInput.value.trim(); updatePreview(); });

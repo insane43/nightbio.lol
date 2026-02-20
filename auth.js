@@ -48,13 +48,26 @@ function isIPBanned() {
   });
 }
 
-// Check if username is already taken (Realtime Database)
+// Check if username is held by admin (reserved, not claimable)
+function isUsernameHeld(username) {
+  const db = getDb();
+  if (!db) return Promise.resolve(false);
+  const normalized = String(username).trim().toLowerCase();
+  if (!normalized) return Promise.resolve(false);
+  return db.ref('heldUsernames/' + normalized).once('value').then(snap => snap.exists());
+}
+
+// Check if username is already taken (Realtime Database) or held by admin
 function isUsernameTaken(username) {
   const db = getDb();
   if (!db) return Promise.reject(new Error('Database not ready'));
   const normalized = String(username).trim().toLowerCase();
-  const ref = db.ref('usernames/' + normalized);
-  return ref.once('value').then(snap => snap.exists());
+  return Promise.all([
+    db.ref('usernames/' + normalized).once('value'),
+    db.ref('heldUsernames/' + normalized).once('value')
+  ]).then(function(res) {
+    return res[0].exists() || res[1].exists();
+  });
 }
 
 // Get next sequential user ID (UID 1, 2, 3...) and increment counter
@@ -116,7 +129,7 @@ function getUidByAlias(alias) {
   });
 }
 
-// Check if alias is taken by someone else (usernames or another user's alias). Optional uid = current user (their own alias is not "taken").
+// Check if alias is taken by someone else (usernames, held usernames, or another user's alias). Optional uid = current user (their own alias is not "taken").
 function isAliasTaken(alias, currentUid) {
   var normalized = String(alias || '').trim().toLowerCase();
   if (!normalized) return Promise.resolve(false);
@@ -124,9 +137,9 @@ function isAliasTaken(alias, currentUid) {
     isUsernameTaken(alias),
     getUidByAlias(alias)
   ]).then(function(res) {
-    var takenByHandle = res[0];
+    var takenByHandleOrHeld = res[0];
     var ownerUid = res[1];
-    if (takenByHandle) return true;
+    if (takenByHandleOrHeld) return true;
     if (ownerUid && ownerUid !== currentUid) return true;
     return false;
   });
@@ -200,8 +213,13 @@ function changeUsername(uid, newUsername) {
       return Promise.reject(new Error('You can only change your handle once every 7 days. Try again later.'));
     }
 
-    return db.ref('usernames/' + newNormalized).once('value').then(function(snap2) {
-      const existingUid = snap2.val();
+    return Promise.all([
+      db.ref('usernames/' + newNormalized).once('value'),
+      db.ref('heldUsernames/' + newNormalized).once('value')
+    ]).then(function(res) {
+      const existingUid = res[0].val();
+      const isHeld = res[1].exists();
+      if (isHeld) return Promise.reject(new Error('That handle is reserved.'));
       if (existingUid && existingUid !== uid) {
         return Promise.reject(new Error('That handle is already in use.'));
       }
