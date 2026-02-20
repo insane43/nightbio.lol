@@ -957,11 +957,13 @@
         if (listEl) {
           listEl.innerHTML = '';
           var badges = data.badges || {};
+          window._dashboardAdminEditOriginalBadges = badges ? Object.assign({}, badges) : {};
           var isOwner = !!window._dashboardIsOwner;
           DASHBOARD_BADGE_KEYS.forEach(function(k) {
             var label = document.createElement('label');
             label.className = 'admin-edit-badge-label';
-            var staffDisabled = (k === 'staff' && !isOwner) ? ' disabled' : '';
+            var ownerOrStaffOnly = ((k === 'staff' || k === 'owner') && !isOwner);
+            var staffDisabled = ownerOrStaffOnly ? ' disabled' : '';
             label.innerHTML = '<input type="checkbox" class="edit-badge-cb" data-badge="' + k + '" ' + (badges[k] ? 'checked' : '') + staffDisabled + '> ' + k;
             listEl.appendChild(label);
           });
@@ -988,6 +990,7 @@
       }
       if (!window._dashboardIsOwner && window._dashboardAdminEditOriginalBadges) {
         data.badges.staff = !!window._dashboardAdminEditOriginalBadges.staff;
+        data.badges.owner = !!window._dashboardAdminEditOriginalBadges.owner;
       }
       adminUpdateUserProfile(uid, data).then(function() {
         var modal = document.getElementById('dashboardAdminEditModal');

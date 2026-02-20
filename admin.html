@@ -844,20 +844,34 @@
 
       function openEditModal(uid) {
         document.getElementById('editUserUid').value = uid;
-        getCurrentUserBio(uid).then(function(data) {
-          if (!data) return;
-          document.getElementById('editDisplayName').value = data.displayName || '';
-          document.getElementById('editBio').value = data.bio || '';
-          var badges = data.badges || {};
-          var listEl = document.getElementById('editBadgesList');
-          listEl.innerHTML = '';
-          BADGE_KEYS.forEach(function(k) {
-            var label = document.createElement('label');
-            label.innerHTML = '<input type="checkbox" class="edit-badge-cb" data-badge="' + k + '" ' + (badges[k] ? 'checked' : '') + '> ' + k;
-            listEl.appendChild(label);
-          });
-          document.getElementById('editUserModal').classList.add('on');
-        }).catch(function() { showToast('Could not load user.', 'error'); });
+        var curUid = auth.currentUser && auth.currentUser.uid;
+        if (!curUid || typeof isOwner !== 'function') {
+          getCurrentUserBio(uid).then(function(data) { if (data) fillEditModal(data, false); }).catch(function() { showToast('Could not load user.', 'error'); });
+          return;
+        }
+        isOwner(curUid).then(function(ownerOk) {
+          window._adminIsOwner = ownerOk;
+          getCurrentUserBio(uid).then(function(data) {
+            if (!data) return;
+            fillEditModal(data, ownerOk);
+          }).catch(function() { showToast('Could not load user.', 'error'); });
+        }).catch(function() { showToast('Could not verify access.', 'error'); });
+      }
+      function fillEditModal(data, ownerOk) {
+        window._adminIsOwner = !!ownerOk;
+        document.getElementById('editDisplayName').value = data.displayName || '';
+        document.getElementById('editBio').value = data.bio || '';
+        var badges = data.badges || {};
+        window._editOriginalBadges = badges ? Object.assign({}, badges) : {};
+        var listEl = document.getElementById('editBadgesList');
+        listEl.innerHTML = '';
+        BADGE_KEYS.forEach(function(k) {
+          var label = document.createElement('label');
+          var dis = (!ownerOk && (k === 'owner' || k === 'staff')) ? ' disabled' : '';
+          label.innerHTML = '<input type="checkbox" class="edit-badge-cb" data-badge="' + k + '" ' + (badges[k] ? 'checked' : '') + dis + '> ' + k;
+          listEl.appendChild(label);
+        });
+        document.getElementById('editUserModal').classList.add('on');
       }
 
       function saveEditUser() {
@@ -871,6 +885,10 @@
         document.querySelectorAll('.edit-badge-cb').forEach(function(cb) {
           data.badges[cb.dataset.badge] = cb.checked;
         });
+        if (!window._adminIsOwner && window._editOriginalBadges) {
+          data.badges.staff = !!window._editOriginalBadges.staff;
+          data.badges.owner = !!window._editOriginalBadges.owner;
+        }
         adminUpdateUserProfile(uid, data).then(function() {
           document.getElementById('editUserModal').classList.remove('on');
           loadUsers();

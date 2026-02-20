@@ -2336,6 +2336,79 @@ body.toplander .skiptranslate { display: none !important; }
   animation: slideUp 0.5s ease-out both;
 }
 
+/* ========== Auth pages (login / signup) — match index ========== */
+.auth-page .page.auth-main {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem 3rem;
+}
+.auth-page .auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(10, 10, 15, 0.55);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  padding: 2.25rem;
+  animation: slideUp 0.5s ease-out 0.1s both;
+}
+.auth-page .auth-card:hover {
+  border-color: rgba(124, 107, 184, 0.2);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(124, 107, 184, 0.08);
+}
+.auth-page .auth-card h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.auth-page .auth-card .subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+.auth-page .auth-card .form-group input:not([type="checkbox"]) {
+  background: rgba(26, 26, 38, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.auth-page .auth-card .form-group input:focus {
+  border-color: var(--purple-accent);
+  box-shadow: 0 0 0 3px rgba(124, 107, 184, 0.2);
+}
+.auth-page .auth-card .btn-primary {
+  background: linear-gradient(135deg, var(--purple-accent) 0%, var(--purple-mid) 100%);
+  box-shadow: 0 4px 18px rgba(124, 107, 184, 0.35);
+}
+.auth-page .auth-card .btn-google {
+  background: rgba(26, 26, 38, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.auth-page .auth-card .btn-google:hover {
+  background: rgba(124, 107, 184, 0.12);
+  border-color: rgba(124, 107, 184, 0.3);
+}
+.auth-page .auth-card .card-footer {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.auth-page .auth-card .card-footer a {
+  color: var(--purple-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.auth-page .auth-card .card-footer a:hover {
+  text-decoration: underline;
+}
+
 /* ========== Dashboard — professional bio editor ========== */
 .dashboard-page .page { max-width: none; padding: 0; }
 .dashboard-page .brand { display: none; }

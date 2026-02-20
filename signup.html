@@ -4,39 +4,86 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create account — nightbio.lol</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%234a3f6b'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='%237c6bb8' font-family='sans-serif'>n</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <nav class="site-nav">
-    <div class="site-nav-inner">
-      <a class="site-nav-logo" href="/">
-        <img alt="nightbio.lol logo" src="/nightbio-logo-pfp.png">
-        <h1>nightbio<span>.</span>lol</h1>
-      </a>
-      <div class="site-nav-links">
-        <a href="help">Help Center</a>
-        <a href="status">System status</a>
-        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
-        <a href="login">Login</a>
-        <a href="signup" class="site-nav-cta">Sign up</a>
+<body class="index-page auth-page">
+  <header class="editor-header index-header">
+    <a href="/" class="editor-logo index-logo">
+      <img alt="nightbio.lol" src="/nightbio-logo-pfp.png" class="index-logo-img">
+      <span class="logo-text">nightbio<span class="logo-dot">.</span>lol</span>
+    </a>
+    <div class="index-header-right">
+      <div class="editor-actions index-nav-actions">
+        <a href="help" class="index-nav-link">Help</a>
+        <a href="status" class="index-nav-link">Status</a>
+        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer" class="index-nav-link">Discord</a>
+        <span class="index-auth-group">
+          <a href="login" class="index-nav-link">Log in</a>
+          <a href="signup" class="btn btn-primary index-nav-cta">Get started</a>
+        </span>
       </div>
-      <button type="button" class="site-nav-hamburger" id="navHamburger" aria-label="Menu">
+      <button type="button" class="index-nav-hamburger" id="navHamburger" aria-label="Menu">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
       </button>
-      <div class="site-nav-drawer" id="navDrawer">
-        <a href="help">Help Center</a>
-        <a href="status">System status</a>
-        <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
-        <a href="login">Login</a>
-        <a href="signup" class="site-nav-cta">Sign up</a>
-      </div>
     </div>
-  </nav>
-  <div class="bg-gradient"></div>
-  <div class="bg-grid"></div>
+    <div class="index-nav-drawer" id="navDrawer">
+      <a href="help">Help</a>
+      <a href="status">Status</a>
+      <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
+      <a href="login">Log in</a>
+      <a href="signup" class="index-drawer-cta">Get started</a>
+    </div>
+  </header>
 
-  <main class="page">
-    <div class="card">
+  <div class="translate-wrapper" aria-label="Translate page">
+    <span class="translate-label">Language</span>
+    <select class="lang-select" id="customLangSelect" aria-label="Select language">
+      <option value="">Select language</option>
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+      <option value="pt">Portuguese</option>
+      <option value="ru">Russian</option>
+      <option value="ja">Japanese</option>
+      <option value="ko">Korean</option>
+      <option value="zh-CN">Chinese (Simplified)</option>
+      <option value="zh-TW">Chinese (Traditional)</option>
+      <option value="ar">Arabic</option>
+      <option value="hi">Hindi</option>
+      <option value="nl">Dutch</option>
+      <option value="pl">Polish</option>
+      <option value="tr">Turkish</option>
+      <option value="vi">Vietnamese</option>
+      <option value="th">Thai</option>
+      <option value="id">Indonesian</option>
+      <option value="sv">Swedish</option>
+      <option value="no">Norwegian</option>
+      <option value="da">Danish</option>
+      <option value="fi">Finnish</option>
+    </select>
+    <div id="google_translate_element"></div>
+  </div>
+
+  <div class="landing-bg" aria-hidden="true">
+    <div class="landing-bg-gradient"></div>
+    <div class="landing-bg-orbs">
+      <div class="landing-orb landing-orb-1"></div>
+      <div class="landing-orb landing-orb-2"></div>
+      <div class="landing-orb landing-orb-3"></div>
+      <div class="landing-orb landing-orb-4"></div>
+    </div>
+    <div class="landing-bg-grid"></div>
+    <div class="landing-bg-noise"></div>
+  </div>
+
+  <main class="page auth-main">
+    <div class="card auth-card">
       <h1>Create account</h1>
       <p class="subtitle">Join nightbio and get your bio link.</p>
 
