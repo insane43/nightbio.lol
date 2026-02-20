@@ -35,10 +35,12 @@
       if (url) {
         var icon = iconSel && iconSel.value ? iconSel.value.trim() : '';
         if (!icon && typeof detectPlatformFromUrl === 'function') icon = detectPlatformFromUrl(url);
+        var iconOnlyCb = items[i].querySelector('.link-icon-only-cb');
         links.push({
           label: (labelIn && labelIn.value ? labelIn.value.trim() : '') || url,
           url: url,
-          icon: icon
+          icon: icon,
+          iconOnly: !!(iconOnlyCb && iconOnlyCb.checked)
         });
       }
     }
@@ -202,6 +204,7 @@
       '<select class="link-icon form-select-sm" aria-label="Platform icon">' + buildIconSelectOptions(iconVal) + '</select>' +
       '<input type="text" class="label-in" placeholder="Label" value="' + (link ? escapeHtml(link.label) : '') + '" maxlength="50">' +
       '<input type="url" class="url-in" placeholder="https://..." value="' + (link ? escapeHtml(link.url) : '') + '" maxlength="500">' +
+      '<label class="link-icon-only-wrap"><input type="checkbox" class="link-icon-only-cb" ' + (link && link.iconOnly ? 'checked' : '') + '> Icon only</label>' +
       '<button type="button" class="btn-icon link-move-up" aria-label="Move up">↑</button>' +
       '<button type="button" class="btn-icon link-move-down" aria-label="Move down">↓</button>' +
       '<button type="button" class="btn-icon link-remove" aria-label="Remove">✕</button>';
@@ -241,6 +244,8 @@
       inputs[j].addEventListener('change', updatePreview);
     }
     li.querySelector('.link-icon').addEventListener('change', updatePreview);
+    var iconOnlyCb = li.querySelector('.link-icon-only-cb');
+    if (iconOnlyCb) iconOnlyCb.addEventListener('change', updatePreview);
     return li;
   }
 
@@ -594,6 +599,10 @@
       if (modalBlurIn) { modalBlurIn.value = d.modalBlur != null ? d.modalBlur : 0; }
       if (modalBorderOpacityIn) { modalBorderOpacityIn.value = d.modalBorderOpacity != null ? d.modalBorderOpacity : 20; }
       if (modalRadiusIn) { modalRadiusIn.value = d.modalRadius != null ? d.modalRadius : 24; }
+      var cardWidthIn = document.getElementById('cardWidth');
+      var cardHeightIn = document.getElementById('cardHeight');
+      if (cardWidthIn) cardWidthIn.value = (d.cardWidth != null && d.cardWidth > 0) ? d.cardWidth : '';
+      if (cardHeightIn) cardHeightIn.value = (d.cardHeight != null && d.cardHeight > 0) ? d.cardHeight : '';
       var modalOpacityVal = document.getElementById('modalOpacityValue');
       var modalBlurVal = document.getElementById('modalBlurValue');
       var modalBorderVal = document.getElementById('modalBorderOpacityValue');
@@ -626,10 +635,15 @@
       window._editorCurrentData.badges = d.badges || { community: true, og: false, owner: false, staff: false, verified: false, premium: false };
       window._editorCurrentData.badgeVisibility = d.badgeVisibility || {};
       window._editorCurrentData.badgeColors = d.badgeColors && typeof d.badgeColors === 'object' ? d.badgeColors : {};
+      window._dashboardIsOwner = !!(d.badges && d.badges.owner);
       renderBadgesList(window._editorCurrentData.badges, window._editorCurrentData.badgeVisibility, window._editorCurrentData.badgeColors);
 
       var showViewsCb = document.getElementById('showViewsOnBio');
       if (showViewsCb) showViewsCb.checked = !!d.showViewsOnBio;
+      var showVerifiedCheckmarkWrap = document.getElementById('showVerifiedCheckmarkWrap');
+      var showVerifiedCheckmarkCb = document.getElementById('showVerifiedCheckmark');
+      if (showVerifiedCheckmarkWrap) showVerifiedCheckmarkWrap.style.display = (d.badges && d.badges.verified) ? '' : 'none';
+      if (showVerifiedCheckmarkCb) showVerifiedCheckmarkCb.checked = !!d.showVerifiedCheckmark;
       var clickToEnterCb = document.getElementById('clickToEnter');
       if (clickToEnterCb) clickToEnterCb.checked = !!d.clickToEnter;
       refreshProfileViews();
@@ -652,6 +666,12 @@
       if (tabPremium) tabPremium.style.display = (d.badges && d.badges.premium) ? '' : 'none';
       var tabAdminPanel = document.getElementById('tabAdminPanel');
       if (tabAdminPanel) tabAdminPanel.style.display = (d.badges && d.badges.staff) ? '' : 'none';
+      var isOwner = !!(d.badges && d.badges.owner);
+      document.querySelectorAll('.da-nav-item[data-section]').forEach(function(nav) {
+        var section = nav.dataset.section;
+        if (['settings', 'maintenance', 'held', 'export', 'sitedata', 'security'].indexOf(section) !== -1 && !isOwner) nav.style.display = 'none';
+        else if (['settings', 'maintenance', 'held', 'export', 'sitedata', 'security'].indexOf(section) !== -1) nav.style.display = '';
+      });
       if (d.badges && d.badges.premium) {
         var set = function(id, val) { var el = document.getElementById(id); if (el) el.value = val != null && val !== '' ? val : ''; };
         set('premiumButtonShape', d.premiumButtonShape);
@@ -797,17 +817,18 @@
         var uidTitle = 'UID ' + (u.userId != null ? u.userId : (u.uid || ''));
         var rawEmail = u.email || '';
         var emailDisplay = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span>') : '—';
+        var isOwner = !!window._dashboardIsOwner;
         var actions = '<button type="button" class="btn-icon edit-user-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Edit">✎</button>' +
           '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="btn-icon" title="View profile">↗</a>' +
-          (rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '');
+          (isOwner && rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '');
         if (isBanned) {
           actions += '<button type="button" class="btn-icon unban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Unban">↩</button>';
-          if (isHardBanned && typeof removeIPBan === 'function') actions += '<button type="button" class="btn-icon danger-outline remove-ip-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Remove IP ban">IP</button>';
+          if (isOwner && isHardBanned && typeof removeIPBan === 'function') actions += '<button type="button" class="btn-icon danger-outline remove-ip-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Remove IP ban">IP</button>';
         } else {
           actions += '<button type="button" class="btn-icon danger ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Ban">⊗</button>';
-          if (typeof hardBanUser === 'function') actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Hard ban (account + IP)">⊛</button>';
+          if (isOwner && typeof hardBanUser === 'function') actions += '<button type="button" class="btn-icon danger hard-ban-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Hard ban (account + IP)">⊛</button>';
         }
-        actions += '<button type="button" class="btn-icon danger-outline delete-account-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Delete account">⌫</button>';
+        if (isOwner) actions += '<button type="button" class="btn-icon danger-outline delete-account-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" title="Delete account">⌫</button>';
         var tr = document.createElement('tr');
         tr.title = uidTitle;
         tr.innerHTML =
@@ -906,14 +927,17 @@
         var bio = document.getElementById('dashboardAdminEditBio');
         if (dn) dn.value = data.displayName || '';
         if (bio) bio.value = data.bio || '';
+        window._dashboardAdminEditOriginalBadges = data.badges || {};
         var listEl = document.getElementById('dashboardAdminEditBadgesList');
         if (listEl) {
           listEl.innerHTML = '';
           var badges = data.badges || {};
+          var isOwner = !!window._dashboardIsOwner;
           DASHBOARD_BADGE_KEYS.forEach(function(k) {
             var label = document.createElement('label');
             label.className = 'admin-edit-badge-label';
-            label.innerHTML = '<input type="checkbox" class="edit-badge-cb" data-badge="' + k + '" ' + (badges[k] ? 'checked' : '') + '> ' + k;
+            var disabled = (k === 'staff' && !isOwner) ? ' disabled' : '';
+            label.innerHTML = '<input type="checkbox" class="edit-badge-cb" data-badge="' + k + '" ' + (badges[k] ? 'checked' : '') + disabled + '> ' + k;
             listEl.appendChild(label);
           });
         }
@@ -936,6 +960,9 @@
         listEl.querySelectorAll('.edit-badge-cb').forEach(function(cb) {
           data.badges[cb.dataset.badge] = cb.checked;
         });
+        if (!window._dashboardIsOwner && window._dashboardAdminEditOriginalBadges) {
+          data.badges.staff = !!window._dashboardAdminEditOriginalBadges.staff;
+        }
       }
       adminUpdateUserProfile(uid, data).then(function() {
         var modal = document.getElementById('dashboardAdminEditModal');
@@ -1055,7 +1082,7 @@
       ul.innerHTML = list.map(function(u) {
         var rawEmail = u.email || '';
         var emailPart = rawEmail ? ('<span class="admin-email-text" data-email="' + escapeHtmlDashboard(rawEmail) + '" data-masked="' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '">' + escapeHtmlDashboard(maskEmailDashboard(rawEmail)) + '</span>') : '';
-        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + (emailPart ? ' — ' + emailPart : '') + '</span>' + (rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '') + '<button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
+        return '<li><span class="name">' + escapeHtmlDashboard(u.username || u.uid) + (emailPart ? ' — ' + emailPart : '') + '</span>' + (window._dashboardIsOwner && rawEmail ? '<button type="button" class="btn-icon admin-email-reveal" aria-label="Reveal email" title="Reveal email">👁</button>' : '') + '<button type="button" class="btn btn-ghost unban-list-btn" data-uid="' + escapeHtmlDashboard(u.uid) + '" style="font-size: 0.85rem;">Unban</button></li>';
       }).join('');
       ul.querySelectorAll('.unban-list-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -1577,6 +1604,8 @@
         modalBlur: (function() { var el = document.getElementById('modalBlur'); return el ? parseInt(el.value, 10) : 0; })(),
         modalBorderOpacity: (function() { var el = document.getElementById('modalBorderOpacity'); return el ? parseInt(el.value, 10) : 20; })(),
         modalRadius: (function() { var el = document.getElementById('modalRadius'); return el ? parseInt(el.value, 10) : 24; })(),
+        cardWidth: (function() { var el = document.getElementById('cardWidth'); var v = el && el.value.trim() !== '' ? parseInt(el.value, 10) : null; return (v != null && v >= 260 && v <= 800) ? v : null; })(),
+        cardHeight: (function() { var el = document.getElementById('cardHeight'); var v = el && el.value.trim() !== '' ? parseInt(el.value, 10) : null; return (v != null && v >= 0 && v <= 1200) ? v : null; })(),
         modalUseGradient: (function() { var el = document.getElementById('modalBackgroundMode'); return el ? el.value === 'gradient' : false; })(),
         modalBackgroundColor: (function() { var el = document.getElementById('modalBackgroundColor'); return el && /^#[0-9A-Fa-f]{6}$/.test(el.value) ? el.value : ''; })(),
         modalGradientColor1: (function() { var el = document.getElementById('modalGradientColor1'); return el && /^#[0-9A-Fa-f]{6}$/.test(el.value) ? el.value : ''; })(),
@@ -1591,6 +1620,7 @@
           metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
           metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
         showViewsOnBio: showViewsCb ? showViewsCb.checked : false,
+        showVerifiedCheckmark: (function() { var el = document.getElementById('showVerifiedCheckmark'); return el ? el.checked : false; })(),
         clickToEnter: (function() { var el = document.getElementById('clickToEnter'); return el ? el.checked : false; })(),
         badges: window._editorCurrentData.badges || { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
         badgeVisibility: window._editorCurrentData.badgeVisibility || {},

@@ -16,6 +16,14 @@ function isStaff(uid) {
   });
 }
 
+function isOwner(uid) {
+  var db = getDb();
+  if (!db || !uid) return Promise.resolve(false);
+  return db.ref('users/' + uid + '/badges/owner').once('value').then(function(snap) {
+    return snap.val() === true;
+  });
+}
+
 function getAllUsers() {
   var db = getDb();
   if (!db) return Promise.reject(new Error('Database not ready'));

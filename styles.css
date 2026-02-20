@@ -4365,6 +4365,16 @@ html { scrollbar-gutter: stable; }
   display: block;
   flex-shrink: 0;
 }
+.bio-link-btn.bio-link-icon-only {
+  width: auto;
+  min-width: 2.75em;
+  justify-content: center;
+  padding-left: 0.75em;
+  padding-right: 0.75em;
+}
+.bio-name-wrap { display: inline-flex; align-items: center; gap: 0.35em; flex-wrap: wrap; }
+.bio-verified-check { color: var(--purple-accent, #7c6bb8); font-size: 0.85em; line-height: 1; }
+.bio-link-btn.bio-link-icon-only .bio-link-label { display: none !important; }
 .bio-link-btn .bio-link-label {
   min-width: 0;
   overflow: hidden;

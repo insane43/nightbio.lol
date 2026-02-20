@@ -276,6 +276,10 @@
         var mainEl = document.getElementById('bioMain');
         if (mainEl) {
           if (data.displayStyle === 'card') {
+            mainEl.style.width = (data.cardWidth != null && data.cardWidth >= 260 && data.cardWidth <= 800) ? (data.cardWidth + 'px') : '';
+            mainEl.style.minWidth = (data.cardWidth != null && data.cardWidth >= 260 && data.cardWidth <= 800) ? (data.cardWidth + 'px') : '';
+            mainEl.style.height = (data.cardHeight != null && data.cardHeight >= 0 && data.cardHeight <= 1200) ? (data.cardHeight + 'px') : '';
+            mainEl.style.minHeight = '';
             var modalOpacityVal = (data.modalOpacity != null ? Math.min(100, Math.max(0, data.modalOpacity)) : 96) / 100;
             mainEl.style.setProperty('--modal-opacity', String(modalOpacityVal));
             mainEl.style.setProperty('--modal-blur', String(Math.min(24, Math.max(0, data.modalBlur != null ? data.modalBlur : 0))) + 'px');
@@ -298,6 +302,10 @@
             mainEl.style.removeProperty('--modal-border-opacity');
             mainEl.style.removeProperty('--modal-radius');
             mainEl.style.background = '';
+            mainEl.style.width = '';
+            mainEl.style.minWidth = '';
+            mainEl.style.height = '';
+            mainEl.style.minHeight = '';
           }
         }
         if (premium && data.premiumCustomFontFamily && data.premiumCustomFontFamily.trim()) {
@@ -475,12 +483,32 @@
         }
 
         var nameText = data.displayName || data.username || '';
+        var existingWrap = document.getElementById('bioNameWrap');
+        if (existingWrap && existingWrap.parentNode) {
+          existingWrap.parentNode.insertBefore(nameEl, existingWrap);
+          existingWrap.remove();
+        }
+        var existingCheck = document.getElementById('bioVerifiedCheck');
+        if (existingCheck) existingCheck.remove();
         if (premium && data.premiumUsernameEffect === 'typewriter') {
           nameEl.textContent = '';
           nameEl.style.display = 'block';
           typewriterEffect(nameEl, nameText, 80);
         } else {
           nameEl.textContent = nameText;
+        }
+        if (data.showVerifiedCheckmark && data.badges && data.badges.verified) {
+          var wrap = document.createElement('span');
+          wrap.id = 'bioNameWrap';
+          wrap.className = 'bio-name-wrap';
+          nameEl.parentNode.insertBefore(wrap, nameEl);
+          wrap.appendChild(nameEl);
+          var checkSpan = document.createElement('span');
+          checkSpan.id = 'bioVerifiedCheck';
+          checkSpan.className = 'bio-verified-check';
+          checkSpan.setAttribute('aria-hidden', 'true');
+          checkSpan.textContent = '\u2713';
+          wrap.appendChild(checkSpan);
         }
         var alsoKnownEl = document.getElementById('bioAlsoKnownAs');
         if (alsoKnownEl) {
@@ -518,7 +546,7 @@
             if (premium && data.badgeColors && data.badgeColors[key] && /^#[0-9A-Fa-f]{6}$/.test(String(data.badgeColors[key]))) {
               span.style.color = String(data.badgeColors[key]);
             }
-            var tip = info ? ((info.label || (labels[key] || key)) + (info.desc ? ' — ' + info.desc : '')) : (labels[key] || key);
+            var tip = (labels[key] || key);
             span.setAttribute('data-tooltip', tip);
             span.setAttribute('tabindex', '0');
             if (icons[key]) {
@@ -609,7 +637,8 @@
           a.href = l.url;
           a.target = '_blank';
           a.rel = 'noopener';
-          a.className = 'bio-link-btn';
+          a.className = 'bio-link-btn' + (l.iconOnly ? ' bio-link-icon-only' : '');
+          a.setAttribute('data-tooltip', l.iconOnly ? (l.label || l.url) : '');
           var iconKey = (l.icon && l.icon.trim()) ? l.icon.trim() : 'link';
           var iconSpan = document.createElement('span');
           iconSpan.className = 'bio-link-icon';
@@ -624,6 +653,7 @@
           var labelSpan = document.createElement('span');
           labelSpan.className = 'bio-link-label';
           labelSpan.textContent = l.label || l.url;
+          if (l.iconOnly) labelSpan.style.display = 'none';
           a.appendChild(labelSpan);
           linksEl.appendChild(a);
         });

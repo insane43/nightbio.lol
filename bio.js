@@ -90,6 +90,8 @@ function loadBioForUid(uid) {
       modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
       modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
       modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
+      cardWidth: (d.cardWidth != null && d.cardWidth >= 260 && d.cardWidth <= 800) ? d.cardWidth : null,
+      cardHeight: (d.cardHeight != null && d.cardHeight >= 0 && d.cardHeight <= 1200) ? d.cardHeight : null,
       modalUseGradient: !!(d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2),
       modalBackgroundColor: (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '',
       modalGradientColor1: (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '',
@@ -99,6 +101,7 @@ function loadBioForUid(uid) {
       metaDescription: d.metaDescription || '',
       metaImageURL: d.metaImageURL || '',
       showViewsOnBio: !!d.showViewsOnBio,
+      showVerifiedCheckmark: !!(d.showVerifiedCheckmark && merged && merged.verified),
       stats: { views: views },
       badges: visibleBadges,
       hasPremium: !!(merged && merged.premium),
@@ -235,6 +238,8 @@ function getCurrentUserBio(uid) {
       modalBlur: d.modalBlur != null ? Math.min(24, Math.max(0, parseInt(d.modalBlur, 10) || 0)) : 0,
       modalBorderOpacity: d.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(d.modalBorderOpacity, 10) || 20)) : 20,
       modalRadius: d.modalRadius != null ? Math.min(32, Math.max(8, parseInt(d.modalRadius, 10) || 24)) : 24,
+      cardWidth: (d.cardWidth != null && d.cardWidth >= 260 && d.cardWidth <= 800) ? d.cardWidth : null,
+      cardHeight: (d.cardHeight != null && d.cardHeight >= 0 && d.cardHeight <= 1200) ? d.cardHeight : null,
       modalUseGradient: !!(d.modalUseGradient && d.modalGradientColor1 && d.modalGradientColor2),
       modalBackgroundColor: (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '',
       modalGradientColor1: (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '',
@@ -244,6 +249,7 @@ function getCurrentUserBio(uid) {
       metaDescription: d.metaDescription || '',
       metaImageURL: d.metaImageURL || '',
       showViewsOnBio: !!d.showViewsOnBio,
+      showVerifiedCheckmark: !!(d.showVerifiedCheckmark && d.badges && d.badges.verified),
       stats: d.stats || { views: 0 },
       badges: mergeBadges(d.badges),
       badgeVisibility: d.badgeVisibility && typeof d.badgeVisibility === 'object' ? d.badgeVisibility : {},
@@ -301,11 +307,14 @@ function saveBio(uid, data) {
     modalBlur: data.modalBlur != null ? Math.min(24, Math.max(0, parseInt(data.modalBlur, 10) || 0)) : 0,
     modalBorderOpacity: data.modalBorderOpacity != null ? Math.min(100, Math.max(0, parseInt(data.modalBorderOpacity, 10) || 20)) : 20,
     modalRadius: data.modalRadius != null ? Math.min(32, Math.max(8, parseInt(data.modalRadius, 10) || 24)) : 24,
+    cardWidth: (data.cardWidth != null && data.cardWidth >= 260 && data.cardWidth <= 800) ? data.cardWidth : null,
+    cardHeight: (data.cardHeight != null && data.cardHeight >= 0 && data.cardHeight <= 1200) ? data.cardHeight : null,
     clickToEnter: !!data.clickToEnter,
     metaTitle: (data.metaTitle || '').trim().slice(0, 80),
     metaDescription: (data.metaDescription || '').trim().slice(0, 200),
     metaImageURL: (data.metaImageURL || '').trim().slice(0, 500),
     showViewsOnBio: !!data.showViewsOnBio,
+    showVerifiedCheckmark: !!data.showVerifiedCheckmark,
     updatedAt: firebase.database.ServerValue.TIMESTAMP
   };
   if (data.badges && typeof data.badges === 'object') {
@@ -327,7 +336,8 @@ function saveBio(uid, data) {
         label: String(l.label || '').trim().slice(0, 50),
         url: String(l.url || '').trim().slice(0, 500),
         icon: String(l.icon || '').trim().slice(0, 30),
-        iconURL: String(l.iconURL || '').trim().slice(0, 500)
+        iconURL: String(l.iconURL || '').trim().slice(0, 500),
+        iconOnly: !!l.iconOnly
       };
     }).filter(function(l) { return l.url; });
   }

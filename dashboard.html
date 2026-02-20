@@ -248,6 +248,16 @@
                 <label for="modalRadius">Corner radius (px)</label>
                 <input type="number" id="modalRadius" min="8" max="32" value="24" class="form-input-num">
               </div>
+              <div class="form-group">
+                <label for="cardWidth">Card width (px)</label>
+                <input type="number" id="cardWidth" min="260" max="800" placeholder="360" class="form-input-num" aria-describedby="cardWidthHint">
+                <span id="cardWidthHint" class="form-hint">Leave empty for default (360px).</span>
+              </div>
+              <div class="form-group">
+                <label for="cardHeight">Card height (px)</label>
+                <input type="number" id="cardHeight" min="0" max="1200" placeholder="auto" class="form-input-num" aria-describedby="cardHeightHint">
+                <span id="cardHeightHint" class="form-hint">Leave empty for auto (fits content).</span>
+              </div>
             </div>
             <div class="form-group form-check">
               <input type="checkbox" id="clickToEnter" class="form-checkbox" aria-describedby="clickToEnterDesc">
@@ -326,6 +336,13 @@
                 Show profile views on my bio link
               </label>
               <p class="panel-desc" id="showViewsOnBioDesc">When enabled, visitors will see your profile view count on your public bio page.</p>
+            </div>
+            <div class="form-group" id="showVerifiedCheckmarkWrap" style="display: none;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="showVerifiedCheckmark" aria-describedby="showVerifiedCheckmarkDesc">
+                Show checkmark next to my username
+              </label>
+              <p class="panel-desc" id="showVerifiedCheckmarkDesc">Only available with the Verified badge. Displays a checkmark (✓) next to your name on your bio link.</p>
             </div>
           </div>
         </section>
