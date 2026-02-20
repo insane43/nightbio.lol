@@ -2665,11 +2665,21 @@ body.toplander .skiptranslate { display: none !important; }
   width: 120px;
   height: 120px;
   border-radius: 50%;
+  flex-shrink: 0;
+}
+.avatar-upload-box .media-preview,
+.avatar-upload-box .avatar-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 .media-preview {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 .avatar-preview-img { border-radius: 50%; }
@@ -2686,8 +2696,17 @@ body.toplander .skiptranslate { display: none !important; }
 }
 .media-placeholder-icon { font-size: 1.75rem; opacity: 0.7; }
 .banner-upload-box .media-preview-wrap {
+  width: 100%;
   height: 100px;
   min-height: 100px;
+}
+.banner-upload-box .media-preview,
+.banner-upload-box .banner-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 .banner-preview-wrap { border-radius: var(--radius-sm); }
 .banner-placeholder { padding: 1rem; }
@@ -3229,9 +3248,13 @@ input[type="checkbox"]:disabled,
 }
 .preview-banner {
   height: 90px;
+  min-height: 90px;
+  width: 100%;
   background: var(--purple-dim);
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
 }
 .preview-profile {
   text-align: center;
@@ -4155,7 +4178,23 @@ html { scrollbar-gutter: stable; }
 }
 
 /* Cover image as full-page background */
-.bio-page #bioCoverBg { image-rendering: auto; }
+.bio-page #bioCoverBg {
+  image-rendering: auto;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%; height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Banner img is not used (cover is full-page bg); ensure it never shows or affects layout */
+.bio-page #bioBanner {
+  display: none !important;
+  position: absolute;
+  width: 0; height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
 .bio-page.bio-has-cover-bg .bg-gradient {
   /* remove the opaque bg so the cover shows through */
   background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 72%);
@@ -4183,13 +4222,17 @@ html { scrollbar-gutter: stable; }
   display: block;
   width: 100px;
   height: 100px;
+  max-width: 100%;
+  min-width: 0;
   margin-left: auto;
   margin-right: auto;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center;
   border: 4px solid var(--bg-card);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   background: var(--bg-elevated);
+  flex-shrink: 0;
 }
 
 /* Premium: 3D tilt parallax on card (card tilts toward cursor) */
@@ -4206,12 +4249,26 @@ html { scrollbar-gutter: stable; }
 }
 .bio-content-wrap.bio-layout-minimal .bio-profile { margin-top: 0; }
 .bio-content-wrap.bio-layout-wide .bio-banner { height: 220px; }
+/* None: flat background, no gradient or pattern */
+.bio-page.bio-bg-none .bg-gradient {
+  background: var(--bg-deep);
+}
+.bio-page.bio-bg-none .bg-gradient::after {
+  display: none;
+}
+.bio-page.bio-bg-none .bg-grid {
+  opacity: 0;
+}
 .bio-page.bio-bg-gradient .bg-gradient {
   background: radial-gradient(ellipse 80% 50% at 50% -20%, var(--purple-glow), transparent 50%),
     radial-gradient(ellipse 60% 40% at 80% 60%, rgba(74, 63, 107, 0.3), transparent 45%),
     var(--bg-deep);
 }
 .bio-page.bio-bg-pattern .bg-grid { opacity: 0.4; }
+.bio-page.bio-bg-snowflakes .bg-gradient,
+.bio-page.bio-bg-snowflakes .bg-grid { opacity: 0.85; }
+.bio-page.bio-bg-rain .bg-gradient,
+.bio-page.bio-bg-rain .bg-grid { opacity: 0.85; }
 .bio-name, .bio-bio-text, .bio-link-btn {
   font-family: var(--bio-font), var(--font-body), sans-serif;
   font-size: var(--bio-font-size);
@@ -4373,7 +4430,8 @@ html { scrollbar-gutter: stable; }
   padding-right: 0.75em;
 }
 .bio-name-wrap { display: inline-flex; align-items: center; gap: 0.35em; flex-wrap: wrap; }
-.bio-verified-check { color: var(--purple-accent, #7c6bb8); font-size: 0.85em; line-height: 1; }
+.bio-verified-check { display: inline-flex; align-items: center; color: var(--purple-accent, #7c6bb8); line-height: 1; }
+.bio-verified-check svg { width: 1em; height: 1em; margin-left: 0.15em; }
 .bio-link-btn.bio-link-icon-only .bio-link-label { display: none !important; }
 .bio-link-btn .bio-link-label {
   min-width: 0;
@@ -4470,7 +4528,7 @@ html { scrollbar-gutter: stable; }
   animation: nbRainbow 4s linear infinite;
   color: var(--purple-accent);
 }
-.bio-content-wrap.bio-username-effect-fuzzy .bio-name {
+.bio-username-effect-fuzzy-removed .bio-name {
   text-shadow: 0 0 8px currentColor, 0 0 12px currentColor, 0 0 4px currentColor;
   filter: blur(0.5px);
 }

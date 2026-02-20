@@ -259,9 +259,9 @@
                 <span id="cardHeightHint" class="form-hint">Leave empty for auto (fits content).</span>
               </div>
             </div>
-            <div class="form-group form-check">
+            <div class="form-group form-check" style="display: none;">
               <input type="checkbox" id="clickToEnter" class="form-checkbox" aria-describedby="clickToEnterDesc">
-              <label for="clickToEnter">Click to enter</label>
+              <label for="clickToEnter" aria-hidden="true">Click to enter</label>
               <p id="clickToEnterDesc" class="panel-desc">Visitors must click to see your bio (like guns.lol). Shows a full-screen “Enter” screen until they click.</p>
             </div>
           </div>
@@ -314,6 +314,8 @@
                 <option value="none">None</option>
                 <option value="gradient">Gradient</option>
                 <option value="pattern">Subtle pattern</option>
+                <option value="snowflakes">Snowflakes</option>
+                <option value="rain">Rain</option>
               </select>
             </div>
           </div>
@@ -736,7 +738,6 @@
                 <option value="">None</option>
                 <option value="typewriter">Typewriter</option>
                 <option value="rainbow">Rainbow</option>
-                <option value="fuzzy">Fuzzy</option>
                 <option value="shuffle">Shuffle</option>
               </select>
             </div>
@@ -789,6 +790,14 @@
                 <input type="text" id="premiumNameColorHex" class="color-hex-input" value="#ffffff" maxlength="7" placeholder="#ffffff">
               </div>
               <p class="panel-desc">Color of your display name. Leave default (white) or pick any color.</p>
+            </div>
+            <div class="form-group">
+              <label for="premiumBioColor">Bio text color</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="premiumBioColor" value="#e2e8f0" aria-label="Bio text color">
+                <input type="text" id="premiumBioColorHex" class="color-hex-input" value="#e2e8f0" maxlength="7" placeholder="#e2e8f0">
+              </div>
+              <p class="panel-desc">Color of your bio paragraph. Leave default or pick any color.</p>
             </div>
             <div class="form-group">
               <label for="premiumBioFontSize">Bio font size (px)</label>

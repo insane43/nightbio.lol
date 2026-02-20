@@ -96,7 +96,6 @@ function loadBioForUid(uid) {
       modalBackgroundColor: (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '',
       modalGradientColor1: (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '',
       modalGradientColor2: (d.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor2)) ? d.modalGradientColor2 : '',
-      clickToEnter: !!d.clickToEnter,
       metaTitle: d.metaTitle || '',
       metaDescription: d.metaDescription || '',
       metaImageURL: d.metaImageURL || '',
@@ -118,6 +117,7 @@ function loadBioForUid(uid) {
       premiumGlowColor: (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '',
       premiumGlowStrength: d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100,
       premiumNameColor: (d.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumNameColor))) ? String(d.premiumNameColor).trim() : '',
+      premiumBioColor: (d.premiumBioColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumBioColor))) ? String(d.premiumBioColor).trim() : '',
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumBackgroundEffect: d.premiumBackgroundEffect === 'blurred' ? 'blurred' : '',
       premiumBackgroundEffectColor: (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '',
@@ -244,7 +244,6 @@ function getCurrentUserBio(uid) {
       modalBackgroundColor: (d.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(d.modalBackgroundColor)) ? d.modalBackgroundColor : '',
       modalGradientColor1: (d.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor1)) ? d.modalGradientColor1 : '',
       modalGradientColor2: (d.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(d.modalGradientColor2)) ? d.modalGradientColor2 : '',
-      clickToEnter: !!d.clickToEnter,
       metaTitle: d.metaTitle || '',
       metaDescription: d.metaDescription || '',
       metaImageURL: d.metaImageURL || '',
@@ -266,6 +265,7 @@ function getCurrentUserBio(uid) {
       premiumGlowColor: (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '',
       premiumGlowStrength: d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100,
       premiumNameColor: (d.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumNameColor))) ? String(d.premiumNameColor).trim() : '',
+      premiumBioColor: (d.premiumBioColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumBioColor))) ? String(d.premiumBioColor).trim() : '',
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
       premiumBackgroundEffect: d.premiumBackgroundEffect === 'blurred' ? 'blurred' : '',
       premiumBackgroundEffectColor: (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '',
@@ -309,7 +309,6 @@ function saveBio(uid, data) {
     modalRadius: data.modalRadius != null ? Math.min(32, Math.max(8, parseInt(data.modalRadius, 10) || 24)) : 24,
     cardWidth: (data.cardWidth != null && data.cardWidth >= 260 && data.cardWidth <= 800) ? data.cardWidth : null,
     cardHeight: (data.cardHeight != null && data.cardHeight >= 0 && data.cardHeight <= 1200) ? data.cardHeight : null,
-    clickToEnter: !!data.clickToEnter,
     metaTitle: (data.metaTitle || '').trim().slice(0, 80),
     metaDescription: (data.metaDescription || '').trim().slice(0, 200),
     metaImageURL: (data.metaImageURL || '').trim().slice(0, 500),
@@ -357,6 +356,7 @@ function saveBio(uid, data) {
   if (data.modalGradientColor1 !== undefined) updates.modalGradientColor1 = (data.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(data.modalGradientColor1)) ? data.modalGradientColor1 : '';
   if (data.modalGradientColor2 !== undefined) updates.modalGradientColor2 = (data.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(data.modalGradientColor2)) ? data.modalGradientColor2 : '';
   if (data.premiumNameColor !== undefined) updates.premiumNameColor = (data.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(data.premiumNameColor))) ? String(data.premiumNameColor).trim() : '';
+  if (data.premiumBioColor !== undefined) updates.premiumBioColor = (data.premiumBioColor && /^#[0-9A-Fa-f]{6}$/.test(String(data.premiumBioColor))) ? String(data.premiumBioColor).trim() : '';
   if (data.premiumBioFontSize !== undefined) updates.premiumBioFontSize = data.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(data.premiumBioFontSize, 10) || 15)) : null;
   if (data.premiumBackgroundEffect !== undefined) updates.premiumBackgroundEffect = (data.premiumBackgroundEffect === 'blurred' || data.premiumBackgroundEffect === 'snowflakes' || data.premiumBackgroundEffect === 'rain') ? data.premiumBackgroundEffect : '';
   if (data.premiumBackgroundEffectColor !== undefined) updates.premiumBackgroundEffectColor = (data.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(data.premiumBackgroundEffectColor)) ? data.premiumBackgroundEffectColor : '';

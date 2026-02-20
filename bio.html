@@ -101,7 +101,7 @@
       }
 
       function loadFont(fontFamily) {
-        if (!fontFamily || fontFamily === 'Outfit') return;
+        if (!fontFamily || typeof fontFamily !== 'string') return;
         var familyParam = fontFamily.replace(/\s+/g, '+');
         var link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -228,41 +228,7 @@
         content.style.display = 'block';
 
         setMetaTags(data);
-        if (data.clickToEnter) {
-          var overlay = document.getElementById('bioClickToEnterOverlay');
-          if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'bioClickToEnterOverlay';
-            overlay.className = 'bio-click-to-enter-overlay';
-            overlay.setAttribute('role', 'button');
-            overlay.tabIndex = 0;
-            overlay.innerHTML = '<span class="bio-click-to-enter-text">Click to enter</span>';
-            overlay.addEventListener('click', function enter() {
-              overlay.removeEventListener('click', enter);
-              overlay.removeEventListener('keydown', onKey);
-              if (data.uid) recordProfileView(data.uid);
-              overlay.classList.add('bio-click-to-enter-dismissed');
-              overlay.style.pointerEvents = 'none';
-              setTimeout(function() {
-                if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-              }, 400);
-            });
-            function onKey(e) {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                overlay.click();
-              }
-            }
-            overlay.addEventListener('keydown', onKey);
-          }
-          overlay.classList.remove('bio-click-to-enter-dismissed');
-          overlay.style.pointerEvents = '';
-          document.body.appendChild(overlay);
-        } else {
-          var existingOverlay = document.getElementById('bioClickToEnterOverlay');
-          if (existingOverlay && existingOverlay.parentNode) existingOverlay.parentNode.removeChild(existingOverlay);
-          if (data.uid) recordProfileView(data.uid);
-        }
+        if (data.uid) recordProfileView(data.uid);
 
         var layout = data.layout || 'classic';
         var fontFamily = data.fontFamily || 'Outfit';
@@ -323,11 +289,14 @@
           (premium && data.premiumGlowBadges ? ' bio-glow-badges' : '') +
           (premium && data.premiumGlowBio ? ' bio-glow-bio' : '') +
           (premium && data.premiumMonochromeBadges ? ' bio-badges-monochrome' : '');
-        document.body.classList.remove('bio-bg-none', 'bio-bg-gradient', 'bio-bg-pattern');
+        document.body.classList.remove('bio-bg-none', 'bio-bg-gradient', 'bio-bg-pattern', 'bio-bg-snowflakes', 'bio-bg-rain');
         document.body.classList.add('bio-bg-' + (bgEffect === 'none' ? 'none' : bgEffect));
         document.body.classList.remove('bio-bg-effect-blurred', 'bio-bg-effect-snowflakes', 'bio-bg-effect-rain');
-        var bgEffectPremium = (premium && data.premiumBackgroundEffect === 'blurred') ? 'blurred' : '';
-        if (bgEffectPremium) document.body.classList.add('bio-bg-effect-blurred');
+        var bgEffectPremium = (premium && (data.premiumBackgroundEffect === 'blurred' || data.premiumBackgroundEffect === 'snowflakes' || data.premiumBackgroundEffect === 'rain')) ? data.premiumBackgroundEffect : '';
+        if (bgEffectPremium === 'blurred') document.body.classList.add('bio-bg-effect-blurred');
+        if (bgEffectPremium === 'snowflakes') document.body.classList.add('bio-bg-effect-snowflakes');
+        if (bgEffectPremium === 'rain') document.body.classList.add('bio-bg-effect-rain');
+        if (bgEffect === 'snowflakes' || bgEffect === 'rain') document.body.classList.add('bio-bg-effect-' + bgEffect);
         var blurCoverEl = document.getElementById('bioBgBlurCover');
         if (blurCoverEl) {
           if (bgEffectPremium === 'blurred') {
@@ -346,6 +315,23 @@
         }
         var oldParticles = document.getElementById('bioParticleEffect');
         if (oldParticles && oldParticles.parentNode) oldParticles.remove();
+        var useSnowflakes = (bgEffect === 'snowflakes') || (premium && data.premiumBackgroundEffect === 'snowflakes');
+        var useRain = (bgEffect === 'rain') || (premium && data.premiumBackgroundEffect === 'rain');
+        if (useSnowflakes || useRain) {
+          var particleWrap = document.createElement('div');
+          particleWrap.id = 'bioParticleEffect';
+          particleWrap.className = 'bio-particle-effect';
+          var count = useSnowflakes ? 35 : 50;
+          for (var i = 0; i < count; i++) {
+            var el = document.createElement('div');
+            el.className = useSnowflakes ? 'bio-snowflake' : 'bio-raindrop';
+            el.style.left = (Math.random() * 100) + '%';
+            el.style.animationDuration = (useSnowflakes ? (4 + Math.random() * 4) : (0.8 + Math.random() * 0.6)) + 's';
+            el.style.animationDelay = (Math.random() * 5) + 's';
+            particleWrap.appendChild(el);
+          }
+          document.body.insertBefore(particleWrap, document.body.firstChild);
+        }
         if (premium && data.premiumVideoBackground && data.premiumVideoBackground.trim()) {
           document.body.classList.add('bio-premium-video-bg');
           var existingVideo = document.getElementById('bioPremiumVideoBg');
@@ -369,7 +355,8 @@
         }
 
         loadFont(fontFamily);
-        document.body.style.setProperty('--bio-font', fontFamily);
+        var fontValue = (fontFamily.indexOf(' ') !== -1) ? ('"' + fontFamily.replace(/"/g, '\\"') + '"') : fontFamily;
+        document.body.style.setProperty('--bio-font', fontValue);
         document.body.style.setProperty('--bio-font-size', fontSize + 'px');
         document.body.style.setProperty('--bio-letter-spacing', letterSpacing + 'px');
         if (data.accentColor) document.body.style.setProperty('--purple-accent', data.accentColor);
@@ -414,7 +401,9 @@
           if (!coverEl) {
             coverEl = document.createElement('div');
             coverEl.id = 'bioCoverBg';
-            coverEl.style.cssText = 'position:fixed;inset:0;z-index:-2;background-size:cover;background-position:center;pointer-events:none;';
+            coverEl.setAttribute('role', 'img');
+            coverEl.setAttribute('aria-hidden', 'true');
+            coverEl.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:-2;background-size:cover;background-position:center;background-repeat:no-repeat;pointer-events:none;';
             document.body.insertBefore(coverEl, document.body.firstChild);
           }
           coverEl.style.backgroundImage = 'url(' + coverUrl.replace(/["\\]/g, '') + ')';
@@ -507,7 +496,8 @@
           checkSpan.id = 'bioVerifiedCheck';
           checkSpan.className = 'bio-verified-check';
           checkSpan.setAttribute('aria-hidden', 'true');
-          checkSpan.textContent = '\u2713';
+          var checkSvg = (window.BADGE_ICONS && window.BADGE_ICONS.checkmark) ? window.BADGE_ICONS.checkmark : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/></svg>';
+          checkSpan.innerHTML = checkSvg;
           wrap.appendChild(checkSpan);
         }
         var alsoKnownEl = document.getElementById('bioAlsoKnownAs');
@@ -524,6 +514,11 @@
           nameEl.style.color = String(data.premiumNameColor).trim();
         } else {
           nameEl.style.color = '';
+        }
+        if (premium && data.premiumBioColor && /^#[0-9A-Fa-f]{6}$/.test(String(data.premiumBioColor))) {
+          bioEl.style.color = String(data.premiumBioColor).trim();
+        } else {
+          bioEl.style.color = '';
         }
         if (premium && data.premiumBioFontSize != null) {
           bioEl.style.fontSize = Math.min(24, Math.max(12, data.premiumBioFontSize)) + 'px';

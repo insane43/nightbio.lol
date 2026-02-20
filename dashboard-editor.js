@@ -644,23 +644,33 @@
       var showVerifiedCheckmarkCb = document.getElementById('showVerifiedCheckmark');
       if (showVerifiedCheckmarkWrap) showVerifiedCheckmarkWrap.style.display = (d.badges && d.badges.verified) ? '' : 'none';
       if (showVerifiedCheckmarkCb) showVerifiedCheckmarkCb.checked = !!d.showVerifiedCheckmark;
-      var clickToEnterCb = document.getElementById('clickToEnter');
-      if (clickToEnterCb) clickToEnterCb.checked = !!d.clickToEnter;
       refreshProfileViews();
 
       if (avatarURLInput) avatarURLInput.value = d.avatarURL || '';
       if (bannerURLInput) bannerURLInput.value = d.bannerURL || '';
       if (songURLInput) songURLInput.value = d.songURL || '';
-      if (avatarPreview && d.avatarURL) {
-        avatarPreview.src = d.avatarURL;
-        avatarPreview.style.display = 'block';
-        if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
-      } else if (avatarPlaceholder) avatarPlaceholder.style.display = '';
-      if (bannerPreview && d.bannerURL) {
-        bannerPreview.src = d.bannerURL;
-        bannerPreview.style.display = 'block';
-        if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
-      } else if (bannerPlaceholder) bannerPlaceholder.style.display = '';
+      if (avatarPreview && avatarPlaceholder) {
+        if (d.avatarURL) {
+          avatarPreview.src = d.avatarURL;
+          avatarPreview.style.display = 'block';
+          avatarPlaceholder.style.display = 'none';
+        } else {
+          avatarPreview.style.display = 'none';
+          avatarPreview.removeAttribute('src');
+          avatarPlaceholder.style.display = 'flex';
+        }
+      }
+      if (bannerPreview && bannerPlaceholder) {
+        if (d.bannerURL) {
+          bannerPreview.src = d.bannerURL;
+          bannerPreview.style.display = 'block';
+          bannerPlaceholder.style.display = 'none';
+        } else {
+          bannerPreview.style.display = 'none';
+          bannerPreview.removeAttribute('src');
+          bannerPlaceholder.style.display = 'flex';
+        }
+      }
 
       var tabPremium = document.getElementById('tabPremium');
       if (tabPremium) tabPremium.style.display = (d.badges && d.badges.premium) ? '' : 'none';
@@ -683,6 +693,10 @@
         set('premiumNameColor', nameColorVal);
         var pNameColorHex = document.getElementById('premiumNameColorHex');
         if (pNameColorHex) pNameColorHex.value = nameColorVal;
+        var bioColorVal = (d.premiumBioColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumBioColor))) ? d.premiumBioColor : '#e2e8f0';
+        set('premiumBioColor', bioColorVal);
+        var pBioColorHex = document.getElementById('premiumBioColorHex');
+        if (pBioColorHex) pBioColorHex.value = bioColorVal;
         set('premiumBioFontSize', d.premiumBioFontSize != null ? d.premiumBioFontSize : '');
         set('premiumCustomFontFamily', d.premiumCustomFontFamily);
         set('premiumLayoutPreset', d.premiumLayoutPreset);
@@ -1437,29 +1451,29 @@
     function syncMediaFromInputs() {
       if (avatarURLInput) {
         window._editorCurrentData.avatarURL = avatarURLInput.value.trim();
-        if (avatarPreview) {
+        if (avatarPreview && avatarPlaceholder) {
           if (window._editorCurrentData.avatarURL) {
             avatarPreview.src = window._editorCurrentData.avatarURL;
             avatarPreview.style.display = 'block';
-            if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
+            avatarPlaceholder.style.display = 'none';
           } else {
             avatarPreview.style.display = 'none';
             avatarPreview.removeAttribute('src');
-            if (avatarPlaceholder) avatarPlaceholder.style.display = '';
+            avatarPlaceholder.style.display = 'flex';
           }
         }
       }
       if (bannerURLInput) {
         window._editorCurrentData.bannerURL = bannerURLInput.value.trim();
-          if (bannerPreview) {
+        if (bannerPreview && bannerPlaceholder) {
           if (window._editorCurrentData.bannerURL) {
             bannerPreview.src = window._editorCurrentData.bannerURL;
             bannerPreview.style.display = 'block';
-          if (bannerPlaceholder) bannerPlaceholder.style.display = 'none';
+            bannerPlaceholder.style.display = 'none';
           } else {
             bannerPreview.style.display = 'none';
             bannerPreview.removeAttribute('src');
-            if (bannerPlaceholder) bannerPlaceholder.style.display = '';
+            bannerPlaceholder.style.display = 'flex';
           }
         }
       }
@@ -1621,7 +1635,6 @@
           metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
         showViewsOnBio: showViewsCb ? showViewsCb.checked : false,
         showVerifiedCheckmark: (function() { var el = document.getElementById('showVerifiedCheckmark'); return el ? el.checked : false; })(),
-        clickToEnter: (function() { var el = document.getElementById('clickToEnter'); return el ? el.checked : false; })(),
         badges: window._editorCurrentData.badges || { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
         badgeVisibility: window._editorCurrentData.badgeVisibility || {},
         badgeColors: (window._editorCurrentData && window._editorCurrentData.badgeColors) || {},
@@ -1655,6 +1668,9 @@
         payload.premiumLinkBorderRadius = pLinkBr && pLinkBr.value.trim() !== '' ? parseInt(pLinkBr.value, 10) : null;
         payload.premiumUsernameEffect = pUsernameEffect ? pUsernameEffect.value.trim() : '';
         payload.premiumNameColor = (pNameColor && /^#[0-9A-Fa-f]{6}$/.test(pNameColor.value)) ? pNameColor.value : (pNameColorHexEl && /^#[0-9A-Fa-f]{6}$/.test(pNameColorHexEl.value.trim()) ? pNameColorHexEl.value.trim() : '');
+        var pBioColor = document.getElementById('premiumBioColor');
+        var pBioColorHexEl = document.getElementById('premiumBioColorHex');
+        payload.premiumBioColor = (pBioColor && /^#[0-9A-Fa-f]{6}$/.test(pBioColor.value)) ? pBioColor.value : (pBioColorHexEl && /^#[0-9A-Fa-f]{6}$/.test(pBioColorHexEl.value.trim()) ? pBioColorHexEl.value.trim() : '';
         payload.premiumBioFontSize = pBioFs && pBioFs.value.trim() !== '' ? parseInt(pBioFs.value, 10) : null;
         var pBgEffect = document.getElementById('premiumBackgroundEffect');
         payload.premiumBackgroundEffect = (pBgEffect && pBgEffect.value === 'blurred') ? 'blurred' : '';
@@ -1773,6 +1789,7 @@
     syncModalColorPicker('modalGradientColor1', 'modalGradientColor1Hex');
     syncModalColorPicker('modalGradientColor2', 'modalGradientColor2Hex');
     syncModalColorPicker('premiumNameColor', 'premiumNameColorHex');
+    syncModalColorPicker('premiumBioColor', 'premiumBioColorHex');
     var pBgEffectSelect = document.getElementById('premiumBackgroundEffect');
     if (pBgEffectSelect) pBgEffectSelect.addEventListener('change', updatePreview);
     var btnStyleEl = document.getElementById('buttonStyle');
