@@ -2668,19 +2668,27 @@ html { scrollbar-gutter: stable; }
     0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 18%, transparent),
     0 0 calc(var(--bio-glow-4xl, 18px) * 1.4) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 8%, transparent);
 }
+/* Badge glow: glow each badge pill (not the container outline) — realistic soft emission */
 .bio-content-wrap.bio-glow-badges .bio-badges {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+.bio-content-wrap.bio-glow-badges .bio-badge {
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 25%, transparent),
-    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 22%, transparent),
-    0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 12%, transparent),
-    0 4px 20px rgba(0, 0, 0, 0.25);
+    0 0 var(--bio-glow-sm, 4px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 70%, transparent),
+    0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 50%, transparent),
+    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 35%, transparent),
+    0 0 var(--bio-glow-2xl, 12px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 22%, transparent),
+    0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 12%, transparent);
 }
 .bio-content-wrap.bio-glow-badges .bio-badge-icon svg {
-  filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 10px color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 40%, transparent));
+  filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 60%, transparent));
 }
 @supports not (color: color-mix(in srgb, red 50%, blue)) {
   .bio-content-wrap.bio-glow-badges .bio-badges {
-    box-shadow: 0 0 0 1px rgba(124,107,184,0.25), 0 0 var(--bio-glow-xl, 10px) var(--bio-glow-color, var(--purple-accent)), 0 4px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+  .bio-content-wrap.bio-glow-badges .bio-badge {
+    box-shadow: 0 0 6px var(--bio-glow-color, var(--purple-accent)), 0 0 14px var(--bio-glow-color, var(--purple-accent));
   }
   .bio-content-wrap.bio-glow-badges .bio-badge-icon svg { filter: drop-shadow(0 0 6px currentColor); }
 }
