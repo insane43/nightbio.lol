@@ -68,6 +68,9 @@
       buttonStyle: (document.getElementById('buttonStyle') && document.getElementById('buttonStyle').value) || 'filled',
       showViewsOnBio: !!(document.getElementById('showViewsOnBio') && document.getElementById('showViewsOnBio').checked),
       badges: (window._editorCurrentData && window._editorCurrentData.badges) || { community: true, og: false, owner: false, staff: false, verified: false, premium: false },
+      badgeVisibility: (window._editorCurrentData && window._editorCurrentData.badgeVisibility) || {},
+      badgeColors: (window._editorCurrentData && window._editorCurrentData.badgeColors) || {},
+      alias: (window._editorCurrentData && window._editorCurrentData.alias != null) ? String(window._editorCurrentData.alias).trim() : '',
       metaTitle: (document.getElementById('metaTitle') && document.getElementById('metaTitle').value.trim()) || '',
       metaDescription: (document.getElementById('metaDescription') && document.getElementById('metaDescription').value.trim()) || '',
       metaImageURL: (document.getElementById('metaImageURL') && document.getElementById('metaImageURL').value.trim()) || '',
@@ -108,6 +111,55 @@
     }
 
     if (nameEl) nameEl.textContent = data.displayName || 'Your name';
+
+    var aliasEl = document.getElementById('previewAlias');
+    if (aliasEl) {
+      var aliasText = (data.alias != null && String(data.alias).trim()) ? String(data.alias).trim() : ((window._editorCurrentData && window._editorCurrentData.alias != null) ? String(window._editorCurrentData.alias).trim() : '');
+      if (aliasText) {
+        aliasEl.textContent = 'also known as @' + aliasText;
+        aliasEl.style.display = '';
+      } else {
+        aliasEl.textContent = '';
+        aliasEl.style.display = 'none';
+      }
+    }
+
+    /* Only show badges that are actually shown on profile (same logic as public bio) */
+    function previewApplyBadgeVisibility(badges, visibility) {
+      var out = {};
+      var keys = ['community', 'og', 'owner', 'staff', 'verified', 'premium'];
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        if (!!badges[k] && (visibility == null || visibility[k] !== false)) out[k] = true;
+      }
+      return out;
+    }
+    var badgesEl = document.getElementById('previewBadges');
+    if (badgesEl) {
+      badgesEl.innerHTML = '';
+      var badges = data.badges || {};
+      var visibility = data.badgeVisibility || {};
+      var visibleBadges = previewApplyBadgeVisibility(badges, visibility);
+      var badgeColors = data.badgeColors || {};
+      var icons = window.BADGE_ICONS || {};
+      var order = ['community', 'verified', 'staff', 'owner', 'og', 'premium'];
+      order.forEach(function(key) {
+        if (!visibleBadges[key]) return;
+        var span = document.createElement('span');
+        span.className = 'preview-badge bio-badge bio-badge-' + key;
+        if (badgeColors[key] && /^#[0-9A-Fa-f]{6}$/.test(String(badgeColors[key]))) {
+          span.style.color = String(badgeColors[key]);
+        }
+        if (icons[key]) {
+          var iconWrap = document.createElement('span');
+          iconWrap.className = 'bio-badge-icon';
+          iconWrap.innerHTML = icons[key];
+          span.appendChild(iconWrap);
+        }
+        badgesEl.appendChild(span);
+      });
+    }
+
     if (bioEl) bioEl.textContent = data.bio || 'Your bio appears here.';
 
     if (linksEl) {
@@ -123,7 +175,10 @@
     }
 
     var screen = document.getElementById('previewScreen');
-    if (screen && data.accentColor) screen.style.setProperty('--preview-accent', data.accentColor);
+    if (screen) {
+      if (data.accentColor) screen.style.setProperty('--preview-accent', data.accentColor);
+      if (data.fontFamily) screen.style.setProperty('font-family', data.fontFamily + ', var(--font-body), sans-serif');
+    }
   }
 
   function buildIconSelectOptions(selected) {
@@ -357,8 +412,12 @@
           ? (window.location.origin + (window.location.pathname || '/').replace(/\/[^/]*$/, '/'))
           : BASE_URL + '/';
         var fullUrl = base + 'bio?u=' + encodeURIComponent(username);
+        var shortDisplay = (base.replace(/\/$/, '')) + '/' + username;
         var viewHref = 'bio?u=' + encodeURIComponent(username);
-        if (bioUrlInput) bioUrlInput.value = fullUrl;
+        if (bioUrlInput) {
+          bioUrlInput.value = shortDisplay;
+          bioUrlInput.setAttribute('data-full-url', fullUrl);
+        }
         if (bioUrlStrip) bioUrlStrip.style.display = 'flex';
         if (viewBioBtn) viewBioBtn.href = viewHref;
       }
@@ -600,22 +659,17 @@
         set('premiumLinkFontSize', d.premiumLinkFontSize != null ? d.premiumLinkFontSize : '');
         set('premiumLinkBorderRadius', d.premiumLinkBorderRadius != null ? d.premiumLinkBorderRadius : '');
         set('premiumUsernameEffect', d.premiumUsernameEffect || '');
-        set('premiumNameGradient', d.premiumNameGradient);
+        var nameColorVal = (d.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumNameColor))) ? d.premiumNameColor : '#ffffff';
+        set('premiumNameColor', nameColorVal);
+        var pNameColorHex = document.getElementById('premiumNameColorHex');
+        if (pNameColorHex) pNameColorHex.value = nameColorVal;
         set('premiumBioFontSize', d.premiumBioFontSize != null ? d.premiumBioFontSize : '');
         set('premiumCustomFontFamily', d.premiumCustomFontFamily);
         set('premiumLayoutPreset', d.premiumLayoutPreset);
         set('premiumProfileAnimation', d.premiumProfileAnimation);
         var pPar = document.getElementById('premiumParallax');
         if (pPar) pPar.checked = !!d.premiumParallax;
-        set('premiumBackgroundEffect', (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '');
-        var pBgEffectColor = document.getElementById('premiumBackgroundEffectColor');
-        var pBgEffectColorHex = document.getElementById('premiumBackgroundEffectColorHex');
-        var bgEffectColorVal = (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '#ffffff';
-        if (pBgEffectColor) pBgEffectColor.value = bgEffectColorVal;
-        if (pBgEffectColorHex) pBgEffectColorHex.value = bgEffectColorVal;
-        var pBgEffectWrap = document.getElementById('premiumBgEffectColorWrap');
-        var pBgEffectSel = document.getElementById('premiumBackgroundEffect');
-        if (pBgEffectWrap && pBgEffectSel) pBgEffectWrap.style.display = (pBgEffectSel.value === 'snowflakes' || pBgEffectSel.value === 'rain') ? 'block' : 'none';
+        set('premiumBackgroundEffect', d.premiumBackgroundEffect === 'blurred' ? 'blurred' : '');
         set('premiumVideoBackground', d.premiumVideoBackground);
         set('premiumBannerBlur', d.premiumBannerBlur != null ? d.premiumBannerBlur : '');
         set('premiumAvatarBorder', d.premiumAvatarBorder);
@@ -1219,6 +1273,103 @@
       }
       var exportBtn = document.getElementById('daExportCsvBtn');
       if (exportBtn) exportBtn.addEventListener('click', exportDaCsv);
+
+      var SITE_DATA_BACKUP_KEYS = ['users', 'usernames', 'aliases', 'siteConfig', 'heldUsernames', 'bannedUids', 'bannedIPs', 'hardBannedUids', 'profileViews', 'meta', 'adminUids'];
+      var SITE_DATA_RESTORE_KEYS = ['users', 'usernames', 'aliases', 'siteConfig', 'heldUsernames', 'bannedUids', 'bannedIPs', 'hardBannedUids', 'profileViews', 'meta'];
+
+      function downloadSiteDataBackup() {
+        var db = window.firebaseDb;
+        if (!db) {
+          showDashboardAdminToast('Database not ready.', 'error');
+          return;
+        }
+        var btn = document.getElementById('daSiteDataDownloadBtn');
+        if (btn) btn.disabled = true;
+        var promises = SITE_DATA_BACKUP_KEYS.map(function(key) {
+          return db.ref(key).once('value').then(function(snap) { return { key: key, val: snap.val() }; });
+        });
+        Promise.all(promises).then(function(results) {
+          var backup = { _exportedAt: new Date().toISOString(), _version: 1 };
+          results.forEach(function(r) { backup[r.key] = r.val; });
+          var json = JSON.stringify(backup, null, 2);
+          var blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'nightbio-site-backup-' + (new Date().toISOString().slice(0, 19).replace(/:/g, '-')) + '.json';
+          a.click();
+          URL.revokeObjectURL(a.href);
+          showDashboardAdminToast('Backup downloaded.');
+        }).catch(function(err) {
+          console.error(err);
+          showDashboardAdminToast('Failed to download backup.', 'error');
+        }).then(function() {
+          if (btn) btn.disabled = false;
+        });
+      }
+
+      function restoreSiteDataFromFile() {
+        var fileInput = document.getElementById('daSiteDataFileInput');
+        var msgEl = document.getElementById('daSiteDataRestoreMsg');
+        if (!fileInput || !fileInput.files || !fileInput.files.length) {
+          if (msgEl) { msgEl.textContent = 'Choose a backup file first.'; msgEl.style.color = 'var(--error, #e11)'; }
+          return;
+        }
+        var file = fileInput.files[0];
+        var db = window.firebaseDb;
+        if (!db) {
+          if (msgEl) msgEl.textContent = 'Database not ready.';
+          showDashboardAdminToast('Database not ready.', 'error');
+          return;
+        }
+        if (!window.confirm('Restore will overwrite ALL current site data (users, usernames, settings, bans, etc.) with the contents of the backup file. Admin UIDs will not be changed. Continue?')) {
+          return;
+        }
+        if (msgEl) { msgEl.textContent = 'Restoring…'; msgEl.style.color = ''; }
+        var restoreBtn = document.getElementById('daSiteDataRestoreBtn');
+        if (restoreBtn) restoreBtn.disabled = true;
+        var reader = new FileReader();
+        reader.onload = function() {
+          var json = reader.result;
+          var data;
+          try {
+            data = JSON.parse(json);
+          } catch (e) {
+            if (msgEl) { msgEl.textContent = 'Invalid JSON in file.'; msgEl.style.color = 'var(--error, #e11)'; }
+            if (restoreBtn) restoreBtn.disabled = false;
+            fileInput.value = '';
+            showDashboardAdminToast('Invalid backup file.', 'error');
+            return;
+          }
+          var promises = SITE_DATA_RESTORE_KEYS.map(function(key) {
+            var val = data[key];
+            return db.ref(key).set(val !== undefined ? val : null);
+          });
+          Promise.all(promises).then(function() {
+            if (msgEl) { msgEl.textContent = 'Restore complete.'; msgEl.style.color = 'var(--success, #0a0)'; }
+            fileInput.value = '';
+            showDashboardAdminToast('Site data restored.');
+            loadDashboardAdmin();
+          }).catch(function(err) {
+            console.error(err);
+            if (msgEl) { msgEl.textContent = 'Restore failed. Check console.'; msgEl.style.color = 'var(--error, #e11)'; }
+            showDashboardAdminToast('Restore failed.', 'error');
+          }).then(function() {
+            if (restoreBtn) restoreBtn.disabled = false;
+          });
+        };
+        reader.onerror = function() {
+          if (msgEl) msgEl.textContent = 'Could not read file.';
+          if (restoreBtn) restoreBtn.disabled = false;
+          showDashboardAdminToast('Could not read file.', 'error');
+        };
+        reader.readAsText(file, 'UTF-8');
+      }
+
+      var daSiteDataDownloadBtn = document.getElementById('daSiteDataDownloadBtn');
+      var daSiteDataRestoreBtn = document.getElementById('daSiteDataRestoreBtn');
+      if (daSiteDataDownloadBtn) daSiteDataDownloadBtn.addEventListener('click', downloadSiteDataBackup);
+      if (daSiteDataRestoreBtn) daSiteDataRestoreBtn.addEventListener('click', restoreSiteDataFromFile);
+
       var heldAdd = document.getElementById('daHeldUsernameAdd');
       var heldInput = document.getElementById('daHeldUsernameInput');
       var heldMsg = document.getElementById('daHeldUsernameMsg');
@@ -1358,6 +1509,7 @@
           window._editorCurrentData.alias = newAlias || '';
           var aliasCooldownEl = document.getElementById('aliasCooldownMsg');
           if (aliasCooldownEl) aliasCooldownEl.textContent = raw ? 'Next change available in 7 days.' : 'You can change your alias now.';
+          updatePreview();
           changeAliasBtn.disabled = false;
         }).catch(function(err) {
           if (aliasChangeMsg) { aliasChangeMsg.textContent = err && err.message ? err.message : 'Could not change alias.'; aliasChangeMsg.style.color = 'var(--text-error, #e11)'; }
@@ -1450,7 +1602,8 @@
         var pLinkHover = document.getElementById('premiumLinkHoverEffect');
         var pLinkFs = document.getElementById('premiumLinkFontSize');
         var pLinkBr = document.getElementById('premiumLinkBorderRadius');
-        var pNameGrad = document.getElementById('premiumNameGradient');
+        var pNameColor = document.getElementById('premiumNameColor');
+        var pNameColorHexEl = document.getElementById('premiumNameColorHex');
         var pBioFs = document.getElementById('premiumBioFontSize');
         var pVidBg = document.getElementById('premiumVideoBackground');
         var pBannerBlur = document.getElementById('premiumBannerBlur');
@@ -1471,12 +1624,10 @@
         payload.premiumLinkFontSize = pLinkFs && pLinkFs.value.trim() !== '' ? parseInt(pLinkFs.value, 10) : null;
         payload.premiumLinkBorderRadius = pLinkBr && pLinkBr.value.trim() !== '' ? parseInt(pLinkBr.value, 10) : null;
         payload.premiumUsernameEffect = pUsernameEffect ? pUsernameEffect.value.trim() : '';
-        payload.premiumNameGradient = pNameGrad ? pNameGrad.value.trim() : '';
+        payload.premiumNameColor = (pNameColor && /^#[0-9A-Fa-f]{6}$/.test(pNameColor.value)) ? pNameColor.value : (pNameColorHexEl && /^#[0-9A-Fa-f]{6}$/.test(pNameColorHexEl.value.trim()) ? pNameColorHexEl.value.trim() : '');
         payload.premiumBioFontSize = pBioFs && pBioFs.value.trim() !== '' ? parseInt(pBioFs.value, 10) : null;
         var pBgEffect = document.getElementById('premiumBackgroundEffect');
-        payload.premiumBackgroundEffect = (pBgEffect && (pBgEffect.value === 'blurred' || pBgEffect.value === 'snowflakes' || pBgEffect.value === 'rain')) ? pBgEffect.value : '';
-        var pBgEffectColorEl = document.getElementById('premiumBackgroundEffectColor');
-        payload.premiumBackgroundEffectColor = (pBgEffectColorEl && /^#[0-9A-Fa-f]{6}$/.test(pBgEffectColorEl.value)) ? pBgEffectColorEl.value : '';
+        payload.premiumBackgroundEffect = (pBgEffect && pBgEffect.value === 'blurred') ? 'blurred' : '';
         payload.premiumVideoBackground = pVidBg ? pVidBg.value.trim() : '';
         payload.premiumBannerBlur = pBannerBlur && pBannerBlur.value.trim() !== '' ? parseInt(pBannerBlur.value, 10) : 0;
         payload.premiumAvatarBorder = pAvatarBorder ? pAvatarBorder.value.trim() : '';
@@ -1591,15 +1742,9 @@
     syncModalColorPicker('modalBackgroundColor', 'modalBackgroundColorHex');
     syncModalColorPicker('modalGradientColor1', 'modalGradientColor1Hex');
     syncModalColorPicker('modalGradientColor2', 'modalGradientColor2Hex');
-    syncModalColorPicker('premiumBackgroundEffectColor', 'premiumBackgroundEffectColorHex');
+    syncModalColorPicker('premiumNameColor', 'premiumNameColorHex');
     var pBgEffectSelect = document.getElementById('premiumBackgroundEffect');
-    var pBgEffectColorWrap = document.getElementById('premiumBgEffectColorWrap');
-    if (pBgEffectSelect && pBgEffectColorWrap) {
-      pBgEffectSelect.addEventListener('change', function() {
-        pBgEffectColorWrap.style.display = (this.value === 'snowflakes' || this.value === 'rain') ? 'block' : 'none';
-        updatePreview();
-      });
-    }
+    if (pBgEffectSelect) pBgEffectSelect.addEventListener('change', updatePreview);
     var btnStyleEl = document.getElementById('buttonStyle');
     if (btnStyleEl) btnStyleEl.addEventListener('change', updatePreview);
     var showViewsCbEl = document.getElementById('showViewsOnBio');
@@ -1626,10 +1771,21 @@
 
     if (copyBioUrlBtn && bioUrlInput) {
       copyBioUrlBtn.addEventListener('click', function() {
-        bioUrlInput.select();
-        document.execCommand('copy');
-        copyBioUrlBtn.textContent = 'Copied!';
-        setTimeout(function() { copyBioUrlBtn.textContent = 'Copy'; }, 1500);
+        var toCopy = bioUrlInput.value;
+        if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(toCopy).then(function() {
+            copyBioUrlBtn.textContent = 'Copied!';
+            setTimeout(function() { copyBioUrlBtn.textContent = 'Copy'; }, 1500);
+          }).catch(function() { fallbackCopy(); });
+        } else {
+          fallbackCopy();
+        }
+        function fallbackCopy() {
+          bioUrlInput.select();
+          document.execCommand('copy');
+          copyBioUrlBtn.textContent = 'Copied!';
+          setTimeout(function() { copyBioUrlBtn.textContent = 'Copy'; }, 1500);
+        }
       });
     }
 
@@ -1640,4 +1796,38 @@
 
   window.dashboardEditor = window.dashboardEditor || {};
   window.dashboardEditor.init = init;
+
+  /* Preview phone: 3D parallax (same as index) — run on DOM ready so it works regardless of init */
+  function setupPreviewParallax() {
+    var previewWrap = document.getElementById('dashboardPreviewWrap');
+    var previewPhone = document.getElementById('dashboardPreviewPhone');
+    if (!previewWrap || !previewPhone) return;
+    var maxDeg = 6;
+    function setPreviewTilt(rotY, rotX) {
+      previewPhone.style.setProperty('--preview-tilt-y', rotY + 'deg');
+      previewPhone.style.setProperty('--preview-tilt-x', rotX + 'deg');
+    }
+    function onPreviewMove(ev) {
+      var r = previewPhone.getBoundingClientRect();
+      var cx = ev.clientX - r.left;
+      var cy = ev.clientY - r.top;
+      var x = (cx / Math.max(1, r.width)) * 2 - 1;
+      var y = (cy / Math.max(1, r.height)) * 2 - 1;
+      setPreviewTilt((x * maxDeg).toFixed(2), ((-y) * maxDeg).toFixed(2));
+    }
+    function onPreviewEnter() {
+      previewWrap.addEventListener('mousemove', onPreviewMove, { passive: true });
+    }
+    function onPreviewLeave() {
+      previewWrap.removeEventListener('mousemove', onPreviewMove);
+      setPreviewTilt(0, 0);
+    }
+    previewWrap.addEventListener('mouseenter', onPreviewEnter);
+    previewWrap.addEventListener('mouseleave', onPreviewLeave);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupPreviewParallax);
+  } else {
+    setupPreviewParallax();
+  }
 })();

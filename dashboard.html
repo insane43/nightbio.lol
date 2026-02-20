@@ -41,6 +41,17 @@
   </div>
   <div class="bg-gradient"></div>
   <div class="bg-grid"></div>
+  <div class="dashboard-bg" aria-hidden="true">
+    <div class="dashboard-bg-gradient"></div>
+    <div class="dashboard-bg-orbs">
+      <div class="dashboard-orb dashboard-orb-1"></div>
+      <div class="dashboard-orb dashboard-orb-2"></div>
+      <div class="dashboard-orb dashboard-orb-3"></div>
+      <div class="dashboard-orb dashboard-orb-4"></div>
+    </div>
+    <div class="dashboard-bg-grid"></div>
+    <div class="dashboard-bg-noise"></div>
+  </div>
 
   <header class="editor-header">
     <a href="index" class="editor-logo">
@@ -337,6 +348,7 @@
               <label for="metaImageURL">Preview image URL (optional)</label>
               <input type="text" id="metaImageURL" placeholder="https://... (OG image for shares)" maxlength="500">
             </div>
+            <p class="panel-desc panel-desc-muted">Use a full URL (https://…) for the image. When someone opens your link in a browser, this title, description, and image are used. Some apps (e.g. Discord) cache previews and may not update immediately.</p>
           </div>
         </section>
 
@@ -435,6 +447,7 @@
               <button type="button" class="da-nav-item" data-section="banned" role="tab">Banned</button>
               <button type="button" class="da-nav-item" data-section="held" role="tab">Username holding</button>
               <button type="button" class="da-nav-item" data-section="export" role="tab">Export</button>
+              <button type="button" class="da-nav-item" data-section="sitedata" role="tab">Site data</button>
               <button type="button" class="da-nav-item" data-section="security" role="tab">Security</button>
             </nav>
             <div class="da-body">
@@ -596,6 +609,29 @@
                   </div>
                 </div>
               </section>
+              <section id="daSectionSiteData" class="da-section">
+                <div class="admin-page-header">
+                  <h3 class="da-section-title">Site data</h3>
+                  <p>Download a full backup of all site data (users, usernames, aliases, settings, bans, etc.) or restore from a previously downloaded backup file. Restore overwrites current data.</p>
+                </div>
+                <div class="admin-card">
+                  <div class="admin-card-body">
+                    <div class="admin-field" style="margin-bottom: 1.25rem;">
+                      <button type="button" class="btn btn-primary" id="daSiteDataDownloadBtn">Download backup</button>
+                      <p class="admin-field-hint" style="margin-top: 0.35rem;">Saves a JSON file with the entire database snapshot (excluding admin UIDs which cannot be restored via this tool).</p>
+                    </div>
+                    <div class="admin-field">
+                      <label for="daSiteDataFileInput">Restore from backup</label>
+                      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <input type="file" id="daSiteDataFileInput" class="da-site-data-file-input" accept=".json,application/json" aria-label="Choose backup file">
+                        <button type="button" class="btn btn-ghost" id="daSiteDataRestoreBtn">Upload &amp; restore</button>
+                      </div>
+                      <p id="daSiteDataRestoreMsg" class="form-hint" aria-live="polite" style="margin-top: 0.35rem;"></p>
+                      <p class="admin-field-hint" style="margin-top: 0.35rem;">Choose a backup JSON file and click Upload &amp; restore. This will replace all current site data with the file contents. Admin UIDs are not modified. Confirm when prompted.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
               <section id="daSectionSecurity" class="da-section">
                 <div class="admin-page-header">
                   <h3 class="da-section-title">Admin UIDs</h3>
@@ -685,9 +721,6 @@
                 <option value="rainbow">Rainbow</option>
                 <option value="fuzzy">Fuzzy</option>
                 <option value="shuffle">Shuffle</option>
-                <option value="white-particles">White particles</option>
-                <option value="black-particles">Black particles</option>
-                <option value="blue-particles">Blue particles</option>
               </select>
             </div>
           </div>
@@ -733,9 +766,12 @@
           <div class="panel-card">
             <h2 class="panel-title">Name &amp; bio</h2>
             <div class="form-group">
-              <label for="premiumNameGradient">Name gradient (CSS gradient)</label>
-              <input type="text" id="premiumNameGradient" placeholder="e.g. linear-gradient(90deg, #a855f7, #ec4899)" class="form-input" maxlength="200">
-              <p class="panel-desc">Leave empty for solid color. Example: linear-gradient(90deg, #a855f7, #ec4899)</p>
+              <label for="premiumNameColor">Name color</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="premiumNameColor" value="#ffffff" aria-label="Display name color">
+                <input type="text" id="premiumNameColorHex" class="color-hex-input" value="#ffffff" maxlength="7" placeholder="#ffffff">
+              </div>
+              <p class="panel-desc">Color of your display name. Leave default (white) or pick any color.</p>
             </div>
             <div class="form-group">
               <label for="premiumBioFontSize">Bio font size (px)</label>
@@ -787,18 +823,8 @@
               <select id="premiumBackgroundEffect" class="form-select">
                 <option value="">None</option>
                 <option value="blurred">Blurred background</option>
-                <option value="snowflakes">Snowflakes</option>
-                <option value="rain">Rain</option>
               </select>
-              <p class="panel-desc">Atmospheric effect behind your profile. Blurred softens the background; snowflakes or rain add falling particles.</p>
-              <div id="premiumBgEffectColorWrap" class="form-group" style="display:none;">
-                <label>Effect color</label>
-                <div class="color-picker-wrap">
-                  <input type="color" id="premiumBackgroundEffectColor" value="#ffffff" aria-label="Background effect color">
-                  <input type="text" id="premiumBackgroundEffectColorHex" class="form-input" value="#ffffff" maxlength="7" placeholder="#ffffff" style="width:5rem;font-size:0.875rem;">
-                </div>
-                <p class="panel-desc">Color of snowflakes or rain. Ignored for blurred.</p>
-              </div>
+              <p class="panel-desc">Blurred uses your cover/avatar as a soft background. No particle effects.</p>
             </div>
             <div class="form-group">
               <label for="premiumVideoBackground">Video background URL</label>
@@ -830,10 +856,11 @@
       </div>
     </div>
 
-    <aside class="editor-preview">
-      <div class="preview-phone">
-        <div class="preview-phone-notch"></div>
-        <div class="preview-screen" id="previewScreen">
+    <aside class="editor-preview" id="dashboardPreviewWrap">
+      <div class="preview-phone-float">
+        <div class="preview-phone" id="dashboardPreviewPhone">
+          <div class="preview-phone-notch"></div>
+          <div class="preview-screen" id="previewScreen">
           <div class="preview-banner" id="previewBanner"></div>
           <div class="preview-profile">
             <div class="preview-avatar-wrap" id="previewAvatarWrap">
@@ -841,9 +868,12 @@
               <div class="preview-avatar-placeholder" id="previewAvatarPlaceholder">?</div>
             </div>
             <div class="preview-name" id="previewName">Your name</div>
+            <div class="preview-alias" id="previewAlias"></div>
+            <div class="preview-badges" id="previewBadges"></div>
             <div class="preview-bio" id="previewBio">Your bio appears here.</div>
             <div class="preview-links" id="previewLinks"></div>
           </div>
+        </div>
         </div>
       </div>
     </aside>

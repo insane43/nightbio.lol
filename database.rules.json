@@ -10,7 +10,7 @@
       ".read": true,
       "$normalized": {
         ".read": true,
-        ".write": "auth != null && (newData.val() === auth.uid || data.val() === auth.uid)"
+        ".write": "auth != null && ((root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true) || (newData.val() === auth.uid || data.val() === auth.uid))"
       }
     },
     "adminUids": {
@@ -20,7 +20,7 @@
     "meta": {
       "lastUserId": {
         ".read": "auth != null",
-        ".write": "auth != null && newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() > data.val())"
+        ".write": "auth != null && newData.isNumber() && newData.val() >= 0 && ((root.child('adminUids').child(auth.uid).exists() || root.child('users').child(auth.uid).child('badges').child('staff').val() === true) || (!data.exists() || newData.val() > data.val()))"
       }
     },
     "siteConfig": {

@@ -155,7 +155,7 @@
 /* Form fields */
 .admin-field { margin-bottom: 1.25rem; }
 .admin-field label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.4rem; }
-.admin-field input,
+.admin-field input:not([type="checkbox"]),
 .admin-field textarea {
   width: 100%;
   max-width: 420px;
@@ -168,7 +168,7 @@
   font-size: 0.9rem;
   transition: border-color 0.2s;
 }
-.admin-field input:focus,
+.admin-field input:not([type="checkbox"]):focus,
 .admin-field textarea:focus { outline: none; border-color: var(--purple-accent); }
 .admin-field textarea { min-height: 100px; resize: vertical; }
 
@@ -304,8 +304,35 @@
 @keyframes adminSpin { to { transform: rotate(360deg); } }
 
 /* Badge checkboxes in modal */
-.admin-badges-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-.admin-badges-grid label { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; cursor: pointer; font-size: 0.9rem; }
+.admin-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1rem;
+}
+.admin-badges-grid label,
+.admin-edit-badge-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  margin: 0;
+}
+.admin-badges-grid input[type="checkbox"],
+.admin-badges-grid .edit-badge-cb {
+  width: 1.15rem;
+  height: 1.15rem;
+  min-width: 1.15rem;
+  flex-shrink: 0;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--purple-accent);
+}
+.admin-edit-badge-label .edit-badge-cb {
+  flex-shrink: 0;
+}
 
 .admin-checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; margin-bottom: 0.35rem; }
 .admin-checkbox-label input { margin: 0; }
@@ -336,3 +363,70 @@
 .da-section.on { display: block; animation: adminFadeIn 0.2s ease; }
 .da-section-title { font-size: 1.15rem; font-weight: 600; margin: 0 0 0.35rem; }
 .da-quick { font-size: 0.85rem; }
+
+/* Site data: file input and browse button — match dashboard form style */
+.da-site-data-file-input {
+  max-width: 280px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.5rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.da-site-data-file-input:focus {
+  border-color: var(--purple-accent);
+  box-shadow: 0 0 0 2px rgba(124, 107, 184, 0.2);
+}
+.da-site-data-file-input::file-selector-button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  margin-inline-end: 0.75rem;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.da-site-data-file-input::file-selector-button:hover {
+  background: rgba(124, 107, 184, 0.15);
+  border-color: rgba(124, 107, 184, 0.3);
+}
+.da-site-data-file-input::-webkit-file-upload-button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  margin-inline-end: 0.75rem;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.da-site-data-file-input::-webkit-file-upload-button:hover {
+  background: rgba(124, 107, 184, 0.15);
+  border-color: rgba(124, 107, 184, 0.3);
+}
+.dashboard-page .da-site-data-file-input {
+  background: rgba(26, 26, 38, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.dashboard-page .da-site-data-file-input::file-selector-button,
+.dashboard-page .da-site-data-file-input::-webkit-file-upload-button {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.dashboard-page .da-site-data-file-input::file-selector-button:hover,
+.dashboard-page .da-site-data-file-input::-webkit-file-upload-button:hover {
+  background: rgba(124, 107, 184, 0.15);
+  border-color: rgba(124, 107, 184, 0.3);
+}

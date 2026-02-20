@@ -114,9 +114,9 @@ function loadBioForUid(uid) {
       premiumGlowBio: !!d.premiumGlowBio,
       premiumGlowColor: (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '',
       premiumGlowStrength: d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100,
-      premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
+      premiumNameColor: (d.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumNameColor))) ? String(d.premiumNameColor).trim() : '',
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
-      premiumBackgroundEffect: (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '',
+      premiumBackgroundEffect: d.premiumBackgroundEffect === 'blurred' ? 'blurred' : '',
       premiumBackgroundEffectColor: (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '',
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
       premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
@@ -259,9 +259,9 @@ function getCurrentUserBio(uid) {
       premiumGlowBio: !!d.premiumGlowBio,
       premiumGlowColor: (d.premiumGlowColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumGlowColor)) ? d.premiumGlowColor : '',
       premiumGlowStrength: d.premiumGlowStrength != null ? Math.min(200, Math.max(25, parseInt(d.premiumGlowStrength, 10) || 100)) : 100,
-      premiumNameGradient: (d.premiumNameGradient || '').trim().slice(0, 200),
+      premiumNameColor: (d.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(d.premiumNameColor))) ? String(d.premiumNameColor).trim() : '',
       premiumBioFontSize: d.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(d.premiumBioFontSize, 10) || 15)) : null,
-      premiumBackgroundEffect: (d.premiumBackgroundEffect === 'blurred' || d.premiumBackgroundEffect === 'snowflakes' || d.premiumBackgroundEffect === 'rain') ? d.premiumBackgroundEffect : '',
+      premiumBackgroundEffect: d.premiumBackgroundEffect === 'blurred' ? 'blurred' : '',
       premiumBackgroundEffectColor: (d.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(d.premiumBackgroundEffectColor)) ? d.premiumBackgroundEffectColor : '',
       premiumVideoBackground: (d.premiumVideoBackground || '').trim().slice(0, 500),
       premiumBannerBlur: d.premiumBannerBlur != null ? Math.min(20, Math.max(0, parseInt(d.premiumBannerBlur, 10) || 0)) : 0,
@@ -346,7 +346,7 @@ function saveBio(uid, data) {
   if (data.modalBackgroundColor !== undefined) updates.modalBackgroundColor = (data.modalBackgroundColor && /^#[0-9A-Fa-f]{6}$/.test(data.modalBackgroundColor)) ? data.modalBackgroundColor : '';
   if (data.modalGradientColor1 !== undefined) updates.modalGradientColor1 = (data.modalGradientColor1 && /^#[0-9A-Fa-f]{6}$/.test(data.modalGradientColor1)) ? data.modalGradientColor1 : '';
   if (data.modalGradientColor2 !== undefined) updates.modalGradientColor2 = (data.modalGradientColor2 && /^#[0-9A-Fa-f]{6}$/.test(data.modalGradientColor2)) ? data.modalGradientColor2 : '';
-  if (data.premiumNameGradient !== undefined) updates.premiumNameGradient = String(data.premiumNameGradient || '').trim().slice(0, 200);
+  if (data.premiumNameColor !== undefined) updates.premiumNameColor = (data.premiumNameColor && /^#[0-9A-Fa-f]{6}$/.test(String(data.premiumNameColor))) ? String(data.premiumNameColor).trim() : '';
   if (data.premiumBioFontSize !== undefined) updates.premiumBioFontSize = data.premiumBioFontSize != null ? Math.min(24, Math.max(12, parseInt(data.premiumBioFontSize, 10) || 15)) : null;
   if (data.premiumBackgroundEffect !== undefined) updates.premiumBackgroundEffect = (data.premiumBackgroundEffect === 'blurred' || data.premiumBackgroundEffect === 'snowflakes' || data.premiumBackgroundEffect === 'rain') ? data.premiumBackgroundEffect : '';
   if (data.premiumBackgroundEffectColor !== undefined) updates.premiumBackgroundEffectColor = (data.premiumBackgroundEffectColor && /^#[0-9A-Fa-f]{6}$/.test(data.premiumBackgroundEffectColor)) ? data.premiumBackgroundEffectColor : '';
