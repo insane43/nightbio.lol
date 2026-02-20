@@ -3,39 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Status — nightbio.lol</title>
+  <title>System status — nightbio.lol</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    .status-page { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-    .status-hero { margin-bottom: 2rem; }
-    .status-hero h1 { font-size: 1.85rem; font-weight: 700; margin-bottom: 0.35rem; letter-spacing: -0.02em; }
-    .status-hero p { color: var(--text-muted); font-size: 0.95rem; }
-    .status-updated { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
-    .status-list { display: flex; flex-direction: column; gap: 0; }
-    .status-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); margin-bottom: 0.5rem; }
-    .status-item:last-child { margin-bottom: 0; }
+    .status-page { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .status-hero { text-align: center; margin-bottom: 2.5rem; }
+    .status-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.03em; }
+    .status-hero .status-tagline { color: var(--text-muted); font-size: 1rem; }
+    .status-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+    .status-meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .status-overview-card {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+      background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .status-overview-left { display: flex; align-items: center; gap: 0.75rem; }
+    .status-overview-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    .status-overview-dot.operational { background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
+    .status-overview-dot.degraded { background: #eab308; box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.2); }
+    .status-overview-dot.outage { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
+    .status-overview-dot.checking { background: var(--text-muted); animation: status-pulse 1.2s ease-in-out infinite; }
+    @keyframes status-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .status-overview-text { font-weight: 600; font-size: 1.05rem; color: var(--text-primary); }
+    .status-overview-detail { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .status-refresh-btn {
+      font-size: 0.85rem; padding: 0.5rem 1rem;
+      color: var(--purple-accent); background: rgba(124, 107, 184, 0.1);
+      border: 1px solid var(--border-subtle); border-radius: 8px;
+      cursor: pointer; font-weight: 500;
+    }
+    .status-refresh-btn:hover { background: rgba(124, 107, 184, 0.18); }
+    .status-refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .status-section { margin-bottom: 1.75rem; }
+    .status-section-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.75rem; padding-left: 0.25rem; }
+    .status-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .status-item {
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem;
+      padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: 10px; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .status-item:hover { border-color: var(--border-default, rgba(255,255,255,0.12)); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .status-dot-wrap { position: relative; flex-shrink: 0; }
-    .status-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
-    .status-dot.operational { background: var(--success); box-shadow: 0 0 12px rgba(107, 184, 124, 0.5); }
-    .status-dot.degraded { background: #e6b84d; box-shadow: 0 0 12px rgba(230, 184, 77, 0.4); }
-    .status-dot.outage { background: var(--error); box-shadow: 0 0 12px rgba(184, 107, 107, 0.5); }
-    .status-dot.checking { background: var(--text-muted); animation: status-pulse 1s ease-in-out infinite; }
-    @keyframes status-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .status-label { font-weight: 600; color: var(--text-primary); }
-    .status-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
-    .status-tooltip { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 8px); padding: 0.5rem 0.75rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-primary); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .status-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .status-dot.operational { background: #22c55e; }
+    .status-dot.degraded { background: #eab308; }
+    .status-dot.outage { background: #ef4444; }
+    .status-dot.checking { background: var(--text-muted); animation: status-pulse 1.2s ease-in-out infinite; }
+    .status-tooltip { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 6px); padding: 0.4rem 0.6rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 0.75rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
     .status-dot-wrap:hover .status-tooltip { opacity: 1; }
-    .status-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-top-color: var(--border-subtle); }
-    .status-overview { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-subtle); }
-    .status-overview-dot { width: 12px; height: 12px; border-radius: 50%; }
-    .status-overview-dot.operational { background: var(--success); }
-    .status-overview-dot.degraded { background: #e6b84d; }
-    .status-overview-dot.outage { background: var(--error); }
-    .status-overview-dot.checking { background: var(--text-muted); animation: status-pulse 1s ease-in-out infinite; }
-    .status-overview-text { font-size: 0.9rem; color: var(--text-muted); }
-    .status-refresh { margin-top: 1.5rem; }
-    .status-refresh button { font-size: 0.85rem; padding: 0.4rem 0.75rem; color: var(--purple-accent); background: transparent; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer; }
-    .status-refresh button:hover { background: rgba(124, 107, 184, 0.1); }
+    .status-item-label { font-weight: 600; color: var(--text-primary); }
+    .status-item-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .status-item-meta { font-size: 0.8rem; color: var(--text-muted); text-align: right; min-width: 4rem; }
+    .status-item-meta.latency-ok { color: #22c55e; }
+    .status-item-meta.latency-slow { color: #eab308; }
+    .status-legend { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.8rem; color: var(--text-muted); }
+    .status-legend-item { display: flex; align-items: center; gap: 0.4rem; }
+    .status-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-legend-dot.op { background: #22c55e; }
+    .status-legend-dot.deg { background: #eab308; }
+    .status-legend-dot.out { background: #ef4444; }
   </style>
 </head>
 <body>
@@ -47,6 +74,7 @@
       </a>
       <div class="site-nav-links">
         <a href="help">Help Center</a>
+        <a href="status">System status</a>
         <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
         <a href="login">Login</a>
         <a href="signup" class="site-nav-cta">Sign up</a>
@@ -56,6 +84,7 @@
       </button>
       <div class="site-nav-drawer" id="navDrawer">
         <a href="help">Help Center</a>
+        <a href="status">System status</a>
         <a href="https://discord.gg/eXPSwFCEEX" target="_blank" rel="noreferrer">Discord</a>
         <a href="login">Login</a>
         <a href="signup" class="site-nav-cta">Sign up</a>
@@ -68,50 +97,68 @@
   <main class="status-page">
     <header class="status-hero">
       <h1>System status</h1>
-      <p>Real-time status of nightbio.lol services.</p>
-      <p class="status-updated" id="statusUpdated">Last checked: —</p>
+      <p class="status-tagline">Live status and response times for nightbio.lol</p>
+      <div class="status-meta">
+        <span id="statusUpdated">Last checked: —</span>
+        <span aria-hidden="true">·</span>
+        <span>Auto-refresh every 60s</span>
+      </div>
     </header>
 
-    <div class="status-overview" id="statusOverview">
-      <span class="status-overview-dot checking" id="overviewDot"></span>
-      <span class="status-overview-text" id="overviewText">Checking all systems…</span>
+    <div class="status-overview-card" id="statusOverview">
+      <div class="status-overview-left">
+        <span class="status-overview-dot checking" id="overviewDot" aria-hidden="true"></span>
+        <div>
+          <div class="status-overview-text" id="overviewText">Checking all systems…</div>
+          <div class="status-overview-detail" id="overviewDetail">Verifying website, authentication, and database</div>
+        </div>
+      </div>
+      <button type="button" class="status-refresh-btn" id="statusRefresh" aria-label="Refresh status">Refresh</button>
     </div>
 
-    <div class="status-list">
-      <div class="status-item">
-        <div class="status-dot-wrap">
-          <span class="status-dot checking" id="dotWebsite" aria-label="Website status"></span>
-          <span class="status-tooltip" id="tooltipWebsite">Checking…</span>
+    <section class="status-section" aria-labelledby="statusSectionTitle">
+      <h2 id="statusSectionTitle" class="status-section-title">Services</h2>
+      <div class="status-list">
+        <div class="status-item">
+          <div class="status-dot-wrap">
+            <span class="status-dot checking" id="dotWebsite" aria-label="Website status"></span>
+            <span class="status-tooltip" id="tooltipWebsite">Checking…</span>
+          </div>
+          <div>
+            <div class="status-item-label">Website</div>
+            <div class="status-item-desc">Homepage, dashboard, login, signup, and bio pages</div>
+          </div>
+          <div class="status-item-meta" id="metaWebsite">—</div>
         </div>
-        <div>
-          <div class="status-label">Website</div>
-          <div class="status-desc">nightbio.lol homepage and pages</div>
+        <div class="status-item">
+          <div class="status-dot-wrap">
+            <span class="status-dot checking" id="dotApi" aria-label="Authentication status"></span>
+            <span class="status-tooltip" id="tooltipApi">Checking…</span>
+          </div>
+          <div>
+            <div class="status-item-label">Authentication</div>
+            <div class="status-item-desc">Firebase Auth — sign in, sign up, password reset</div>
+          </div>
+          <div class="status-item-meta" id="metaApi">—</div>
+        </div>
+        <div class="status-item">
+          <div class="status-dot-wrap">
+            <span class="status-dot checking" id="dotDb" aria-label="Database status"></span>
+            <span class="status-tooltip" id="tooltipDb">Checking…</span>
+          </div>
+          <div>
+            <div class="status-item-label">Database</div>
+            <div class="status-item-desc">Firebase Realtime Database — profiles, links, settings</div>
+          </div>
+          <div class="status-item-meta" id="metaDb">—</div>
         </div>
       </div>
-      <div class="status-item">
-        <div class="status-dot-wrap">
-          <span class="status-dot checking" id="dotApi" aria-label="API status"></span>
-          <span class="status-tooltip" id="tooltipApi">Checking…</span>
-        </div>
-        <div>
-          <div class="status-label">API</div>
-          <div class="status-desc">Firebase Auth & backend services</div>
-        </div>
-      </div>
-      <div class="status-item">
-        <div class="status-dot-wrap">
-          <span class="status-dot checking" id="dotDb" aria-label="Database status"></span>
-          <span class="status-tooltip" id="tooltipDb">Checking…</span>
-        </div>
-        <div>
-          <div class="status-label">Database</div>
-          <div class="status-desc">Firebase Realtime Database</div>
-        </div>
-      </div>
-    </div>
+    </section>
 
-    <div class="status-refresh">
-      <button type="button" id="statusRefresh">Refresh status</button>
+    <div class="status-legend">
+      <div class="status-legend-item"><span class="status-legend-dot op" aria-hidden="true"></span> Operational</div>
+      <div class="status-legend-item"><span class="status-legend-dot deg" aria-hidden="true"></span> Degraded</div>
+      <div class="status-legend-item"><span class="status-legend-dot out" aria-hidden="true"></span> Outage</div>
     </div>
   </main>
 
@@ -127,7 +174,7 @@
       }
       var TOOLTIPS = {
         operational: 'Operational — All systems normal.',
-        degraded: 'Degraded — Slow or partial outage. We\'re looking into it.',
+        degraded: 'Degraded — Slow or partial issues. We\'re looking into it.',
         outage: 'Outage — Service unavailable. We\'re working on a fix.',
         checking: 'Checking…'
       };
@@ -139,31 +186,42 @@
         dot.setAttribute('aria-label', state);
         tip.textContent = TOOLTIPS[state] || TOOLTIPS.checking;
       }
-      function setOverview(allOk, anyDegraded, anyDown) {
+      function setMeta(id, text, ok) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = text;
+        el.classList.remove('latency-ok', 'latency-slow');
+        if (ok === true) el.classList.add('latency-ok');
+        if (ok === false) el.classList.add('latency-slow');
+      }
+      function setOverview(allOk, anyDegraded, anyDown, detail) {
         var dot = document.getElementById('overviewDot');
         var text = document.getElementById('overviewText');
+        var detailEl = document.getElementById('overviewDetail');
         if (!dot || !text) return;
         dot.className = 'status-overview-dot';
-        if (anyDown) { dot.classList.add('outage'); text.textContent = 'Some systems are down.'; }
-        else if (anyDegraded) { dot.classList.add('degraded'); text.textContent = 'Some systems are degraded.'; }
-        else if (allOk) { dot.classList.add('operational'); text.textContent = 'All systems operational.'; }
-        else { dot.classList.add('checking'); text.textContent = 'Checking all systems…'; }
+        if (anyDown) { dot.classList.add('outage'); text.textContent = 'Some systems are down'; if (detailEl) detailEl.textContent = detail || 'One or more services are unavailable.'; }
+        else if (anyDegraded) { dot.classList.add('degraded'); text.textContent = 'Some systems degraded'; if (detailEl) detailEl.textContent = detail || 'Performance issues detected.'; }
+        else if (allOk) { dot.classList.add('operational'); text.textContent = 'All systems operational'; if (detailEl) detailEl.textContent = detail || 'All services are running normally.'; }
+        else { dot.classList.add('checking'); text.textContent = 'Checking all systems…'; if (detailEl) detailEl.textContent = 'Verifying website, authentication, and database'; }
       }
       function runChecks() {
         var updatedEl = document.getElementById('statusUpdated');
-        if (updatedEl) updatedEl.textContent = 'Last checked: ' + new Date().toLocaleTimeString();
+        if (updatedEl) updatedEl.textContent = 'Last checked: ' + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        var refreshBtn = document.getElementById('statusRefresh');
+        if (refreshBtn) refreshBtn.disabled = true;
 
         setDot('dotWebsite', 'checking', 'tooltipWebsite');
         setDot('dotApi', 'checking', 'tooltipApi');
         setDot('dotDb', 'checking', 'tooltipDb');
+        setMeta('metaWebsite', '—');
+        setMeta('metaApi', '—');
+        setMeta('metaDb', '—');
         setOverview(false, false, false);
 
-        var websiteOk = false;
-        var apiOk = false;
-        var dbOk = false;
-        var websiteDegraded = false;
-        var apiDegraded = false;
-        var dbDegraded = false;
+        var websiteOk = false, apiOk = false, dbOk = false;
+        var websiteDegraded = false, apiDegraded = false, dbDegraded = false;
+        var websiteMs = null, apiMs = null, dbMs = null;
         var done = { w: false, a: false, d: false };
 
         function finish() {
@@ -171,26 +229,50 @@
           setDot('dotWebsite', websiteDegraded ? 'degraded' : (websiteOk ? 'operational' : 'outage'), 'tooltipWebsite');
           setDot('dotApi', apiDegraded ? 'degraded' : (apiOk ? 'operational' : 'outage'), 'tooltipApi');
           setDot('dotDb', dbDegraded ? 'degraded' : (dbOk ? 'operational' : 'outage'), 'tooltipDb');
+          setMeta('metaWebsite', websiteMs != null ? websiteMs + ' ms' : (websiteOk ? 'OK' : '—'));
+          setMeta('metaApi', apiMs != null ? apiMs + ' ms' : (apiOk ? 'OK' : '—'));
+          setMeta('metaDb', dbMs != null ? dbMs + ' ms' : (dbOk ? 'OK' : '—'));
           setOverview(websiteOk && apiOk && dbOk, websiteDegraded || apiDegraded || dbDegraded, !websiteOk || !apiOk || !dbOk);
+          if (refreshBtn) refreshBtn.disabled = false;
         }
 
+        var t0 = performance.now();
         fetch(window.location.origin + '/', { method: 'HEAD', cache: 'no-store' })
           .then(function(r) { websiteOk = r.ok; })
           .catch(function() { websiteOk = false; })
-          .finally(function() { done.w = true; finish(); });
+          .finally(function() {
+            websiteMs = Math.round(performance.now() - t0);
+            done.w = true;
+            finish();
+          });
 
         if (typeof initFirebase === 'function') initFirebase();
         var db = window.firebaseDb || (typeof firebase !== 'undefined' && firebase.database ? firebase.database() : null);
         var auth = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth() : null;
 
         if (auth) {
-          var t = setTimeout(function() { if (!done.a) { apiDegraded = true; apiOk = true; done.a = true; finish(); } }, 6000);
-          auth.getRedirectResult().then(function() { apiOk = true; done.a = true; clearTimeout(t); finish(); }).catch(function() { apiOk = false; done.a = true; clearTimeout(t); finish(); });
+          var tAuth = performance.now();
+          var timeoutAuth = setTimeout(function() {
+            if (!done.a) { apiDegraded = true; apiOk = true; apiMs = Math.round(performance.now() - tAuth); done.a = true; finish(); }
+          }, 8000);
+          auth.getRedirectResult().then(function() {
+            apiOk = true;
+            apiMs = Math.round(performance.now() - tAuth);
+            done.a = true;
+            clearTimeout(timeoutAuth);
+            finish();
+          }).catch(function() {
+            apiOk = false;
+            done.a = true;
+            clearTimeout(timeoutAuth);
+            finish();
+          });
         } else { apiOk = false; done.a = true; finish(); }
 
         if (db) {
+          var tDb = performance.now();
           db.ref('siteConfig').limitToFirst(1).once('value')
-            .then(function() { dbOk = true; done.d = true; finish(); })
+            .then(function() { dbOk = true; dbMs = Math.round(performance.now() - tDb); done.d = true; finish(); })
             .catch(function() { dbOk = false; done.d = true; finish(); });
         } else { dbOk = false; done.d = true; finish(); }
       }
@@ -198,7 +280,7 @@
       var refreshIntervalMs = 60000;
       runChecks();
       var refreshTimer = setInterval(runChecks, refreshIntervalMs);
-      document.getElementById('statusRefresh').addEventListener('click', runChecks);
+      document.getElementById('statusRefresh').addEventListener('click', function() { runChecks(); });
 
       var drawer = document.getElementById('navDrawer');
       var hamburger = document.getElementById('navHamburger');
