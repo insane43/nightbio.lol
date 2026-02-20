@@ -1184,55 +1184,6 @@
       bannerURLInput.addEventListener('input', syncMediaFromInputs);
       bannerURLInput.addEventListener('change', syncMediaFromInputs);
     }
-    var avatarFileInput = document.getElementById('avatarFileInput');
-    var bannerFileInput = document.getElementById('bannerFileInput');
-    var avatarUploadBtn = document.getElementById('avatarUploadBtn');
-    var bannerUploadBtn = document.getElementById('bannerUploadBtn');
-    var avatarUploadProgress = document.getElementById('avatarUploadProgress');
-    var bannerUploadProgress = document.getElementById('bannerUploadProgress');
-    var avatarUploadPct = document.getElementById('avatarUploadPct');
-    var bannerUploadPct = document.getElementById('bannerUploadPct');
-    function doUpload(field, fileInput, progressEl, pctEl, urlInput, previewImg, placeholder) {
-      var file = fileInput && fileInput.files && fileInput.files[0];
-      if (!file) return;
-      var uploadFn = typeof window.uploadBioImage === 'function' ? window.uploadBioImage : null;
-      if (!uploadFn) {
-        if (msgEl) showMsg(msgEl, 'Upload not available. Refresh the page.', 'error');
-        return;
-      }
-      if (progressEl) progressEl.style.display = 'block';
-      if (pctEl) pctEl.textContent = '0';
-      if (avatarUploadBtn && field === 'avatar') avatarUploadBtn.disabled = true;
-      if (bannerUploadBtn && field === 'banner') bannerUploadBtn.disabled = true;
-      uploadFn(uid, file, field, function(pct) {
-        if (pctEl) pctEl.textContent = pct;
-        if (progressEl) progressEl.innerHTML = 'Uploading… <span id="' + (field === 'avatar' ? 'avatarUploadPct' : 'bannerUploadPct') + '">' + pct + '</span>%';
-      }).then(function(url) {
-        if (urlInput) { urlInput.value = url; urlInput.dispatchEvent(new Event('input', { bubbles: true })); }
-        if (progressEl) progressEl.style.display = 'none';
-        if (avatarUploadBtn && field === 'avatar') avatarUploadBtn.disabled = false;
-        if (bannerUploadBtn && field === 'banner') bannerUploadBtn.disabled = false;
-        fileInput.value = '';
-      }).catch(function(err) {
-        if (progressEl) progressEl.style.display = 'none';
-        if (avatarUploadBtn && field === 'avatar') avatarUploadBtn.disabled = false;
-        if (bannerUploadBtn && field === 'banner') bannerUploadBtn.disabled = false;
-        fileInput.value = '';
-        if (msgEl) showMsg(msgEl, (err && err.message) ? err.message : 'Upload failed', 'error');
-      });
-    }
-    if (avatarUploadBtn && avatarFileInput) {
-      avatarUploadBtn.addEventListener('click', function() { avatarFileInput.click(); });
-      avatarFileInput.addEventListener('change', function() {
-        doUpload('avatar', avatarFileInput, avatarUploadProgress, avatarUploadPct, avatarURLInput, avatarPreview, avatarPlaceholder);
-      });
-    }
-    if (bannerUploadBtn && bannerFileInput) {
-      bannerUploadBtn.addEventListener('click', function() { bannerFileInput.click(); });
-      bannerFileInput.addEventListener('change', function() {
-        doUpload('banner', bannerFileInput, bannerUploadProgress, bannerUploadPct, bannerURLInput, bannerPreview, bannerPlaceholder);
-      });
-    }
     if (songURLInput) {
       songURLInput.addEventListener('input', function() { window._editorCurrentData.songURL = songURLInput.value.trim(); updatePreview(); });
       songURLInput.addEventListener('change', function() { window._editorCurrentData.songURL = songURLInput.value.trim(); updatePreview(); });

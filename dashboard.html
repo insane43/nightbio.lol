@@ -77,7 +77,7 @@
         <section class="editor-panel active" id="panelProfile" role="tabpanel" aria-labelledby="tabProfile">
           <div class="panel-card">
             <h2 class="panel-title">Profile picture &amp; banner</h2>
-            <p class="panel-desc">Upload an image (under 5MB) or paste an image URL below.</p>
+            <p class="panel-desc">Paste an image URL for your profile photo and cover image.</p>
             <div class="media-upload-grid">
               <div class="media-upload-box avatar-upload-box">
                 <div class="media-preview-wrap">
@@ -86,13 +86,8 @@
                     <span class="media-placeholder-icon">👤</span>
                     <span>Profile photo</span>
                   </div>
-                  <div id="avatarUploadProgress" class="media-upload-progress" style="display: none;">Uploading… <span id="avatarUploadPct">0</span>%</div>
                 </div>
-                <div class="media-upload-actions">
-                  <input type="file" id="avatarFileInput" accept="image/*" class="media-file-input" aria-label="Upload profile picture">
-                  <button type="button" class="btn btn-secondary btn-sm" id="avatarUploadBtn">Upload image</button>
-                </div>
-                <label for="avatarURLInput" class="form-label-inline">Or paste URL</label>
+                <label for="avatarURLInput" class="form-label-inline">Profile picture URL</label>
                 <input type="url" id="avatarURLInput" placeholder="https://..." class="form-input" maxlength="500">
               </div>
               <div class="media-upload-box banner-upload-box">
@@ -102,13 +97,8 @@
                     <span class="media-placeholder-icon">🖼</span>
                     <span>Cover image</span>
                   </div>
-                  <div id="bannerUploadProgress" class="media-upload-progress" style="display: none;">Uploading… <span id="bannerUploadPct">0</span>%</div>
                 </div>
-                <div class="media-upload-actions">
-                  <input type="file" id="bannerFileInput" accept="image/*" class="media-file-input" aria-label="Upload cover image">
-                  <button type="button" class="btn btn-secondary btn-sm" id="bannerUploadBtn">Upload image</button>
-                </div>
-                <label for="bannerURLInput" class="form-label-inline">Or paste URL</label>
+                <label for="bannerURLInput" class="form-label-inline">Cover image URL</label>
                 <input type="url" id="bannerURLInput" placeholder="https://..." class="form-input" maxlength="500">
               </div>
             </div>

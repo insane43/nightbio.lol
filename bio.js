@@ -363,60 +363,6 @@ function saveBio(uid, data) {
   return db.ref('users/' + uid).update(updates);
 }
 
-// Upload image to Storage and return download URL. field = 'avatar' | 'banner'
-// onProgress(percent) is optional; called with 0-100.
-// Progress may stay at 0% until the end in some environments; we use a single max-wait timeout.
-function uploadBioImage(uid, file, field, onProgress) {
-  var storage = getStorage();
-  if (!storage) return Promise.reject(new Error('Storage not loaded. Refresh the page.'));
-  if (!uid || !file) return Promise.reject(new Error('Invalid upload'));
-  var maxSize = 5 * 1024 * 1024; // 5MB per storage rules
-  if (file.size > maxSize) return Promise.reject(new Error('Image must be under 5MB.'));
-  // Storage rules require image/* and size < 5MB. Ensure contentType is always image/*
-  var contentType = (file.type && file.type.indexOf('image/') === 0) ? file.type : 'image/jpeg';
-  var ext = (file.name && file.name.split('.').pop()) || 'jpg';
-  var safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
-  var path = 'bios/' + uid + '/' + field + '_' + Date.now() + '.' + safeExt;
-  var ref = storage.ref(path);
-  var metadata = { contentType: contentType };
-  var task = ref.put(file, metadata);
-  return new Promise(function(resolve, reject) {
-    var done = false;
-    var maxWaitMs = 180000; // 3 minutes max
-    var timeoutId = null;
-    function finishErr(err) {
-      if (done) return;
-      done = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      reject(err);
-    }
-    function finishOk(url) {
-      if (done) return;
-      done = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      resolve(url);
-    }
-    timeoutId = setTimeout(function() {
-      if (done) return;
-      try { task.cancel(); } catch (e) {}
-      finishErr(new Error('Upload took too long. Try a smaller image (under 1MB). In Firebase Console go to Build → Storage and check your bucket name matches firebase-config.js (e.g. nightbio.appspot.com vs nightbio.firebasestorage.app).'));
-    }, maxWaitMs);
-
-    task.on('state_changed',
-      function(snapshot) {
-        if (onProgress && snapshot.totalBytes > 0) {
-          var pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-          onProgress(pct);
-        }
-      },
-      finishErr,
-      function() {
-        ref.getDownloadURL().then(finishOk).catch(finishErr);
-      }
-    );
-  });
-}
-
 // Upload MP3 to Storage and return download URL. Used for profile song.
 // onProgress(percent) is optional; called with 0-100.
 function uploadBioSong(uid, file, onProgress) {
