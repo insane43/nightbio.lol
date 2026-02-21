@@ -502,7 +502,7 @@
         }
         var alsoKnownEl = document.getElementById('bioAlsoKnownAs');
         if (alsoKnownEl) {
-          if (data.alias && data.alias.trim()) {
+          if (data.showAliasOnBio !== false && data.alias && data.alias.trim()) {
             alsoKnownEl.textContent = 'also known as @' + data.alias.trim();
             alsoKnownEl.style.display = '';
           } else {
@@ -661,14 +661,44 @@
           linksEl.appendChild(a);
         });
 
-        if (premium && data.liveEditPositions && typeof data.liveEditPositions === 'object') {
-          var profile = content && content.querySelector('.bio-profile');
-          if (profile) {
+        var profileEl = content && content.querySelector('.bio-profile');
+        var nameWrapEl = document.getElementById('bioNameWrap');
+        if (premium && data.liveEditOrder && Array.isArray(data.liveEditOrder) && data.liveEditOrder.length > 0) {
+          if (profileEl) {
+            profileEl.classList.add('bio-live-edit-layout');
+            profileEl.style.display = 'flex';
+            profileEl.style.flexDirection = 'column';
+            profileEl.style.position = 'relative';
+            profileEl.style.minHeight = '';
+            var orderMap = [
+              { key: 'avatar', el: avatar },
+              { key: 'name', el: nameWrapEl || nameEl },
+              { key: 'badges', el: document.getElementById('bioBadges') },
+              { key: 'bio', el: bioEl },
+              { key: 'profileViews', el: viewsEl },
+              { key: 'song', el: songWrap },
+              { key: 'links', el: linksEl }
+            ];
+            orderMap.forEach(function(item) {
+              if (!item.el) return;
+              var idx = data.liveEditOrder.indexOf(item.key);
+              item.el.style.order = idx >= 0 ? String(idx) : '';
+              item.el.style.position = '';
+              item.el.style.left = '';
+              item.el.style.top = '';
+              item.el.style.transform = '';
+              item.el.style.margin = '';
+            });
+          }
+        } else if (premium && data.liveEditPositions && typeof data.liveEditPositions === 'object') {
+          if (profileEl) {
             var defaultPos = { avatar: { x: 50, y: 12 }, name: { x: 50, y: 22 }, badges: { x: 50, y: 28 }, bio: { x: 50, y: 38 }, profileViews: { x: 50, y: 46 }, links: { x: 50, y: 58 } };
             var pos = data.liveEditPositions;
-            profile.classList.add('bio-live-edit-layout');
-            profile.style.position = 'relative';
-            profile.style.minHeight = '100vh';
+            profileEl.classList.add('bio-live-edit-layout');
+            profileEl.style.display = '';
+            profileEl.style.flexDirection = '';
+            profileEl.style.position = 'relative';
+            profileEl.style.minHeight = '100vh';
             var applyPos = function(el, key) {
               if (!el) return;
               var p = (pos[key] && typeof pos[key].x === 'number' && typeof pos[key].y === 'number') ? pos[key] : (defaultPos[key] || { x: 50, y: 50 });
@@ -679,12 +709,9 @@
               el.style.margin = '0';
             };
             applyPos(avatar, 'avatar');
-            var nameWrap = document.getElementById('bioNameWrap');
-            applyPos(nameWrap || nameEl, 'name');
-            var badgesEl = document.getElementById('bioBadges');
-            applyPos(badgesEl, 'badges');
+            applyPos(nameWrapEl || nameEl, 'name');
+            applyPos(document.getElementById('bioBadges'), 'badges');
             applyPos(bioEl, 'bio');
-            var viewsEl = document.getElementById('bioViews');
             applyPos(viewsEl, 'profileViews');
             applyPos(linksEl, 'links');
             if (songWrap) songWrap.style.display = 'none';
@@ -692,13 +719,15 @@
             if (alsoKnownEl) alsoKnownEl.style.display = 'none';
           }
         } else {
-          var profileNorm = content && content.querySelector('.bio-profile');
-          if (profileNorm) {
-            profileNorm.classList.remove('bio-live-edit-layout');
-            profileNorm.style.minHeight = '';
-            [avatar, nameEl, document.getElementById('bioNameWrap'), document.getElementById('bioBadges'), bioEl, document.getElementById('bioViews'), linksEl].forEach(function(el) {
-              if (el) { el.style.position = ''; el.style.left = ''; el.style.top = ''; el.style.transform = ''; el.style.margin = ''; }
+          if (profileEl) {
+            profileEl.classList.remove('bio-live-edit-layout');
+            profileEl.style.display = '';
+            profileEl.style.flexDirection = '';
+            profileEl.style.minHeight = '';
+            [avatar, nameEl, nameWrapEl, document.getElementById('bioBadges'), bioEl, viewsEl, linksEl, songWrap].forEach(function(el) {
+              if (el) { el.style.order = ''; el.style.position = ''; el.style.left = ''; el.style.top = ''; el.style.transform = ''; el.style.margin = ''; }
             });
+            if (songWrap) songWrap.style.display = '';
           }
         }
 

@@ -81,6 +81,7 @@
         <button type="button" class="editor-tab" role="tab" id="tabBadges" aria-selected="false" data-tab="badges">Badges</button>
         <button type="button" class="editor-tab" role="tab" id="tabStatus" aria-selected="false" data-tab="status">Status</button>
         <button type="button" class="editor-tab editor-tab-premium" role="tab" id="tabPremium" aria-selected="false" data-tab="premium" style="display: none;">Premium</button>
+        <button type="button" class="editor-tab editor-tab-premium" role="tab" id="tabLiveCanvas" aria-selected="false" data-tab="liveCanvas" style="display: none;">Live Canvas Editor</button>
         <button type="button" class="editor-tab editor-tab-staff" role="tab" id="tabAdminPanel" aria-selected="false" data-tab="adminPanel" style="display: none;">Admin panel</button>
       </nav>
 
@@ -139,6 +140,13 @@
               </div>
               <p id="aliasChangeMsg" class="form-hint" aria-live="polite" style="margin-top: 0.35rem;"></p>
               <p id="aliasCooldownMsg" class="panel-desc" style="margin-top: 0.5rem; font-size: 0.85rem;"></p>
+              <div class="form-group form-check" style="margin-top: 1rem;">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="showAliasOnBio" class="form-checkbox" checked aria-describedby="showAliasOnBioDesc">
+                  <span id="showAliasOnBioDesc">Show &quot;also known as @alias&quot; on my bio link</span>
+                </label>
+                <p class="panel-desc" style="margin-top: 0.25rem;">When off, visitors won&apos;t see your alias under your name on your public bio.</p>
+              </div>
             </div>
           </div>
           <div class="panel-card">
@@ -694,7 +702,7 @@
 
         <!-- Premium tab (only visible with premium badge) -->
         <section class="editor-panel" id="panelPremium" role="tabpanel" aria-labelledby="tabPremium" hidden>
-’<div class="panel-card premium-card">
+          <div class="panel-card premium-card">
             <h2 class="panel-title">Premium features</h2>
             <p class="panel-desc">Unlock these options with the Premium badge. Customize your profile with advanced styling and effects.</p>
           </div>
@@ -927,6 +935,89 @@
                 </span>
               </label>
               <textarea id="premiumCustomCSS" placeholder=".bio-name { letter-spacing: 0.1em; }" rows="4" class="form-input" maxlength="2000"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Live Canvas Editor (premium only) — drag to reorder blocks, save to apply on bio -->
+        <section class="editor-panel" id="panelLiveCanvas" role="tabpanel" aria-labelledby="tabLiveCanvas" hidden>
+          <div class="panel-card live-canvas-card">
+            <div class="live-canvas-header">
+              <div class="live-canvas-header-text">
+                <h2 class="panel-title live-canvas-title">Live Canvas Editor</h2>
+                <span class="live-canvas-badge" aria-hidden="true">Reorder [BETA]</span>
+              </div>
+              <p class="panel-desc live-canvas-desc">Drag blocks to change the order on your bio. Save changes to apply.</p>
+              <div class="live-canvas-toolbar">
+                <a href="#" id="liveCanvasOpenBioLink" class="live-canvas-open-bio" target="_blank" rel="noopener">Open your bio</a>
+                <button type="button" class="btn btn-ghost live-canvas-reset-btn" id="liveCanvasResetOrderBtn">
+                  <span class="live-canvas-reset-icon" aria-hidden="true"></span>
+                  Reset order
+                </button>
+                <p class="live-canvas-unsaved-hint" id="liveCanvasUnsavedHint" style="display: none;">Order changed — save to apply</p>
+              </div>
+            </div>
+            <div class="live-canvas-preview-wrap" id="liveCanvasPreviewWrap">
+              <div class="live-canvas-screen" id="canvasPreviewScreen">
+                <div class="live-canvas-banner" id="canvasPreviewBanner"></div>
+                <div class="live-canvas-blocks" id="liveCanvasBlocks">
+                  <div class="live-canvas-drop-indicator" id="liveCanvasDropIndicator" aria-hidden="true"></div>
+                  <div class="live-canvas-block" data-block-id="avatar" draggable="true">
+                    <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
+                    <div class="live-canvas-block-inner">
+                      <span class="live-canvas-block-label">Avatar</span>
+                      <div class="live-canvas-avatar-wrap" id="canvasPreviewAvatarWrap">
+                        <img id="canvasPreviewAvatar" class="live-canvas-avatar" src="" alt="" style="display: none;">
+                        <div class="live-canvas-avatar-placeholder" id="canvasPreviewAvatarPlaceholder">?</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="live-canvas-block" data-block-id="name" draggable="true">
+                    <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
+                    <div class="live-canvas-block-inner">
+                      <span class="live-canvas-block-label">Name</span>
+                      <div class="live-canvas-name" id="canvasPreviewName">Your name</div>
+                      <div class="live-canvas-alias" id="canvasPreviewAlias"></div>
+                    </div>
+                  </div>
+                  <div class="live-canvas-block" data-block-id="badges" draggable="true">
+                    <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
+                    <div class="live-canvas-block-inner">
+                      <span class="live-canvas-block-label">Badges</span>
+                      <div class="live-canvas-badges" id="canvasPreviewBadges"></div>
+                    </div>
+                  </div>
+                  <div class="live-canvas-block" data-block-id="bio" draggable="true">
+                    <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
+                    <div class="live-canvas-block-inner">
+                      <span class="live-canvas-block-label">Bio</span>
+                      <div class="live-canvas-bio" id="canvasPreviewBio">Your bio appears here.</div>
+                    </div>
+                  </div>
+                  <div class="live-canvas-block" data-block-id="profileViews" draggable="true">
+                    <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
+                    <div class="live-canvas-block-inner">
+                      <span class="live-canvas-block-label">Profile views</span>
+                      <div class="live-canvas-views" id="canvasPreviewViews">—</div>
+                    </div>
+                  </div>
+                  <div class="live-canvas-block" data-block-id="song" draggable="true">
+                    <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
+                    <div class="live-canvas-block-inner">
+                      <span class="live-canvas-block-label">Song</span>
+                      <div class="live-canvas-song-placeholder" id="canvasPreviewSong">Add in Profile tab</div>
+                    </div>
+                  </div>
+                  <div class="live-canvas-block" data-block-id="links" draggable="true">
+                    <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
+                    <div class="live-canvas-block-inner">
+                      <span class="live-canvas-block-label">Links</span>
+                      <div class="live-canvas-links" id="canvasPreviewLinks"></div>
+                      <p class="live-canvas-links-empty" id="canvasPreviewLinksEmpty">Add links in the Links tab</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>

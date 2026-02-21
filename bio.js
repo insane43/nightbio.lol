@@ -108,6 +108,7 @@ function loadBioForUid(uid) {
       metaImageURL: d.metaImageURL || '',
       showViewsOnBio: !!d.showViewsOnBio,
       showVerifiedCheckmark: !!(d.showVerifiedCheckmark && merged && merged.verified),
+      showAliasOnBio: d.showAliasOnBio !== false,
       stats: { views: views },
       badges: visibleBadges,
       hasPremium: !!(merged && merged.premium),
@@ -138,9 +139,26 @@ function loadBioForUid(uid) {
       premiumLayoutPreset: (d.premiumLayoutPreset || '').trim().slice(0, 20),
       premiumProfileAnimation: (d.premiumProfileAnimation || '').trim().slice(0, 20),
       premiumParallax: !!d.premiumParallax,
-      liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null
+      liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null,
+      liveEditOrder: sanitizeLiveEditOrder(d.liveEditOrder)
     };
   });
+}
+
+var LIVE_EDIT_ORDER_DEFAULT = ['avatar', 'name', 'badges', 'bio', 'profileViews', 'song', 'links'];
+function sanitizeLiveEditOrder(arr) {
+  if (!arr || !Array.isArray(arr)) return null;
+  var allowed = LIVE_EDIT_ORDER_DEFAULT.slice();
+  var out = [];
+  for (var i = 0; i < arr.length; i++) {
+    var id = arr[i];
+    if (typeof id === 'string' && allowed.indexOf(id) !== -1 && out.indexOf(id) === -1) out.push(id);
+  }
+  for (var j = 0; j < allowed.length; j++) {
+    if (out.indexOf(allowed[j]) === -1) out.push(allowed[j]);
+  }
+  if (out.length !== allowed.length) return null;
+  return out;
 }
 
 function mergeBadges(loaded) {
@@ -264,6 +282,7 @@ function getCurrentUserBio(uid) {
       metaImageURL: d.metaImageURL || '',
       showViewsOnBio: !!d.showViewsOnBio,
       showVerifiedCheckmark: !!(d.showVerifiedCheckmark && d.badges && d.badges.verified),
+      showAliasOnBio: d.showAliasOnBio !== false,
       stats: d.stats || { views: 0 },
       badges: mergeBadges(d.badges),
       badgeVisibility: d.badgeVisibility && typeof d.badgeVisibility === 'object' ? d.badgeVisibility : {},
@@ -294,7 +313,8 @@ function getCurrentUserBio(uid) {
       premiumLayoutPreset: (d.premiumLayoutPreset || '').trim().slice(0, 20),
       premiumProfileAnimation: (d.premiumProfileAnimation || '').trim().slice(0, 20),
       premiumParallax: !!d.premiumParallax,
-      liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null
+      liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null,
+      liveEditOrder: sanitizeLiveEditOrder(d.liveEditOrder)
     };
   });
 }
@@ -336,6 +356,7 @@ function saveBio(uid, data) {
     showVerifiedCheckmark: !!data.showVerifiedCheckmark,
     updatedAt: firebase.database.ServerValue.TIMESTAMP
   };
+  if (data.showAliasOnBio !== undefined) updates.showAliasOnBio = !!data.showAliasOnBio;
   if (data.badges && typeof data.badges === 'object') {
     if (data.badges.community !== undefined) updates['badges/community'] = !!data.badges.community;
   }
@@ -392,7 +413,11 @@ function saveBio(uid, data) {
   if (data.premiumLayoutPreset !== undefined) updates.premiumLayoutPreset = String(data.premiumLayoutPreset || '').trim().slice(0, 20);
   if (data.premiumProfileAnimation !== undefined) updates.premiumProfileAnimation = String(data.premiumProfileAnimation || '').trim().slice(0, 20);
   if (data.premiumParallax !== undefined) updates.premiumParallax = !!data.premiumParallax;
-  if (data.liveEditPositions === null) {
+  if (data.liveEditOrder !== undefined) {
+    var order = sanitizeLiveEditOrder(data.liveEditOrder);
+    updates.liveEditOrder = order;
+    updates.liveEditPositions = null;
+  } else if (data.liveEditPositions === null) {
     updates.liveEditPositions = null;
   } else if (data.liveEditPositions !== undefined && data.liveEditPositions && typeof data.liveEditPositions === 'object') {
     var sanitizedPos = {};

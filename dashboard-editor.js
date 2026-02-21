@@ -2,6 +2,7 @@
 (function() {
   var BASE_URL = typeof window !== 'undefined' && window.location && window.location.origin ? window.location.origin : 'https://nightbio.lol';
   var MAX_LINKS = 20;
+  var LIVE_EDIT_ORDER_DEFAULT = ['avatar', 'name', 'badges', 'bio', 'profileViews', 'song', 'links'];
 
   function showMsg(el, text, type) {
     if (!el) return;
@@ -121,7 +122,9 @@
     var aliasEl = document.getElementById('previewAlias');
     if (aliasEl) {
       var aliasText = (data.alias != null && String(data.alias).trim()) ? String(data.alias).trim() : ((window._editorCurrentData && window._editorCurrentData.alias != null) ? String(window._editorCurrentData.alias).trim() : '');
-      if (aliasText) {
+      var showAliasCb = document.getElementById('showAliasOnBio');
+      var showAlias = (!showAliasCb || showAliasCb.checked) && aliasText;
+      if (showAlias) {
         aliasEl.textContent = 'also known as @' + aliasText;
         aliasEl.style.display = '';
       } else {
@@ -204,6 +207,162 @@
       if (data.accentColor) screen.style.setProperty('--preview-accent', data.accentColor);
       if (data.fontFamily) screen.style.setProperty('font-family', data.fontFamily + ', var(--font-body), sans-serif');
     }
+
+    /* Live Canvas Editor: mirror preview into canvas panel when present */
+    var canvasBanner = document.getElementById('canvasPreviewBanner');
+    var canvasAvatar = document.getElementById('canvasPreviewAvatar');
+    var canvasAvatarPlace = document.getElementById('canvasPreviewAvatarPlaceholder');
+    var canvasName = document.getElementById('canvasPreviewName');
+    var canvasAlias = document.getElementById('canvasPreviewAlias');
+    var canvasBadges = document.getElementById('canvasPreviewBadges');
+    var canvasBio = document.getElementById('canvasPreviewBio');
+    var canvasLinks = document.getElementById('canvasPreviewLinks');
+    var canvasScreen = document.getElementById('canvasPreviewScreen');
+    if (canvasBanner || canvasAvatar || canvasName) {
+      if (canvasBanner) {
+        if (data.bannerURL) {
+          canvasBanner.style.backgroundImage = 'url(' + escapeHtml(data.bannerURL) + ')';
+          canvasBanner.style.backgroundSize = 'cover';
+          canvasBanner.style.backgroundPosition = 'center';
+        } else canvasBanner.style.backgroundImage = 'none';
+      }
+      if (canvasAvatar && canvasAvatarPlace) {
+        if (data.avatarURL) {
+          canvasAvatar.src = data.avatarURL;
+          canvasAvatar.style.display = 'block';
+          canvasAvatarPlace.style.display = 'none';
+        } else {
+          canvasAvatar.style.display = 'none';
+          canvasAvatar.removeAttribute('src');
+          canvasAvatarPlace.style.display = 'flex';
+          canvasAvatarPlace.textContent = (data.displayName || '?').charAt(0).toUpperCase();
+        }
+      }
+      if (canvasName) canvasName.textContent = data.displayName || 'Your name';
+      if (canvasAlias) {
+        var aliasText = (data.alias != null && String(data.alias).trim()) ? String(data.alias).trim() : ((window._editorCurrentData && window._editorCurrentData.alias != null) ? String(window._editorCurrentData.alias).trim() : '');
+        var showAliasCbCanvas = document.getElementById('showAliasOnBio');
+        var showAliasCanvas = (!showAliasCbCanvas || showAliasCbCanvas.checked) && aliasText;
+        if (showAliasCanvas) {
+          canvasAlias.textContent = 'also known as @' + aliasText;
+          canvasAlias.style.display = '';
+        } else {
+          canvasAlias.textContent = '';
+          canvasAlias.style.display = 'none';
+        }
+      }
+      if (canvasBadges) {
+        canvasBadges.innerHTML = '';
+        var badges = data.badges || {};
+        var visibility = data.badgeVisibility || {};
+        var visibleBadges = previewApplyBadgeVisibility(badges, visibility);
+        var badgeColors = data.badgeColors || {};
+        var icons = window.BADGE_ICONS || {};
+        var order = ['community', 'verified', 'staff', 'owner', 'og', 'premium'];
+        order.forEach(function(key) {
+          if (!visibleBadges[key]) return;
+          var span = document.createElement('span');
+          span.className = 'preview-badge bio-badge bio-badge-' + key;
+          if (badgeColors[key] && /^#[0-9A-Fa-f]{6}$/.test(String(badgeColors[key]))) span.style.color = String(badgeColors[key]);
+          if (icons[key]) {
+            var iconWrap = document.createElement('span');
+            iconWrap.className = 'bio-badge-icon';
+            iconWrap.innerHTML = icons[key];
+            span.appendChild(iconWrap);
+          }
+          canvasBadges.appendChild(span);
+        });
+      }
+      if (canvasBio) canvasBio.textContent = data.bio || 'Your bio appears here.';
+      var canvasViews = document.getElementById('canvasPreviewViews');
+      if (canvasViews) {
+        var showViews = document.getElementById('showViewsOnBio');
+        var viewsCount = (window._editorCurrentData && window._editorCurrentData.stats && typeof window._editorCurrentData.stats.views === 'number') ? window._editorCurrentData.stats.views : 0;
+        if (showViews && showViews.checked && viewsCount >= 0) {
+          canvasViews.textContent = viewsCount.toLocaleString() + ' profile view' + (viewsCount === 1 ? '' : 's');
+          canvasViews.classList.remove('live-canvas-views-empty');
+        } else {
+          canvasViews.textContent = 'Enable in Analytics to show';
+          canvasViews.classList.add('live-canvas-views-empty');
+        }
+      }
+      var canvasSong = document.getElementById('canvasPreviewSong');
+      if (canvasSong) {
+        var hasSong = !!(data.songURL && data.songURL.trim());
+        canvasSong.textContent = hasSong ? 'Spotify / song added' : 'Add in Profile tab';
+        canvasSong.classList.toggle('live-canvas-song-set', !!hasSong);
+      }
+      if (canvasLinks) {
+        var links = data.links || [];
+        var hasLinks = links.length > 0;
+        var linksEmptyEl = document.getElementById('canvasPreviewLinksEmpty');
+        if (linksEmptyEl) linksEmptyEl.style.display = hasLinks ? 'none' : '';
+        canvasLinks.innerHTML = '';
+        var allIconOnly = hasLinks && links.every(function(l) { return l.iconOnly; });
+        canvasLinks.classList.toggle('preview-links-icon-only', !!allIconOnly);
+        var iconMap = window.LINK_ICON_SVG || {};
+        links.forEach(function(l) {
+          if (!l.url) return;
+          var btn = document.createElement('span');
+          btn.className = 'preview-link-btn' + (l.iconOnly ? ' preview-link-btn-icon-only' : '');
+          if (l.iconOnly) {
+            btn.title = l.label || l.url;
+            var iconKey = (l.icon && l.icon.trim()) ? l.icon.trim() : 'link';
+            var svg = iconMap[iconKey] || iconMap.link || '';
+            if (svg) {
+              var iconSpan = document.createElement('span');
+              iconSpan.className = 'preview-link-icon';
+              iconSpan.innerHTML = svg;
+              iconSpan.setAttribute('aria-hidden', 'true');
+              btn.appendChild(iconSpan);
+            } else btn.textContent = (l.label || l.url).charAt(0).toUpperCase();
+          } else btn.textContent = l.label || l.url;
+          if (l.color && /^#[0-9A-Fa-f]{6}$/.test(String(l.color).trim())) btn.style.color = l.color.trim();
+          canvasLinks.appendChild(btn);
+        });
+      }
+      if (canvasScreen) {
+        if (data.accentColor) canvasScreen.style.setProperty('--preview-accent', data.accentColor);
+        if (data.fontFamily) canvasScreen.style.setProperty('font-family', data.fontFamily + ', var(--font-body), sans-serif');
+      }
+    }
+
+    /* Sidebar live preview: apply same block order as Live Canvas so preview stays in sync */
+    applySidebarPreviewOrder();
+  }
+
+  function applySidebarPreviewOrder() {
+    var profile = document.querySelector('.preview-profile');
+    if (!profile) return;
+    var order = (window._editorCurrentData && window._editorCurrentData.liveEditOrder && Array.isArray(window._editorCurrentData.liveEditOrder))
+      ? window._editorCurrentData.liveEditOrder
+      : LIVE_EDIT_ORDER_DEFAULT.slice();
+    var avatarWrap = document.getElementById('previewAvatarWrap');
+    var nameEl = document.getElementById('previewName');
+    var aliasEl = document.getElementById('previewAlias');
+    var badgesEl = document.getElementById('previewBadges');
+    var bioEl = document.getElementById('previewBio');
+    var linksEl = document.getElementById('previewLinks');
+    profile.style.display = 'flex';
+    profile.style.flexDirection = 'column';
+    var map = {
+      avatar: [avatarWrap],
+      name: [nameEl, aliasEl],
+      badges: [badgesEl],
+      bio: [bioEl],
+      profileViews: [],
+      song: [],
+      links: [linksEl]
+    };
+    for (var i = 0; i < order.length; i++) {
+      var id = order[i];
+      var els = map[id];
+      if (els) {
+        for (var j = 0; j < els.length; j++) {
+          if (els[j]) els[j].style.order = String(i);
+        }
+      }
+    }
   }
 
   function buildIconSelectOptions(selected) {
@@ -284,6 +443,135 @@
     if (addBtn) addBtn.disabled = count >= MAX_LINKS;
   }
 
+  function ensureLiveEditOrder(d) {
+    var order = (d && d.liveEditOrder && Array.isArray(d.liveEditOrder) && d.liveEditOrder.length === LIVE_EDIT_ORDER_DEFAULT.length) ? d.liveEditOrder : LIVE_EDIT_ORDER_DEFAULT.slice();
+    var seen = {};
+    var out = [];
+    for (var i = 0; i < order.length; i++) {
+      var id = order[i];
+      if (typeof id === 'string' && LIVE_EDIT_ORDER_DEFAULT.indexOf(id) !== -1 && !seen[id]) { seen[id] = true; out.push(id); }
+    }
+    for (var j = 0; j < LIVE_EDIT_ORDER_DEFAULT.length; j++) {
+      if (!seen[LIVE_EDIT_ORDER_DEFAULT[j]]) out.push(LIVE_EDIT_ORDER_DEFAULT[j]);
+    }
+    return out;
+  }
+
+  function applyCanvasBlockOrder() {
+    var container = document.getElementById('liveCanvasBlocks');
+    if (!container || !window._editorCurrentData) return;
+    var indicator = document.getElementById('liveCanvasDropIndicator');
+    if (indicator && indicator.parentNode) indicator.parentNode.removeChild(indicator);
+    var order = (window._editorCurrentData.liveEditOrder && Array.isArray(window._editorCurrentData.liveEditOrder)) ? window._editorCurrentData.liveEditOrder : LIVE_EDIT_ORDER_DEFAULT.slice();
+    var blocks = container.querySelectorAll('.live-canvas-block');
+    var byId = {};
+    for (var i = 0; i < blocks.length; i++) {
+      var id = blocks[i].getAttribute('data-block-id');
+      if (id) byId[id] = blocks[i];
+    }
+    for (var k = 0; k < order.length; k++) {
+      if (byId[order[k]]) container.appendChild(byId[order[k]]);
+    }
+    if (indicator) container.insertBefore(indicator, container.firstChild);
+  }
+
+  function updateLiveCanvasUnsavedHint() {
+    var hint = document.getElementById('liveCanvasUnsavedHint');
+    if (!hint) return;
+    var current = (window._editorCurrentData && window._editorCurrentData.liveEditOrder && Array.isArray(window._editorCurrentData.liveEditOrder)) ? window._editorCurrentData.liveEditOrder : LIVE_EDIT_ORDER_DEFAULT.slice();
+    var saved = (window._editorLastSavedOrder && Array.isArray(window._editorLastSavedOrder)) ? window._editorLastSavedOrder : LIVE_EDIT_ORDER_DEFAULT.slice();
+    var same = current.length === saved.length && current.every(function(id, i) { return saved[i] === id; });
+    hint.style.display = same ? 'none' : '';
+  }
+
+  function syncLiveEditOrderFromDOM() {
+    var container = document.getElementById('liveCanvasBlocks');
+    if (!container || !window._editorCurrentData) return;
+    var blocks = container.querySelectorAll('.live-canvas-block');
+    var order = [];
+    for (var i = 0; i < blocks.length; i++) {
+      var id = blocks[i].getAttribute('data-block-id');
+      if (id) order.push(id);
+    }
+    if (order.length === LIVE_EDIT_ORDER_DEFAULT.length) window._editorCurrentData.liveEditOrder = order;
+  }
+
+  function wireLiveCanvasDragDrop() {
+    if (window._liveCanvasDnDWired) return;
+    window._liveCanvasDnDWired = true;
+    var container = document.getElementById('liveCanvasBlocks');
+    if (!container) return;
+    var indicator = document.getElementById('liveCanvasDropIndicator');
+    var dragged = null;
+    function hideDropIndicator() {
+      if (indicator) {
+        indicator.style.display = 'none';
+        indicator.classList.remove('live-canvas-drop-indicator-visible');
+      }
+      container.classList.remove('live-canvas-dragging-active');
+    }
+    function showDropIndicator(beforeBlock) {
+      if (!indicator) return;
+      indicator.style.display = 'block';
+      indicator.classList.add('live-canvas-drop-indicator-visible');
+      if (beforeBlock && beforeBlock !== indicator && beforeBlock.parentNode === container) {
+        container.insertBefore(indicator, beforeBlock);
+      } else {
+        container.appendChild(indicator);
+      }
+    }
+    container.addEventListener('dragstart', function(e) {
+      var block = e.target.closest('.live-canvas-block');
+      if (!block) return;
+      dragged = block;
+      e.dataTransfer.setData('text/plain', block.getAttribute('data-block-id') || '');
+      e.dataTransfer.effectAllowed = 'move';
+      block.classList.add('live-canvas-dragging');
+      container.classList.add('live-canvas-dragging-active');
+    });
+    container.addEventListener('dragend', function(e) {
+      if (dragged) dragged.classList.remove('live-canvas-dragging');
+      dragged = null;
+      hideDropIndicator();
+    });
+    container.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      var block = e.target.closest('.live-canvas-block');
+      if (indicator && dragged && block && block !== dragged) {
+        var rect = block.getBoundingClientRect();
+        var mid = rect.top + rect.height / 2;
+        if (e.clientY < mid) showDropIndicator(block);
+        else showDropIndicator(block.nextSibling);
+      }
+    });
+    container.addEventListener('drop', function(e) {
+      e.preventDefault();
+      hideDropIndicator();
+      var block = e.target.closest('.live-canvas-block');
+      if (block && dragged && block !== dragged) {
+        var rect = block.getBoundingClientRect();
+        var mid = rect.top + rect.height / 2;
+        var insertBefore = e.clientY < mid;
+        if (insertBefore) container.insertBefore(dragged, block);
+        else container.insertBefore(dragged, block.nextSibling);
+        syncLiveEditOrderFromDOM();
+        applySidebarPreviewOrder();
+        updateLiveCanvasUnsavedHint();
+      }
+    });
+    var resetBtn = document.getElementById('liveCanvasResetOrderBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function() {
+        if (!window._editorCurrentData) return;
+        window._editorCurrentData.liveEditOrder = LIVE_EDIT_ORDER_DEFAULT.slice();
+        applyCanvasBlockOrder();
+        applySidebarPreviewOrder();
+        updateLiveCanvasUnsavedHint();
+      });
+    }
+  }
+
   function switchTab(tabId) {
     var tabs = document.querySelectorAll('.editor-tab');
     var panels = document.querySelectorAll('.editor-panel');
@@ -299,6 +587,11 @@
     });
     if (tabId === 'analytics') refreshProfileViews();
     if (tabId === 'adminPanel' && typeof loadDashboardAdmin === 'function') loadDashboardAdmin();
+    if (tabId === 'liveCanvas') {
+      applyCanvasBlockOrder();
+      updatePreview();
+      updateLiveCanvasUnsavedHint();
+    }
     if (tabId === 'status') {
       runDashboardStatusChecks();
       if (!window._dashboardStatusWired) {
@@ -451,6 +744,8 @@
         }
         if (bioUrlStrip) bioUrlStrip.style.display = 'flex';
         if (viewBioBtn) viewBioBtn.href = viewHref;
+        var openBioLink = document.getElementById('liveCanvasOpenBioLink');
+        if (openBioLink) openBioLink.href = viewHref;
       }
     }
 
@@ -554,6 +849,10 @@
     getCurrentUserBio(uid).then(function(data) {
       var d = data || { links: [] };
       window._editorCurrentData = d;
+      window._editorCurrentData.liveEditOrder = ensureLiveEditOrder(d);
+      window._editorLastSavedOrder = (window._editorCurrentData.liveEditOrder || LIVE_EDIT_ORDER_DEFAULT).slice();
+      applyCanvasBlockOrder();
+      wireLiveCanvasDragDrop();
 
       if (d.username) setBioUrl(d.username);
       var currentHandleEl = document.getElementById('currentHandleDisplay');
@@ -661,6 +960,8 @@
 
       var showViewsCb = document.getElementById('showViewsOnBio');
       if (showViewsCb) showViewsCb.checked = !!d.showViewsOnBio;
+      var showAliasOnBioCb = document.getElementById('showAliasOnBio');
+      if (showAliasOnBioCb) showAliasOnBioCb.checked = d.showAliasOnBio !== false;
       refreshProfileViews();
 
       if (avatarURLInput) avatarURLInput.value = d.avatarURL || '';
@@ -679,6 +980,8 @@
 
       var tabPremium = document.getElementById('tabPremium');
       if (tabPremium) tabPremium.style.display = (d.badges && d.badges.premium) ? '' : 'none';
+      var tabLiveCanvas = document.getElementById('tabLiveCanvas');
+      if (tabLiveCanvas) tabLiveCanvas.style.display = (d.badges && d.badges.premium) ? '' : 'none';
       var tabAdminPanel = document.getElementById('tabAdminPanel');
       if (tabAdminPanel) tabAdminPanel.style.display = (d.badges && d.badges.staff) ? '' : 'none';
       window._dashboardIsOwner = !!(d.badges && d.badges.owner);
@@ -1654,6 +1957,7 @@
           metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
           metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
         showViewsOnBio: showViewsCb ? showViewsCb.checked : false,
+        showAliasOnBio: (function() { var el = document.getElementById('showAliasOnBio'); return el ? el.checked : true; })(),
         badges: window._editorCurrentData.badges || { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
         badgeVisibility: window._editorCurrentData.badgeVisibility || {},
         badgeColors: (window._editorCurrentData && window._editorCurrentData.badgeColors) || {},
@@ -1709,6 +2013,9 @@
         payload.premiumLayoutPreset = pLayoutPreset ? pLayoutPreset.value.trim() : '';
         payload.premiumProfileAnimation = pAnim ? pAnim.value.trim() : '';
         payload.premiumParallax = pParallax ? !!pParallax.checked : false;
+        var order = (window._editorCurrentData.liveEditOrder && Array.isArray(window._editorCurrentData.liveEditOrder)) ? window._editorCurrentData.liveEditOrder : null;
+        payload.liveEditOrder = order;
+        payload.liveEditPositions = null;
       }
       return payload;
     }
@@ -1720,6 +2027,10 @@
         clearMsg(msgEl);
         saveBio(uid, data).then(function() {
           showMsg(msgEl, 'Saved', 'success');
+          if (window._editorCurrentData && window._editorCurrentData.liveEditOrder) {
+            window._editorLastSavedOrder = window._editorCurrentData.liveEditOrder.slice();
+            updateLiveCanvasUnsavedHint();
+          }
           saveBtn.disabled = false;
         }).catch(function() {
           showMsg(msgEl, 'Failed to save', 'error');
@@ -1811,6 +2122,8 @@
     if (btnStyleEl) btnStyleEl.addEventListener('change', updatePreview);
     var showViewsCbEl = document.getElementById('showViewsOnBio');
     if (showViewsCbEl) showViewsCbEl.addEventListener('change', updatePreview);
+    var showAliasOnBioEl = document.getElementById('showAliasOnBio');
+    if (showAliasOnBioEl) showAliasOnBioEl.addEventListener('change', updatePreview);
     function bindModalRange(id, valueId, suffix) {
       var el = document.getElementById(id);
       var valEl = document.getElementById(valueId);
