@@ -157,7 +157,6 @@ body {
   object-fit: cover;
   display: block;
   background: var(--bg-elevated);
-  vertical-align: middle;
 }
 .site-nav-logo h1 {
   font-size: inherit;
@@ -4960,7 +4959,7 @@ html { scrollbar-gutter: stable; }
 .bio-content-wrap.bio-glow-badges .bio-badge-icon svg {
   filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 60%, transparent));
 }
-@supports not (color: color-mix(in srgb, red 50%, blue)) {
+@supports not (color: color-mix(in srgb, red, blue)) {
   .bio-content-wrap.bio-glow-badges .bio-badges {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   }
@@ -4969,7 +4968,7 @@ html { scrollbar-gutter: stable; }
   }
   .bio-content-wrap.bio-glow-badges .bio-badge-icon svg { filter: drop-shadow(0 0 6px currentColor); }
   .bio-content-wrap.bio-glow-socials .bio-link-btn.bio-link-icon-only .bio-link-icon {
-    filter: drop-shadow(0 0 6px var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent)))) drop-shadow(0 0 12px var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent)));
+    filter: drop-shadow(0 0 6px var(--purple-accent)) drop-shadow(0 0 12px var(--purple-accent));
   }
 }
 .bio-content-wrap.bio-glow-bio .bio-bio-text {
@@ -4978,7 +4977,7 @@ html { scrollbar-gutter: stable; }
     0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 28%, transparent),
     0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 12%, transparent);
 }
-@supports not (color: color-mix(in srgb, red 50%, blue)) {
+@supports not (color: color-mix(in srgb, red, blue)) {
   .bio-content-wrap.bio-glow-username .bio-name {
     text-shadow: 0 0 var(--bio-glow-sm, 4px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-2xl, 12px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-5xl, 24px) var(--bio-glow-color, var(--purple-accent));
   }
