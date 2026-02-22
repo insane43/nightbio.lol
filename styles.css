@@ -2486,6 +2486,173 @@ body.toplander .skiptranslate { display: none !important; }
   white-space: nowrap;
 }
 .editor-qr-btn:hover { background: var(--purple-accent); }
+
+/* QR code modal — premium revamp */
+.qr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  animation: qrModalBackdropIn 0.3s ease-out;
+}
+@keyframes qrModalBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.qr-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 14, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.qr-modal-box {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 340px;
+  padding: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(22, 22, 32, 0.98) 0%, rgba(16, 16, 24, 0.99) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(124, 107, 184, 0.2),
+    0 32px 64px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(124, 107, 184, 0.12);
+  animation: qrModalBoxIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes qrModalBoxIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.qr-modal-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(124, 107, 184, 0.4) 0%, rgba(74, 63, 107, 0.2) 40%, rgba(124, 107, 184, 0.25) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.qr-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(232, 230, 240, 0.9);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.qr-modal-close:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  transform: scale(1.05);
+}
+.qr-modal-close:active {
+  transform: scale(0.98);
+}
+.qr-modal-header {
+  padding: 1.75rem 1.5rem 0.5rem;
+  text-align: center;
+  padding-right: 3.25rem;
+}
+.qr-modal-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem;
+  color: var(--text-primary, #e8e6f0);
+}
+.qr-modal-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted, rgba(232, 230, 240, 0.65));
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.qr-modal-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  text-align: center;
+}
+.qr-modal-image-wrap {
+  display: inline-block;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.qr-modal-image {
+  display: block;
+  width: 256px;
+  height: 256px;
+  max-width: 100%;
+  border-radius: 12px;
+  background: #fff;
+}
+.qr-modal-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--purple-accent, #7c6bb8) 0%, var(--purple-mid, #5b4d8a) 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(124, 107, 184, 0.35);
+}
+.qr-modal-share:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124, 107, 184, 0.45);
+}
+.qr-modal-share:active {
+  transform: translateY(0);
+}
+.qr-modal-share-icon {
+  flex-shrink: 0;
+}
+.qr-modal-footer {
+  padding: 0.75rem 1.5rem 1.25rem;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--purple-accent, #7c6bb8);
+  text-align: center;
+  opacity: 0.9;
+}
+
 .editor-view-btn {
   font-size: 0.85rem;
   color: var(--purple-accent);

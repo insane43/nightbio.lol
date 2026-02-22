@@ -61,7 +61,7 @@
       <span class="editor-url-label">Your link</span>
       <input type="text" class="editor-url-input" id="bioUrlInput" readonly value="" aria-label="Your bio URL">
       <button type="button" class="editor-copy-btn" id="copyBioUrlBtn">Copy</button>
-      <button type="button" class="editor-qr-btn" id="downloadQrBtn" title="Download QR code">QR code</button>
+      <button type="button" class="editor-qr-btn" id="downloadQrBtn" title="Show QR code">QR code</button>
       <a href="#" class="editor-view-btn" id="viewBioBtn" target="_blank" rel="noopener">View profile</a>
     </div>
     <div class="editor-actions">
@@ -70,6 +70,30 @@
       <button type="button" class="btn btn-ghost editor-logout-btn" id="logoutBtn">Log out</button>
     </div>
   </header>
+
+  <div id="qrModal" class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle" style="display: none;">
+    <div class="qr-modal-backdrop" id="qrModalBackdrop"></div>
+    <div class="qr-modal-box">
+      <div class="qr-modal-glow" aria-hidden="true"></div>
+      <button type="button" class="qr-modal-close" id="qrModalClose" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="qr-modal-header">
+        <h2 id="qrModalTitle" class="qr-modal-title">Your QR code</h2>
+        <p class="qr-modal-subtitle">Scan to open your bio link</p>
+      </div>
+      <div class="qr-modal-body">
+        <div class="qr-modal-image-wrap">
+          <img id="qrModalImage" class="qr-modal-image" src="" alt="QR code for your bio link">
+        </div>
+        <button type="button" class="qr-modal-share" id="qrModalShare" aria-label="Share QR code">
+          <svg class="qr-modal-share-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share QR code
+        </button>
+      </div>
+      <p class="qr-modal-footer">nightbio.lol</p>
+    </div>
+  </div>
 
   <main class="editor-main">
     <div class="editor-side">

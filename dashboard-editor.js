@@ -2165,27 +2165,64 @@
     }
 
     var downloadQrBtn = document.getElementById('downloadQrBtn');
-    if (downloadQrBtn && bioUrlInput) {
-      downloadQrBtn.addEventListener('click', function() {
+    var qrModal = document.getElementById('qrModal');
+    var qrModalImage = document.getElementById('qrModalImage');
+    var qrModalClose = document.getElementById('qrModalClose');
+    var qrModalBackdrop = document.getElementById('qrModalBackdrop');
+    var qrModalShare = document.getElementById('qrModalShare');
+    if (downloadQrBtn && bioUrlInput && qrModal && qrModalImage) {
+      function closeQrModal() {
+        qrModal.style.display = 'none';
+        qrModalImage.src = '';
+      }
+      function getBioFullUrl() {
         var fullUrl = bioUrlInput.getAttribute('data-full-url') || bioUrlInput.value;
-        if (!fullUrl || !fullUrl.trim()) return;
-        var url = (fullUrl.indexOf('http') === 0) ? fullUrl.trim() : ('https://' + fullUrl.trim().replace(/^\/+/, ''));
+        if (!fullUrl || !fullUrl.trim()) return '';
+        return (fullUrl.indexOf('http') === 0) ? fullUrl.trim() : ('https://' + fullUrl.trim().replace(/^\/+/, ''));
+      }
+      downloadQrBtn.addEventListener('click', function() {
+        var url = getBioFullUrl();
+        if (!url) return;
         var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=' + encodeURIComponent(url);
-        downloadQrBtn.disabled = true;
-        fetch(qrApiUrl).then(function(res) { return res.blob(); }).then(function(blob) {
-          var objectUrl = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = objectUrl;
-          a.download = 'nightbio-qr.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(objectUrl);
-        }).catch(function() {
-          window.open(qrApiUrl, '_blank', 'noopener');
-        }).then(function() {
-          downloadQrBtn.disabled = false;
+        qrModalImage.src = qrApiUrl;
+        qrModal.style.display = 'flex';
+      });
+      if (qrModalShare) {
+        var shareIconHtml = '<svg class="qr-modal-share-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share QR code';
+        function resetShareBtn() {
+          qrModalShare.innerHTML = shareIconHtml;
+        }
+        qrModalShare.addEventListener('click', function() {
+          var qrSrc = qrModalImage.src;
+          if (!qrSrc || qrSrc.indexOf('api.qrserver.com') === -1) return;
+          qrModalShare.disabled = true;
+          fetch(qrSrc).then(function(res) { return res.blob(); }).then(function(blob) {
+            var file = new File([blob], 'nightbio-qr.png', { type: 'image/png' });
+            if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+              return navigator.share({ title: 'My nightbio QR code', files: [file] }).then(function() {
+                qrModalShare.textContent = 'Shared!';
+                setTimeout(function() { qrModalShare.innerHTML = shareIconHtml; qrModalShare.disabled = false; }, 1500);
+              });
+            }
+            var objectUrl = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = objectUrl;
+            a.download = 'nightbio-qr.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(objectUrl);
+            qrModalShare.textContent = 'Downloaded!';
+            setTimeout(function() { qrModalShare.innerHTML = shareIconHtml; qrModalShare.disabled = false; }, 1500);
+          }).catch(function() {
+            qrModalShare.disabled = false;
+          });
         });
+      }
+      if (qrModalClose) qrModalClose.addEventListener('click', closeQrModal);
+      if (qrModalBackdrop) qrModalBackdrop.addEventListener('click', closeQrModal);
+      document.addEventListener('keydown', function onQrKey(e) {
+        if (e.key === 'Escape' && qrModal.style.display === 'flex') closeQrModal();
       });
     }
 
