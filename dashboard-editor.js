@@ -2164,6 +2164,31 @@
       });
     }
 
+    var downloadQrBtn = document.getElementById('downloadQrBtn');
+    if (downloadQrBtn && bioUrlInput) {
+      downloadQrBtn.addEventListener('click', function() {
+        var fullUrl = bioUrlInput.getAttribute('data-full-url') || bioUrlInput.value;
+        if (!fullUrl || !fullUrl.trim()) return;
+        var url = (fullUrl.indexOf('http') === 0) ? fullUrl.trim() : ('https://' + fullUrl.trim().replace(/^\/+/, ''));
+        var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=' + encodeURIComponent(url);
+        downloadQrBtn.disabled = true;
+        fetch(qrApiUrl).then(function(res) { return res.blob(); }).then(function(blob) {
+          var objectUrl = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = objectUrl;
+          a.download = 'nightbio-qr.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(objectUrl);
+        }).catch(function() {
+          window.open(qrApiUrl, '_blank', 'noopener');
+        }).then(function() {
+          downloadQrBtn.disabled = false;
+        });
+      });
+    }
+
     window.dashboardEditor = window.dashboardEditor || {};
     window.dashboardEditor.updateLinkCount = updateLinkCount;
     window.dashboardEditor.updatePreview = updatePreview;
