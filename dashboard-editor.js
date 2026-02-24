@@ -605,7 +605,19 @@
       }
     }
     if (tabId === 'settings') {
-      refreshSettingsPanel();
+      var user = typeof getAuth === 'function' && getAuth() && getAuth().currentUser ? getAuth().currentUser : null;
+      var uid = user ? user.uid : null;
+      if (uid && typeof getCurrentUserBio === 'function') {
+        getCurrentUserBio(uid).then(function(fresh) {
+          if (fresh && window._editorCurrentData) {
+            window._editorCurrentData.discordId = fresh.discordId || null;
+            window._editorCurrentData.discordProfile = fresh.discordProfile || null;
+          }
+          refreshSettingsPanel();
+        }).catch(function() { refreshSettingsPanel(); });
+      } else {
+        refreshSettingsPanel();
+      }
       if (!window._settingsWired) wireSettingsPanel();
     }
   }
@@ -636,20 +648,27 @@
     var discordUsername = document.getElementById('settingsDiscordUsername');
     var discordUserId = document.getElementById('settingsDiscordUserId');
     var dp = d && d.discordProfile && d.discordProfile.id ? d.discordProfile : null;
-    if (discordWrap) discordWrap.style.display = dp ? '' : 'none';
+    var discordIdOnly = d && d.discordId && !dp;
+    var isLinked = !!dp || !!discordIdOnly;
+    if (discordWrap) discordWrap.style.display = isLinked ? '' : 'none';
+    if (discordAvatar) discordAvatar.style.display = dp ? '' : 'none';
+    if (discordDisplayName) discordDisplayName.style.display = dp ? '' : 'none';
+    if (discordUsername) discordUsername.style.display = dp ? '' : 'none';
     if (dp) {
       var id = String(dp.id);
       var avatarUrl = dp.avatar
         ? 'https://cdn.discordapp.com/avatars/' + id + '/' + dp.avatar + '.png?size=128'
         : 'https://cdn.discordapp.com/embed/avatars/' + ((parseInt(id, 10) >> 22) % 6) + '.png';
-      if (discordAvatar) {
-        discordAvatar.src = avatarUrl;
-        discordAvatar.alt = (dp.displayName || dp.username || 'Discord') + ' avatar';
-      }
-      if (discordDisplayName) discordDisplayName.textContent = (dp.displayName && dp.displayName.trim()) ? dp.displayName.trim() : '—';
-      if (discordUsername) discordUsername.textContent = (dp.username && dp.username.trim()) ? '@' + dp.username.trim() : '—';
-      if (discordUserId) discordUserId.textContent = 'ID: ' + id;
+      discordAvatar.src = avatarUrl;
+      discordAvatar.alt = (dp.displayName || dp.username || 'Discord') + ' avatar';
+      discordDisplayName.textContent = (dp.displayName && dp.displayName.trim()) ? dp.displayName.trim() : '—';
+      discordUsername.textContent = (dp.username && dp.username.trim()) ? '@' + dp.username.trim() : '—';
+      discordUserId.textContent = 'ID: ' + id;
+    } else if (discordIdOnly) {
+      if (discordUserId) discordUserId.textContent = 'ID: ' + String(d.discordId);
+      if (discordDisplayName) { discordDisplayName.textContent = 'Linked (run /link in Discord again to show name and avatar)'; discordDisplayName.style.display = ''; }
     }
+    if (discordUserId) discordUserId.style.display = '';
   }
 
   function wireSettingsPanel() {
