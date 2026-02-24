@@ -2853,25 +2853,37 @@ body.toplander .skiptranslate { display: none !important; }
 .settings-discord-unlink-btn {
   margin-left: auto;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  align-self: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
+  border: 1px solid var(--border-subtle, rgba(0,0,0,0.12));
+  border-radius: 10px;
+  background: var(--bg-card, rgba(255,255,255,0.06));
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 .settings-discord-unlink-btn:hover {
   color: var(--text-error, #e11);
   background: rgba(238, 17, 17, 0.08);
+  border-color: rgba(238, 17, 17, 0.35);
+}
+.settings-discord-unlink-btn:active {
+  transform: scale(0.96);
 }
 .settings-discord-unlink-btn:focus-visible {
   outline: 2px solid var(--purple-accent);
   outline-offset: 2px;
+}
+.settings-discord-unlink-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 .settings-discord-avatar {
   width: 56px;
