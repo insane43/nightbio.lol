@@ -112,6 +112,7 @@ function loadBioForUid(uid) {
       stats: { views: views },
       badges: visibleBadges,
       hasPremium: !!(merged && merged.premium),
+      discordProfile: (d.discordProfile && typeof d.discordProfile === 'object') ? d.discordProfile : null,
       badgeColors: sanitizeBadgeColors(d.badgeColors),
       premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
       premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
@@ -320,6 +321,28 @@ function getCurrentUserBio(uid) {
     };
   });
 }
+
+// Human-readable labels for Discord account badges (user flags) for display on profile
+window.DISCORD_BADGE_LABELS = {
+  Staff: 'Discord Staff',
+  Partner: 'Partner',
+  HypeSquad: 'HypeSquad Events',
+  BugHunterLevel1: 'Bug Hunter Level 1',
+  BugHunterLevel2: 'Bug Hunter Level 2',
+  HypeSquadOnlineHouse1: 'HypeSquad Bravery',
+  HypeSquadOnlineHouse2: 'HypeSquad Brilliance',
+  HypeSquadOnlineHouse3: 'HypeSquad Balance',
+  PremiumEarlySupporter: 'Early Nitro',
+  VerifiedDeveloper: 'Verified Bot Developer',
+  CertifiedModerator: 'Certified Moderator',
+  ActiveDeveloper: 'Active Developer',
+  BotHTTPInteractions: 'Bot',
+  Spammer: 'Spammer',
+  DisablePremium: 'Disable Premium',
+  Collaborator: 'Collaborator',
+  RestrictedCollaborator: 'Restricted Collaborator',
+  Quarantined: 'Quarantined'
+};
 
 // Save only bio-related fields to users/{uid} (user can only set badges.community)
 function saveBio(uid, data) {

@@ -669,6 +669,44 @@
       if (discordDisplayName) { discordDisplayName.textContent = 'Linked (run /link in Discord again to show name and avatar)'; discordDisplayName.style.display = ''; }
     }
     if (discordUserId) discordUserId.style.display = '';
+
+    var discordBadgesEl = document.getElementById('settingsDiscordBadges');
+    if (discordBadgesEl) {
+      var discordAccountBadges = (dp && Array.isArray(dp.discordBadges)) ? dp.discordBadges : [];
+      var discordBadgeLabels = {
+        Staff: 'Discord Staff',
+        Partner: 'Partner',
+        HypeSquad: 'HypeSquad Events',
+        BugHunterLevel1: 'Bug Hunter Level 1',
+        BugHunterLevel2: 'Bug Hunter Level 2',
+        HypeSquadOnlineHouse1: 'HypeSquad Bravery',
+        HypeSquadOnlineHouse2: 'HypeSquad Brilliance',
+        HypeSquadOnlineHouse3: 'HypeSquad Balance',
+        PremiumEarlySupporter: 'Early Nitro',
+        VerifiedDeveloper: 'Verified Bot Developer',
+        CertifiedModerator: 'Certified Moderator',
+        ActiveDeveloper: 'Active Developer',
+        BotHTTPInteractions: 'Bot',
+        Spammer: 'Spammer',
+        DisablePremium: 'Disable Premium',
+        Collaborator: 'Collaborator',
+        RestrictedCollaborator: 'Restricted Collaborator',
+        Quarantined: 'Quarantined'
+      };
+      if (!isLinked || discordAccountBadges.length === 0) {
+        discordBadgesEl.style.display = 'none';
+        discordBadgesEl.innerHTML = '';
+      } else {
+        discordBadgesEl.style.display = '';
+        discordBadgesEl.innerHTML = '';
+        discordAccountBadges.forEach(function(key) {
+          var pill = document.createElement('span');
+          pill.className = 'settings-discord-badge-pill settings-discord-badge-' + (key || '').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+          pill.textContent = discordBadgeLabels[key] || (key || '').replace(/([A-Z])/g, ' $1').replace(/^./, function(s) { return s.toUpperCase(); }).trim();
+          discordBadgesEl.appendChild(pill);
+        });
+      }
+    }
   }
 
   function wireSettingsPanel() {

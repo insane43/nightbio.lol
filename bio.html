@@ -29,6 +29,7 @@
         <h1 id="bioName" class="bio-name"></h1>
         <p id="bioAlsoKnownAs" class="bio-alias" style="display: none;"></p>
         <div id="bioBadges" class="bio-badges"></div>
+        <div id="bioDiscordBadges" class="bio-discord-badges" style="display: none;"></div>
         <p id="bioBio" class="bio-bio-text"></p>
         <p id="bioViews" class="bio-views" style="display: none;"></p>
         <div id="bioSongWrap" class="bio-song-wrap" style="display: none;"></div>
@@ -558,6 +559,25 @@
             }
             badgesRow.appendChild(span);
           });
+        }
+
+        var discordBadgesRow = document.getElementById('bioDiscordBadges');
+        if (discordBadgesRow && data.discordProfile && Array.isArray(data.discordProfile.discordBadges) && data.discordProfile.discordBadges.length > 0) {
+          discordBadgesRow.style.display = '';
+          discordBadgesRow.innerHTML = '';
+          var discordLabels = window.DISCORD_BADGE_LABELS || {};
+          data.discordProfile.discordBadges.forEach(function(key) {
+            var label = discordLabels[key] || (key && key.replace(/([A-Z])/g, ' $1').replace(/^./, function(s) { return s.toUpperCase(); }).trim()) || key;
+            var span = document.createElement('span');
+            span.className = 'bio-discord-badge-pill bio-discord-badge-' + (key || '').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+            span.textContent = label;
+            span.setAttribute('data-tooltip', 'Discord: ' + label);
+            span.setAttribute('tabindex', '0');
+            discordBadgesRow.appendChild(span);
+          });
+        } else if (discordBadgesRow) {
+          discordBadgesRow.style.display = 'none';
+          discordBadgesRow.innerHTML = '';
         }
 
         if (data.bio) {
