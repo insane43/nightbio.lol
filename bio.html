@@ -29,8 +29,14 @@
         <h1 id="bioName" class="bio-name"></h1>
         <p id="bioAlsoKnownAs" class="bio-alias" style="display: none;"></p>
         <div id="bioBadges" class="bio-badges"></div>
-        <div id="bioDiscordBadges" class="bio-discord-badges" style="display: none;"></div>
         <p id="bioBio" class="bio-bio-text"></p>
+        <div id="bioDiscordPresenceWrap" class="bio-discord-presence-wrap" style="display: none;">
+          <img id="bioDiscordAvatar" class="bio-discord-presence-avatar" src="" alt="">
+          <div class="bio-discord-presence-info">
+            <span id="bioDiscordDisplayName" class="bio-discord-presence-display-name"></span>
+            <span id="bioDiscordUsername" class="bio-discord-presence-username"></span>
+          </div>
+        </div>
         <p id="bioViews" class="bio-views" style="display: none;"></p>
         <div id="bioSongWrap" class="bio-song-wrap" style="display: none;"></div>
         <div id="bioLinks" class="bio-links"></div>
@@ -369,7 +375,11 @@
         if (glowColor) content.style.setProperty('--bio-glow-color', glowColor);
         else content.style.removeProperty('--bio-glow-color');
         var glowStrength = (premium && data.premiumGlowStrength != null) ? Math.min(200, Math.max(25, Number(data.premiumGlowStrength) || 100)) : 100;
-        var glowS = glowStrength / 100;
+        // Non-linear mapping so glow strength slider has clearly visible low/high differences.
+        var glowNorm = (glowStrength - 25) / 175; // 0..1
+        if (glowNorm < 0) glowNorm = 0;
+        if (glowNorm > 1) glowNorm = 1;
+        var glowS = 0.35 + Math.pow(glowNorm, 1.35) * 2.65; // ~0.35 .. 3.0
         function setGlowBlur(name, basePx) { var v = (basePx * glowS) + 'px'; document.body.style.setProperty('--bio-glow-' + name, v); content.style.setProperty('--bio-glow-' + name, v); }
         setGlowBlur('sm', 4);
         setGlowBlur('md', 6);
@@ -430,13 +440,15 @@
           avatar.src = data.avatarURL;
           avatar.alt = data.displayName || data.username;
           avatar.style.display = 'block';
+          avatar.classList.toggle('avatar-no-border', data.showAvatarBorder === false);
           if (premium && data.premiumAvatarBorder && data.premiumAvatarBorder.trim()) {
-            avatar.style.border = data.premiumAvatarBorder.trim();
+            avatar.style.border = (data.showAvatarBorder === false) ? 'none' : data.premiumAvatarBorder.trim();
           } else {
-            avatar.style.border = '';
+            avatar.style.border = (data.showAvatarBorder === false) ? 'none' : '';
           }
         } else {
           avatar.style.display = 'none';
+          avatar.classList.remove('avatar-no-border');
           avatar.removeAttribute('src');
         }
 
@@ -536,6 +548,7 @@
         var badgesRow = document.getElementById('bioBadges');
         if (badgesRow) {
           badgesRow.innerHTML = '';
+          badgesRow.classList.toggle('badges-no-card', data.badgesUseCard === false);
           var badges = data.badges || {};
           var icons = window.BADGE_ICONS || {};
           var labels = { community: 'Community', og: 'OG', owner: 'Owner', staff: 'Staff', verified: 'Verified', premium: 'Premium' };
@@ -561,25 +574,6 @@
           });
         }
 
-        var discordBadgesRow = document.getElementById('bioDiscordBadges');
-        if (discordBadgesRow && data.discordProfile && Array.isArray(data.discordProfile.discordBadges) && data.discordProfile.discordBadges.length > 0) {
-          discordBadgesRow.style.display = '';
-          discordBadgesRow.innerHTML = '';
-          var discordLabels = window.DISCORD_BADGE_LABELS || {};
-          data.discordProfile.discordBadges.forEach(function(key) {
-            var label = discordLabels[key] || (key && key.replace(/([A-Z])/g, ' $1').replace(/^./, function(s) { return s.toUpperCase(); }).trim()) || key;
-            var span = document.createElement('span');
-            span.className = 'bio-discord-badge-pill bio-discord-badge-' + (key || '').replace(/[^a-z0-9]/gi, '-').toLowerCase();
-            span.textContent = label;
-            span.setAttribute('data-tooltip', 'Discord: ' + label);
-            span.setAttribute('tabindex', '0');
-            discordBadgesRow.appendChild(span);
-          });
-        } else if (discordBadgesRow) {
-          discordBadgesRow.style.display = 'none';
-          discordBadgesRow.innerHTML = '';
-        }
-
         if (data.bio) {
           bioEl.style.display = 'block';
           if (premium && data.typewriterBio) {
@@ -592,6 +586,33 @@
           }
         } else {
           bioEl.style.display = 'none';
+        }
+
+        var discordWrap = document.getElementById('bioDiscordPresenceWrap');
+        var discordAvatarEl = document.getElementById('bioDiscordAvatar');
+        var discordDisplayNameEl = document.getElementById('bioDiscordDisplayName');
+        var discordUsernameEl = document.getElementById('bioDiscordUsername');
+        if (discordWrap && data.showDiscordPresence && data.discordProfile && data.discordProfile.id) {
+          var dp = data.discordProfile;
+          var avatarUrl = (dp.avatar && dp.avatar.trim()) ? ('https://cdn.discordapp.com/avatars/' + dp.id + '/' + dp.avatar + '.png?size=128') : ('https://cdn.discordapp.com/embed/avatars/' + (parseInt(dp.id, 10) >> 22) % 6 + '.png');
+          if (discordAvatarEl) { discordAvatarEl.src = avatarUrl; discordAvatarEl.alt = dp.displayName || dp.username || 'Discord'; discordAvatarEl.style.display = 'block'; }
+          if (discordDisplayNameEl) { discordDisplayNameEl.textContent = (dp.displayName && dp.displayName.trim()) ? dp.displayName.trim() : (dp.username || ''); }
+          if (discordUsernameEl) { discordUsernameEl.textContent = (dp.username && dp.username.trim()) ? '@' + dp.username.trim() : ''; }
+          discordWrap.classList.toggle('discord-presence-no-card', data.discordPresenceUseCard === false);
+          if (data.discordPresenceWidth != null && isFinite(data.discordPresenceWidth)) { discordWrap.style.maxWidth = String(data.discordPresenceWidth) + 'px'; discordWrap.style.width = '100%'; }
+          else { discordWrap.style.maxWidth = ''; discordWrap.style.width = ''; }
+          if (data.discordPresenceHeight != null && isFinite(data.discordPresenceHeight) && Number(data.discordPresenceHeight) > 0) discordWrap.style.minHeight = String(data.discordPresenceHeight) + 'px';
+          else discordWrap.style.minHeight = '';
+          discordWrap.style.display = 'flex';
+        } else if (discordWrap) {
+          discordWrap.style.display = 'none';
+          discordWrap.classList.remove('discord-presence-no-card');
+          if (discordAvatarEl) { discordAvatarEl.removeAttribute('src'); discordAvatarEl.style.display = 'none'; }
+          if (discordDisplayNameEl) discordDisplayNameEl.textContent = '';
+          if (discordUsernameEl) discordUsernameEl.textContent = '';
+          discordWrap.style.maxWidth = '';
+          discordWrap.style.width = '';
+          discordWrap.style.minHeight = '';
         }
 
         var viewsEl = document.getElementById('bioViews');
@@ -699,6 +720,7 @@
               { key: 'name', el: nameWrapEl || nameEl },
               { key: 'badges', el: document.getElementById('bioBadges') },
               { key: 'bio', el: bioEl },
+              { key: 'discord', el: document.getElementById('bioDiscordPresenceWrap') },
               { key: 'profileViews', el: viewsEl },
               { key: 'song', el: songWrap },
               { key: 'links', el: linksEl }

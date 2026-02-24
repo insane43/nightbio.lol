@@ -242,20 +242,6 @@
         <!-- Appearance tab -->
         <section class="editor-panel" id="panelAppearance" role="tabpanel" aria-labelledby="tabAppearance" hidden>
           <div class="panel-card">
-            <h2 class="panel-title">Template</h2>
-            <p class="panel-desc">Apply a preset look (color, font) in one click.</p>
-            <div class="form-group">
-              <label for="templateSelect">Preset</label>
-              <select id="templateSelect" class="form-select">
-                <option value="">Custom (no preset)</option>
-                <option value="minimal">Minimal</option>
-                <option value="classic">Classic</option>
-                <option value="neon">Neon</option>
-                <option value="warm">Warm</option>
-              </select>
-            </div>
-          </div>
-          <div class="panel-card">
             <h2 class="panel-title">Display style</h2>
             <p class="panel-desc">Show your bio full-width or inside a centered card.</p>
             <div class="form-group">
@@ -324,6 +310,53 @@
               </div>
             </div>
           </div>
+          <div id="showDiscordPresenceWrap" class="panel-card" style="display: none;">
+            <h2 class="panel-title">Discord</h2>
+            <p class="panel-desc">Show your linked Discord profile on your biolink below your bio (avatar, display name, username).</p>
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" id="showDiscordPresence">
+                <span>Show Discord presence</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" id="discordPresenceUseCard" checked>
+                <span>Display Discord presence in a card</span>
+              </label>
+            </div>
+            <div class="form-group form-row">
+              <div>
+                <label for="discordPresenceWidth">Discord card width (px)</label>
+                <input type="number" id="discordPresenceWidth" min="200" max="600" placeholder="320" class="form-input-num" aria-describedby="discordPresenceWidthHint">
+                <span id="discordPresenceWidthHint" class="form-hint">Leave empty for default.</span>
+              </div>
+              <div>
+                <label for="discordPresenceHeight">Discord card height (px)</label>
+                <input type="number" id="discordPresenceHeight" min="0" max="400" placeholder="auto" class="form-input-num" aria-describedby="discordPresenceHeightHint">
+                <span id="discordPresenceHeightHint" class="form-hint">Leave empty for auto (fits content).</span>
+              </div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Badges</h2>
+            <p class="panel-desc">Control how badges are styled on your biolink and previews.</p>
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" id="badgesUseCard" checked>
+                <span>Display badges in a card</span>
+              </label>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Profile photo</h2>
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" id="showAvatarBorder" checked>
+                <span>Show profile picture border</span>
+              </label>
+            </div>
+          </div>
           <div class="panel-card">
             <h2 class="panel-title">Theme</h2>
             <div class="form-group">
@@ -363,19 +396,6 @@
                 <label for="letterSpacing">Letter spacing</label>
                 <input type="number" id="letterSpacing" min="-1" max="2" step="0.1" value="0" class="form-input-num">
               </div>
-            </div>
-          </div>
-          <div class="panel-card">
-            <h2 class="panel-title">Background</h2>
-            <div class="form-group">
-              <label for="backgroundEffect">Effect</label>
-              <select id="backgroundEffect" class="form-select">
-                <option value="none">None</option>
-                <option value="gradient">Gradient</option>
-                <option value="pattern">Subtle pattern</option>
-                <option value="snowflakes">Snowflakes</option>
-                <option value="rain">Rain</option>
-              </select>
             </div>
           </div>
         </section>
@@ -567,7 +587,6 @@
                   <div class="settings-discord-display-name" id="settingsDiscordDisplayName">—</div>
                   <div class="settings-discord-username" id="settingsDiscordUsername">—</div>
                   <div class="settings-discord-user-id" id="settingsDiscordUserId">—</div>
-                  <div id="settingsDiscordBadges" class="settings-discord-badges" style="display: none;"></div>
                 </div>
                 <button type="button" id="settingsDiscordUnlinkBtn" class="settings-discord-unlink-btn" title="Unlink Discord" aria-label="Unlink Discord account">
                   <svg class="settings-discord-unlink-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1121,6 +1140,20 @@
                       <div class="live-canvas-bio" id="canvasPreviewBio">Your bio appears here.</div>
                     </div>
                   </div>
+                  <div class="live-canvas-block" data-block-id="discord" draggable="true">
+                    <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
+                    <div class="live-canvas-block-inner">
+                      <span class="live-canvas-block-label">Discord</span>
+                      <div class="live-canvas-discord-wrap" id="canvasPreviewDiscordWrap">
+                        <img id="canvasPreviewDiscordAvatar" class="live-canvas-discord-avatar" src="" alt="" style="display: none;">
+                        <div class="live-canvas-discord-placeholder" id="canvasPreviewDiscordPlaceholder">Link Discord in Settings &amp; enable in Appearance</div>
+                        <div class="live-canvas-discord-info" id="canvasPreviewDiscordInfo" style="display: none;">
+                          <span id="canvasPreviewDiscordDisplayName" class="live-canvas-discord-display-name"></span>
+                          <span id="canvasPreviewDiscordUsername" class="live-canvas-discord-username"></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div class="live-canvas-block" data-block-id="profileViews" draggable="true">
                     <span class="live-canvas-drag-handle" aria-label="Drag to reorder"><span class="live-canvas-grip" aria-hidden="true"></span></span>
                     <div class="live-canvas-block-inner">
@@ -1166,6 +1199,13 @@
             <div class="preview-alias" id="previewAlias"></div>
             <div class="preview-badges" id="previewBadges"></div>
             <div class="preview-bio" id="previewBio">Your bio appears here.</div>
+            <div class="preview-discord-wrap" id="previewDiscordWrap" style="display: none;">
+              <img id="previewDiscordAvatar" class="preview-discord-avatar" src="" alt="" style="display: none;">
+              <div class="preview-discord-info">
+                <span id="previewDiscordDisplayName" class="preview-discord-display-name"></span>
+                <span id="previewDiscordUsername" class="preview-discord-username"></span>
+              </div>
+            </div>
             <div class="preview-links" id="previewLinks"></div>
           </div>
         </div>

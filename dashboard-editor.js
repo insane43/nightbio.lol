@@ -2,7 +2,7 @@
 (function() {
   var BASE_URL = typeof window !== 'undefined' && window.location && window.location.origin ? window.location.origin : 'https://nightbio.lol';
   var MAX_LINKS = 20;
-  var LIVE_EDIT_ORDER_DEFAULT = ['avatar', 'name', 'badges', 'bio', 'profileViews', 'song', 'links'];
+  var LIVE_EDIT_ORDER_DEFAULT = ['avatar', 'name', 'badges', 'bio', 'discord', 'profileViews', 'song', 'links'];
 
   function showMsg(el, text, type) {
     if (!el) return;
@@ -71,13 +71,20 @@
       fontSize: parseInt(document.getElementById('fontSize') && document.getElementById('fontSize').value, 10) || 16,
       letterSpacing: parseFloat(document.getElementById('letterSpacing') && document.getElementById('letterSpacing').value) || 0,
       typewriterBio: !!(document.getElementById('typewriterBio') && document.getElementById('typewriterBio').checked),
-      backgroundEffect: (document.getElementById('backgroundEffect') && document.getElementById('backgroundEffect').value) || 'none',
+      backgroundEffect: (window._editorCurrentData && window._editorCurrentData.backgroundEffect) || 'none',
       buttonStyle: (document.getElementById('buttonStyle') && document.getElementById('buttonStyle').value) || 'filled',
       showViewsOnBio: !!(document.getElementById('showViewsOnBio') && document.getElementById('showViewsOnBio').checked),
+      showAvatarBorder: !((document.getElementById('showAvatarBorder') && document.getElementById('showAvatarBorder').checked) === false),
+      badgesUseCard: !((document.getElementById('badgesUseCard') && document.getElementById('badgesUseCard').checked) === false),
       badges: (window._editorCurrentData && window._editorCurrentData.badges) || { community: true, og: false, owner: false, staff: false, verified: false, premium: false },
       badgeVisibility: (window._editorCurrentData && window._editorCurrentData.badgeVisibility) || {},
       badgeColors: (window._editorCurrentData && window._editorCurrentData.badgeColors) || {},
       alias: (window._editorCurrentData && window._editorCurrentData.alias != null) ? String(window._editorCurrentData.alias).trim() : '',
+      showDiscordPresence: !!(document.getElementById('showDiscordPresence') && document.getElementById('showDiscordPresence').checked),
+      discordPresenceUseCard: !((document.getElementById('discordPresenceUseCard') && document.getElementById('discordPresenceUseCard').checked) === false),
+      discordProfile: (window._editorCurrentData && window._editorCurrentData.discordProfile && typeof window._editorCurrentData.discordProfile === 'object') ? window._editorCurrentData.discordProfile : null,
+      discordPresenceWidth: (function() { var el = document.getElementById('discordPresenceWidth'); var v = el ? String(el.value || '').trim() : ''; if (!v) return (window._editorCurrentData && window._editorCurrentData.discordPresenceWidth != null) ? window._editorCurrentData.discordPresenceWidth : null; return parseInt(v, 10) || null; })(),
+      discordPresenceHeight: (function() { var el = document.getElementById('discordPresenceHeight'); var v = el ? String(el.value || '').trim() : ''; if (!v) return (window._editorCurrentData && window._editorCurrentData.discordPresenceHeight != null) ? window._editorCurrentData.discordPresenceHeight : null; return parseInt(v, 10) || null; })(),
       metaTitle: (document.getElementById('metaTitle') && document.getElementById('metaTitle').value.trim()) || '',
       metaDescription: (document.getElementById('metaDescription') && document.getElementById('metaDescription').value.trim()) || '',
       metaImageURL: (document.getElementById('metaImageURL') && document.getElementById('metaImageURL').value.trim()) || '',
@@ -116,6 +123,8 @@
         avatarPlace.textContent = (data.displayName || '?').charAt(0).toUpperCase();
       }
     }
+    var previewAvatarWrap = document.getElementById('previewAvatarWrap');
+    if (previewAvatarWrap) previewAvatarWrap.classList.toggle('avatar-no-border', data.showAvatarBorder === false);
 
     if (nameEl) nameEl.textContent = data.displayName || 'Your name';
 
@@ -146,6 +155,7 @@
     var badgesEl = document.getElementById('previewBadges');
     if (badgesEl) {
       badgesEl.innerHTML = '';
+      badgesEl.classList.toggle('badges-no-card', data.badgesUseCard === false);
       var badges = data.badges || {};
       var visibility = data.badgeVisibility || {};
       var visibleBadges = previewApplyBadgeVisibility(badges, visibility);
@@ -170,6 +180,44 @@
     }
 
     if (bioEl) bioEl.textContent = data.bio || 'Your bio appears here.';
+
+    var previewDiscordWrap = document.getElementById('previewDiscordWrap');
+    var previewDiscordAvatar = document.getElementById('previewDiscordAvatar');
+    var previewDiscordDisplayName = document.getElementById('previewDiscordDisplayName');
+    var previewDiscordUsername = document.getElementById('previewDiscordUsername');
+    if (previewDiscordWrap) {
+      var showDiscord = !!(data.showDiscordPresence && data.discordProfile && data.discordProfile.id);
+      if (showDiscord && data.discordProfile) {
+        var dp = data.discordProfile;
+        var discAvatarUrl = (dp.avatar && dp.avatar.trim()) ? ('https://cdn.discordapp.com/avatars/' + dp.id + '/' + dp.avatar + '.png?size=128') : ('https://cdn.discordapp.com/embed/avatars/' + (parseInt(dp.id, 10) >> 22) % 6 + '.png');
+        if (previewDiscordAvatar) { previewDiscordAvatar.src = discAvatarUrl; previewDiscordAvatar.alt = dp.displayName || dp.username || 'Discord'; previewDiscordAvatar.style.display = 'block'; }
+        if (previewDiscordDisplayName) previewDiscordDisplayName.textContent = (dp.displayName && dp.displayName.trim()) ? dp.displayName.trim() : (dp.username || '');
+        if (previewDiscordUsername) previewDiscordUsername.textContent = (dp.username && dp.username.trim()) ? '@' + dp.username.trim() : '';
+        previewDiscordWrap.classList.toggle('discord-presence-no-card', data.discordPresenceUseCard === false);
+        previewDiscordWrap.style.display = 'flex';
+        if (data.discordPresenceWidth != null && isFinite(data.discordPresenceWidth)) {
+          previewDiscordWrap.style.maxWidth = String(data.discordPresenceWidth) + 'px';
+          previewDiscordWrap.style.width = '100%';
+        } else {
+          previewDiscordWrap.style.maxWidth = '';
+          previewDiscordWrap.style.width = '';
+        }
+        if (data.discordPresenceHeight != null && isFinite(data.discordPresenceHeight) && Number(data.discordPresenceHeight) > 0) {
+          previewDiscordWrap.style.minHeight = String(data.discordPresenceHeight) + 'px';
+        } else {
+          previewDiscordWrap.style.minHeight = '';
+        }
+      } else {
+        previewDiscordWrap.style.display = 'none';
+        previewDiscordWrap.classList.remove('discord-presence-no-card');
+        if (previewDiscordAvatar) { previewDiscordAvatar.removeAttribute('src'); previewDiscordAvatar.style.display = 'none'; }
+        if (previewDiscordDisplayName) previewDiscordDisplayName.textContent = '';
+        if (previewDiscordUsername) previewDiscordUsername.textContent = '';
+        previewDiscordWrap.style.maxWidth = '';
+        previewDiscordWrap.style.width = '';
+        previewDiscordWrap.style.minHeight = '';
+      }
+    }
 
     if (linksEl) {
       linksEl.innerHTML = '';
@@ -238,6 +286,8 @@
           canvasAvatarPlace.textContent = (data.displayName || '?').charAt(0).toUpperCase();
         }
       }
+      var canvasAvatarWrap = document.getElementById('canvasPreviewAvatarWrap');
+      if (canvasAvatarWrap) canvasAvatarWrap.classList.toggle('avatar-no-border', data.showAvatarBorder === false);
       if (canvasName) canvasName.textContent = data.displayName || 'Your name';
       if (canvasAlias) {
         var aliasText = (data.alias != null && String(data.alias).trim()) ? String(data.alias).trim() : ((window._editorCurrentData && window._editorCurrentData.alias != null) ? String(window._editorCurrentData.alias).trim() : '');
@@ -253,6 +303,7 @@
       }
       if (canvasBadges) {
         canvasBadges.innerHTML = '';
+        canvasBadges.classList.toggle('badges-no-card', data.badgesUseCard === false);
         var badges = data.badges || {};
         var visibility = data.badgeVisibility || {};
         var visibleBadges = previewApplyBadgeVisibility(badges, visibility);
@@ -321,6 +372,44 @@
           canvasLinks.appendChild(btn);
         });
       }
+      var canvasDiscordWrap = document.getElementById('canvasPreviewDiscordWrap');
+      var canvasDiscordAvatar = document.getElementById('canvasPreviewDiscordAvatar');
+      var canvasDiscordPlaceholder = document.getElementById('canvasPreviewDiscordPlaceholder');
+      var canvasDiscordInfo = document.getElementById('canvasPreviewDiscordInfo');
+      var canvasDiscordDisplayName = document.getElementById('canvasPreviewDiscordDisplayName');
+      var canvasDiscordUsername = document.getElementById('canvasPreviewDiscordUsername');
+      if (canvasDiscordWrap) {
+        var showDiscordCanvas = !!(data.showDiscordPresence && data.discordProfile && data.discordProfile.id);
+        if (showDiscordCanvas && data.discordProfile) {
+          var dcp = data.discordProfile;
+          var canvasDiscAvatarUrl = (dcp.avatar && dcp.avatar.trim()) ? ('https://cdn.discordapp.com/avatars/' + dcp.id + '/' + dcp.avatar + '.png?size=128') : ('https://cdn.discordapp.com/embed/avatars/' + (parseInt(dcp.id, 10) >> 22) % 6 + '.png');
+          if (canvasDiscordAvatar) { canvasDiscordAvatar.src = canvasDiscAvatarUrl; canvasDiscordAvatar.alt = dcp.displayName || dcp.username || 'Discord'; canvasDiscordAvatar.style.display = 'block'; }
+          if (canvasDiscordPlaceholder) canvasDiscordPlaceholder.style.display = 'none';
+          if (canvasDiscordInfo) canvasDiscordInfo.style.display = '';
+          if (canvasDiscordDisplayName) canvasDiscordDisplayName.textContent = (dcp.displayName && dcp.displayName.trim()) ? dcp.displayName.trim() : (dcp.username || '');
+          if (canvasDiscordUsername) canvasDiscordUsername.textContent = (dcp.username && dcp.username.trim()) ? '@' + dcp.username.trim() : '';
+          canvasDiscordWrap.classList.toggle('discord-presence-no-card', data.discordPresenceUseCard === false);
+        } else {
+          if (canvasDiscordAvatar) { canvasDiscordAvatar.removeAttribute('src'); canvasDiscordAvatar.style.display = 'none'; }
+          if (canvasDiscordPlaceholder) canvasDiscordPlaceholder.style.display = '';
+          if (canvasDiscordInfo) canvasDiscordInfo.style.display = 'none';
+          if (canvasDiscordDisplayName) canvasDiscordDisplayName.textContent = '';
+          if (canvasDiscordUsername) canvasDiscordUsername.textContent = '';
+          canvasDiscordWrap.classList.remove('discord-presence-no-card');
+        }
+        if (data.discordPresenceWidth != null && isFinite(data.discordPresenceWidth)) {
+          canvasDiscordWrap.style.maxWidth = String(data.discordPresenceWidth) + 'px';
+          canvasDiscordWrap.style.width = '100%';
+        } else {
+          canvasDiscordWrap.style.maxWidth = '';
+          canvasDiscordWrap.style.width = '';
+        }
+        if (data.discordPresenceHeight != null && isFinite(data.discordPresenceHeight) && Number(data.discordPresenceHeight) > 0) {
+          canvasDiscordWrap.style.minHeight = String(data.discordPresenceHeight) + 'px';
+        } else {
+          canvasDiscordWrap.style.minHeight = '';
+        }
+      }
       if (canvasScreen) {
         if (data.accentColor) canvasScreen.style.setProperty('--preview-accent', data.accentColor);
         if (data.fontFamily) canvasScreen.style.setProperty('font-family', data.fontFamily + ', var(--font-body), sans-serif');
@@ -342,6 +431,7 @@
     var aliasEl = document.getElementById('previewAlias');
     var badgesEl = document.getElementById('previewBadges');
     var bioEl = document.getElementById('previewBio');
+    var discordWrap = document.getElementById('previewDiscordWrap');
     var linksEl = document.getElementById('previewLinks');
     profile.style.display = 'flex';
     profile.style.flexDirection = 'column';
@@ -350,6 +440,7 @@
       name: [nameEl, aliasEl],
       badges: [badgesEl],
       bio: [bioEl],
+      discord: [discordWrap],
       profileViews: [],
       song: [],
       links: [linksEl]
@@ -503,6 +594,10 @@
     if (!container) return;
     var indicator = document.getElementById('liveCanvasDropIndicator');
     var dragged = null;
+    var lastIndicatorBefore = undefined; // undefined = unknown, null = end, Element = before that element
+    var rafScheduled = false;
+    var lastOverBlock = null;
+    var lastClientY = 0;
     function hideDropIndicator() {
       if (indicator) {
         indicator.style.display = 'none';
@@ -514,11 +609,18 @@
       if (!indicator) return;
       indicator.style.display = 'block';
       indicator.classList.add('live-canvas-drop-indicator-visible');
-      if (beforeBlock && beforeBlock !== indicator && beforeBlock.parentNode === container) {
+      if (beforeBlock === indicator) beforeBlock = indicator.nextSibling;
+      if (beforeBlock && beforeBlock.parentNode === container) {
+        // Already in correct spot?
+        if (indicator.parentNode === container && indicator.nextSibling === beforeBlock && lastIndicatorBefore === beforeBlock) return;
         container.insertBefore(indicator, beforeBlock);
-      } else {
-        container.appendChild(indicator);
+        lastIndicatorBefore = beforeBlock;
+        return;
       }
+      // Append to end
+      if (indicator.parentNode === container && indicator.nextSibling == null && lastIndicatorBefore === null) return;
+      container.appendChild(indicator);
+      lastIndicatorBefore = null;
     }
     container.addEventListener('dragstart', function(e) {
       var block = e.target.closest('.live-canvas-block');
@@ -528,37 +630,58 @@
       e.dataTransfer.effectAllowed = 'move';
       block.classList.add('live-canvas-dragging');
       container.classList.add('live-canvas-dragging-active');
+      lastIndicatorBefore = undefined;
     });
     container.addEventListener('dragend', function(e) {
       if (dragged) dragged.classList.remove('live-canvas-dragging');
       dragged = null;
+      rafScheduled = false;
+      lastOverBlock = null;
       hideDropIndicator();
     });
     container.addEventListener('dragover', function(e) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      var block = e.target.closest('.live-canvas-block');
-      if (indicator && dragged && block && block !== dragged) {
-        var rect = block.getBoundingClientRect();
-        var mid = rect.top + rect.height / 2;
-        if (e.clientY < mid) showDropIndicator(block);
-        else showDropIndicator(block.nextSibling);
-      }
+      if (!indicator || !dragged) return;
+      lastOverBlock = e.target.closest('.live-canvas-block');
+      lastClientY = e.clientY;
+      if (rafScheduled) return;
+      rafScheduled = true;
+      window.requestAnimationFrame(function() {
+        rafScheduled = false;
+        if (!dragged) return;
+        var block = lastOverBlock;
+        // If hovering the dragged block itself, don't move the indicator (prevents jumpiness)
+        if (block === dragged) return;
+        if (block) {
+          var rect = block.getBoundingClientRect();
+          var mid = rect.top + rect.height / 2;
+          if (lastClientY < mid) showDropIndicator(block);
+          else showDropIndicator(block.nextSibling);
+        } else {
+          // Allow dropping to the end when hovering empty space
+          showDropIndicator(null);
+        }
+      });
     });
     container.addEventListener('drop', function(e) {
       e.preventDefault();
       hideDropIndicator();
       var block = e.target.closest('.live-canvas-block');
-      if (block && dragged && block !== dragged) {
+      if (!dragged) return;
+      // Prefer the indicator position (supports dropping in gaps / end)
+      if (indicator && indicator.parentNode === container) {
+        container.insertBefore(dragged, indicator);
+      } else if (block && block !== dragged) {
         var rect = block.getBoundingClientRect();
         var mid = rect.top + rect.height / 2;
         var insertBefore = e.clientY < mid;
         if (insertBefore) container.insertBefore(dragged, block);
         else container.insertBefore(dragged, block.nextSibling);
-        syncLiveEditOrderFromDOM();
-        applySidebarPreviewOrder();
-        updateLiveCanvasUnsavedHint();
       }
+      syncLiveEditOrderFromDOM();
+      applySidebarPreviewOrder();
+      updateLiveCanvasUnsavedHint();
     });
     var resetBtn = document.getElementById('liveCanvasResetOrderBtn');
     if (resetBtn) {
@@ -669,44 +792,8 @@
       if (discordDisplayName) { discordDisplayName.textContent = 'Linked (run /link in Discord again to show name and avatar)'; discordDisplayName.style.display = ''; }
     }
     if (discordUserId) discordUserId.style.display = '';
-
-    var discordBadgesEl = document.getElementById('settingsDiscordBadges');
-    if (discordBadgesEl) {
-      var discordAccountBadges = (dp && Array.isArray(dp.discordBadges)) ? dp.discordBadges : [];
-      var discordBadgeLabels = {
-        Staff: 'Discord Staff',
-        Partner: 'Partner',
-        HypeSquad: 'HypeSquad Events',
-        BugHunterLevel1: 'Bug Hunter Level 1',
-        BugHunterLevel2: 'Bug Hunter Level 2',
-        HypeSquadOnlineHouse1: 'HypeSquad Bravery',
-        HypeSquadOnlineHouse2: 'HypeSquad Brilliance',
-        HypeSquadOnlineHouse3: 'HypeSquad Balance',
-        PremiumEarlySupporter: 'Early Nitro',
-        VerifiedDeveloper: 'Verified Bot Developer',
-        CertifiedModerator: 'Certified Moderator',
-        ActiveDeveloper: 'Active Developer',
-        BotHTTPInteractions: 'Bot',
-        Spammer: 'Spammer',
-        DisablePremium: 'Disable Premium',
-        Collaborator: 'Collaborator',
-        RestrictedCollaborator: 'Restricted Collaborator',
-        Quarantined: 'Quarantined'
-      };
-      if (!isLinked || discordAccountBadges.length === 0) {
-        discordBadgesEl.style.display = 'none';
-        discordBadgesEl.innerHTML = '';
-      } else {
-        discordBadgesEl.style.display = '';
-        discordBadgesEl.innerHTML = '';
-        discordAccountBadges.forEach(function(key) {
-          var pill = document.createElement('span');
-          pill.className = 'settings-discord-badge-pill settings-discord-badge-' + (key || '').replace(/[^a-z0-9]/gi, '-').toLowerCase();
-          pill.textContent = discordBadgeLabels[key] || (key || '').replace(/([A-Z])/g, ' $1').replace(/^./, function(s) { return s.toUpperCase(); }).trim();
-          discordBadgesEl.appendChild(pill);
-        });
-      }
-    }
+    var showDiscordPresenceWrap = document.getElementById('showDiscordPresenceWrap');
+    if (showDiscordPresenceWrap) showDiscordPresenceWrap.style.display = (isLinked && dp && dp.id) ? '' : 'none';
   }
 
   function wireSettingsPanel() {
@@ -1291,8 +1378,6 @@
       if (letterSpacingIn) letterSpacingIn.value = d.letterSpacing != null ? d.letterSpacing : 0;
       var typewriterCb = document.getElementById('typewriterBio');
       if (typewriterCb) typewriterCb.checked = (d.badges && d.badges.premium) ? !!d.typewriterBio : false;
-      var bgEffect = document.getElementById('backgroundEffect');
-      if (bgEffect) bgEffect.value = d.backgroundEffect || 'none';
       var btnStyle = document.getElementById('buttonStyle');
       if (btnStyle) btnStyle.value = d.buttonStyle || 'filled';
       var metaTitleIn = document.getElementById('metaTitle');
@@ -1313,8 +1398,22 @@
 
       var showViewsCb = document.getElementById('showViewsOnBio');
       if (showViewsCb) showViewsCb.checked = !!d.showViewsOnBio;
+      var showAvatarBorderCb = document.getElementById('showAvatarBorder');
+      if (showAvatarBorderCb) showAvatarBorderCb.checked = d.showAvatarBorder !== false;
       var showAliasOnBioCb = document.getElementById('showAliasOnBio');
       if (showAliasOnBioCb) showAliasOnBioCb.checked = d.showAliasOnBio !== false;
+      var badgesUseCardCb = document.getElementById('badgesUseCard');
+      if (badgesUseCardCb) badgesUseCardCb.checked = d.badgesUseCard !== false;
+      var showDiscordPresenceCb = document.getElementById('showDiscordPresence');
+      if (showDiscordPresenceCb) showDiscordPresenceCb.checked = !!d.showDiscordPresence;
+      var discordPresenceUseCardCb = document.getElementById('discordPresenceUseCard');
+      if (discordPresenceUseCardCb) discordPresenceUseCardCb.checked = d.discordPresenceUseCard !== false;
+      var discordPresenceWidthIn = document.getElementById('discordPresenceWidth');
+      if (discordPresenceWidthIn) discordPresenceWidthIn.value = (d.discordPresenceWidth != null && isFinite(d.discordPresenceWidth)) ? String(d.discordPresenceWidth) : '';
+      var discordPresenceHeightIn = document.getElementById('discordPresenceHeight');
+      if (discordPresenceHeightIn) discordPresenceHeightIn.value = (d.discordPresenceHeight != null && isFinite(d.discordPresenceHeight)) ? String(d.discordPresenceHeight) : '';
+      var showDiscordPresenceWrap = document.getElementById('showDiscordPresenceWrap');
+      if (showDiscordPresenceWrap) showDiscordPresenceWrap.style.display = (d.discordId || (d.discordProfile && d.discordProfile.id)) ? '' : 'none';
       refreshProfileViews();
 
       if (avatarURLInput) avatarURLInput.value = d.avatarURL || '';
@@ -2272,7 +2371,6 @@
         var fontSizeIn = document.getElementById('fontSize');
         var letterSpacingIn = document.getElementById('letterSpacing');
         var typewriterCb = document.getElementById('typewriterBio');
-        var bgEffect = document.getElementById('backgroundEffect');
         var btnStyle = document.getElementById('buttonStyle');
         var metaTitleIn = document.getElementById('metaTitle');
         var metaDescIn = document.getElementById('metaDescription');
@@ -2304,13 +2402,19 @@
           fontSize: fontSizeIn ? (parseInt(fontSizeIn.value, 10) || 16) : 16,
           letterSpacing: letterSpacingIn ? (parseFloat(letterSpacingIn.value) || 0) : 0,
         typewriterBio: (window._editorCurrentData && window._editorCurrentData.badges && window._editorCurrentData.badges.premium) ? (typewriterCb ? typewriterCb.checked : false) : false,
-          backgroundEffect: bgEffect ? bgEffect.value : 'none',
+          backgroundEffect: (window._editorCurrentData && window._editorCurrentData.backgroundEffect) || 'none',
           buttonStyle: btnStyle ? btnStyle.value : 'filled',
           metaTitle: metaTitleIn ? metaTitleIn.value.trim() : '',
           metaDescription: metaDescIn ? metaDescIn.value.trim() : '',
           metaImageURL: metaImageIn ? metaImageIn.value.trim() : '',
         showViewsOnBio: showViewsCb ? showViewsCb.checked : false,
+        showAvatarBorder: (function() { var el = document.getElementById('showAvatarBorder'); return el ? el.checked : true; })(),
+        badgesUseCard: (function() { var el = document.getElementById('badgesUseCard'); return el ? el.checked : true; })(),
         showAliasOnBio: (function() { var el = document.getElementById('showAliasOnBio'); return el ? el.checked : true; })(),
+        showDiscordPresence: (function() { var el = document.getElementById('showDiscordPresence'); return el ? el.checked : false; })(),
+        discordPresenceUseCard: (function() { var el = document.getElementById('discordPresenceUseCard'); return el ? el.checked : true; })(),
+        discordPresenceWidth: (function() { var el = document.getElementById('discordPresenceWidth'); return el && String(el.value || '').trim() !== '' ? parseInt(el.value, 10) : null; })(),
+        discordPresenceHeight: (function() { var el = document.getElementById('discordPresenceHeight'); return el && String(el.value || '').trim() !== '' ? parseInt(el.value, 10) : null; })(),
         badges: window._editorCurrentData.badges || { community: badgeCommunityEl ? badgeCommunityEl.checked : true },
         badgeVisibility: window._editorCurrentData.badgeVisibility || {},
         badgeColors: (window._editorCurrentData && window._editorCurrentData.badgeColors) || {},
@@ -2392,45 +2496,6 @@
       });
     }
 
-    var templateSelect = document.getElementById('templateSelect');
-    if (templateSelect) {
-      templateSelect.addEventListener('change', function() {
-        var v = templateSelect.value;
-        if (!v) return;
-        var fontSel = document.getElementById('fontFamily');
-        var accentColorEl = document.getElementById('accentColor');
-        var accentHex = document.getElementById('accentColorHex');
-        var btnStyle = document.getElementById('buttonStyle');
-        var bgEffect = document.getElementById('backgroundEffect');
-        if (v === 'minimal') {
-          if (fontSel) fontSel.value = 'Inter';
-          if (accentColorEl) accentColorEl.value = '#64748b';
-          if (accentHex) accentHex.value = '#64748b';
-          if (btnStyle) btnStyle.value = 'outline';
-          if (bgEffect) bgEffect.value = 'none';
-        } else if (v === 'classic') {
-          if (fontSel) fontSel.value = 'Outfit';
-          if (accentColorEl) accentColorEl.value = '#7c6bb8';
-          if (accentHex) accentHex.value = '#7c6bb8';
-          if (btnStyle) btnStyle.value = 'filled';
-          if (bgEffect) bgEffect.value = 'gradient';
-        } else if (v === 'neon') {
-          if (fontSel) fontSel.value = 'Space Mono';
-          if (accentColorEl) accentColorEl.value = '#22d3ee';
-          if (accentHex) accentHex.value = '#22d3ee';
-          if (btnStyle) btnStyle.value = 'outline';
-          if (bgEffect) bgEffect.value = 'gradient';
-        } else if (v === 'warm') {
-          if (fontSel) fontSel.value = 'Playfair Display';
-          if (accentColorEl) accentColorEl.value = '#ea580c';
-          if (accentHex) accentHex.value = '#ea580c';
-          if (btnStyle) btnStyle.value = 'filled';
-          if (bgEffect) bgEffect.value = 'gradient';
-        }
-        updatePreview();
-      });
-    }
-
     var displayStyleSel = document.getElementById('displayStyleSelect');
     if (displayStyleSel) {
       displayStyleSel.addEventListener('change', function() {
@@ -2475,8 +2540,20 @@
     if (btnStyleEl) btnStyleEl.addEventListener('change', updatePreview);
     var showViewsCbEl = document.getElementById('showViewsOnBio');
     if (showViewsCbEl) showViewsCbEl.addEventListener('change', updatePreview);
+    var showAvatarBorderEl = document.getElementById('showAvatarBorder');
+    if (showAvatarBorderEl) showAvatarBorderEl.addEventListener('change', updatePreview);
+    var badgesUseCardEl = document.getElementById('badgesUseCard');
+    if (badgesUseCardEl) badgesUseCardEl.addEventListener('change', updatePreview);
     var showAliasOnBioEl = document.getElementById('showAliasOnBio');
     if (showAliasOnBioEl) showAliasOnBioEl.addEventListener('change', updatePreview);
+    var showDiscordPresenceEl = document.getElementById('showDiscordPresence');
+    if (showDiscordPresenceEl) showDiscordPresenceEl.addEventListener('change', updatePreview);
+    var discordPresenceUseCardEl = document.getElementById('discordPresenceUseCard');
+    if (discordPresenceUseCardEl) discordPresenceUseCardEl.addEventListener('change', updatePreview);
+    var discordPresenceWidthEl = document.getElementById('discordPresenceWidth');
+    if (discordPresenceWidthEl) { discordPresenceWidthEl.addEventListener('input', updatePreview); discordPresenceWidthEl.addEventListener('change', updatePreview); }
+    var discordPresenceHeightEl = document.getElementById('discordPresenceHeight');
+    if (discordPresenceHeightEl) { discordPresenceHeightEl.addEventListener('input', updatePreview); discordPresenceHeightEl.addEventListener('change', updatePreview); }
     function bindModalRange(id, valueId, suffix) {
       var el = document.getElementById(id);
       var valEl = document.getElementById(valueId);

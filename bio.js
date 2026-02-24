@@ -107,12 +107,12 @@ function loadBioForUid(uid) {
       metaDescription: d.metaDescription || '',
       metaImageURL: d.metaImageURL || '',
       showViewsOnBio: !!d.showViewsOnBio,
+      showAvatarBorder: d.showAvatarBorder !== false,
       showVerifiedCheckmark: !!(d.showVerifiedCheckmark && merged && merged.verified),
       showAliasOnBio: d.showAliasOnBio !== false,
       stats: { views: views },
       badges: visibleBadges,
       hasPremium: !!(merged && merged.premium),
-      discordProfile: (d.discordProfile && typeof d.discordProfile === 'object') ? d.discordProfile : null,
       badgeColors: sanitizeBadgeColors(d.badgeColors),
       premiumButtonShape: (d.premiumButtonShape || '').trim().slice(0, 20),
       premiumLinkHoverEffect: (d.premiumLinkHoverEffect || '').trim().slice(0, 20),
@@ -141,12 +141,18 @@ function loadBioForUid(uid) {
       premiumProfileAnimation: (d.premiumProfileAnimation || '').trim().slice(0, 20),
       premiumParallax: !!d.premiumParallax,
       liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null,
-      liveEditOrder: sanitizeLiveEditOrder(d.liveEditOrder)
+      liveEditOrder: sanitizeLiveEditOrder(d.liveEditOrder),
+      showDiscordPresence: !!(d.showDiscordPresence && d.discordProfile && d.discordProfile.id),
+      discordProfile: (d.showDiscordPresence && d.discordProfile && d.discordProfile.id) ? { id: d.discordProfile.id, username: d.discordProfile.username || '', displayName: d.discordProfile.displayName || '', avatar: d.discordProfile.avatar != null ? d.discordProfile.avatar : null } : null,
+      badgesUseCard: d.badgesUseCard !== false,
+      discordPresenceUseCard: d.discordPresenceUseCard !== false,
+      discordPresenceWidth: (typeof d.discordPresenceWidth === 'number' && isFinite(d.discordPresenceWidth)) ? d.discordPresenceWidth : null,
+      discordPresenceHeight: (typeof d.discordPresenceHeight === 'number' && isFinite(d.discordPresenceHeight)) ? d.discordPresenceHeight : null
     };
   });
 }
 
-var LIVE_EDIT_ORDER_DEFAULT = ['avatar', 'name', 'badges', 'bio', 'profileViews', 'song', 'links'];
+var LIVE_EDIT_ORDER_DEFAULT = ['avatar', 'name', 'badges', 'bio', 'discord', 'profileViews', 'song', 'links'];
 function sanitizeLiveEditOrder(arr) {
   if (!arr || !Array.isArray(arr)) return null;
   var allowed = LIVE_EDIT_ORDER_DEFAULT.slice();
@@ -282,6 +288,7 @@ function getCurrentUserBio(uid) {
       metaDescription: d.metaDescription || '',
       metaImageURL: d.metaImageURL || '',
       showViewsOnBio: !!d.showViewsOnBio,
+      showAvatarBorder: d.showAvatarBorder !== false,
       showVerifiedCheckmark: !!(d.showVerifiedCheckmark && d.badges && d.badges.verified),
       showAliasOnBio: d.showAliasOnBio !== false,
       stats: d.stats || { views: 0 },
@@ -317,32 +324,15 @@ function getCurrentUserBio(uid) {
       liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null,
       liveEditOrder: sanitizeLiveEditOrder(d.liveEditOrder),
       discordId: d.discordId || null,
-      discordProfile: (d.discordProfile && typeof d.discordProfile === 'object') ? d.discordProfile : null
+      discordProfile: (d.discordProfile && typeof d.discordProfile === 'object') ? d.discordProfile : null,
+      showDiscordPresence: !!d.showDiscordPresence,
+      badgesUseCard: d.badgesUseCard !== false,
+      discordPresenceUseCard: d.discordPresenceUseCard !== false,
+      discordPresenceWidth: (typeof d.discordPresenceWidth === 'number' && isFinite(d.discordPresenceWidth)) ? d.discordPresenceWidth : null,
+      discordPresenceHeight: (typeof d.discordPresenceHeight === 'number' && isFinite(d.discordPresenceHeight)) ? d.discordPresenceHeight : null
     };
   });
 }
-
-// Human-readable labels for Discord account badges (user flags) for display on profile
-window.DISCORD_BADGE_LABELS = {
-  Staff: 'Discord Staff',
-  Partner: 'Partner',
-  HypeSquad: 'HypeSquad Events',
-  BugHunterLevel1: 'Bug Hunter Level 1',
-  BugHunterLevel2: 'Bug Hunter Level 2',
-  HypeSquadOnlineHouse1: 'HypeSquad Bravery',
-  HypeSquadOnlineHouse2: 'HypeSquad Brilliance',
-  HypeSquadOnlineHouse3: 'HypeSquad Balance',
-  PremiumEarlySupporter: 'Early Nitro',
-  VerifiedDeveloper: 'Verified Bot Developer',
-  CertifiedModerator: 'Certified Moderator',
-  ActiveDeveloper: 'Active Developer',
-  BotHTTPInteractions: 'Bot',
-  Spammer: 'Spammer',
-  DisablePremium: 'Disable Premium',
-  Collaborator: 'Collaborator',
-  RestrictedCollaborator: 'Restricted Collaborator',
-  Quarantined: 'Quarantined'
-};
 
 // Save only bio-related fields to users/{uid} (user can only set badges.community)
 function saveBio(uid, data) {
@@ -378,10 +368,22 @@ function saveBio(uid, data) {
     metaDescription: (data.metaDescription || '').trim().slice(0, 200),
     metaImageURL: (data.metaImageURL || '').trim().slice(0, 500),
     showViewsOnBio: !!data.showViewsOnBio,
+    showAvatarBorder: data.showAvatarBorder !== false,
     showVerifiedCheckmark: !!data.showVerifiedCheckmark,
     updatedAt: firebase.database.ServerValue.TIMESTAMP
   };
   if (data.showAliasOnBio !== undefined) updates.showAliasOnBio = !!data.showAliasOnBio;
+  if (data.showDiscordPresence !== undefined) updates.showDiscordPresence = !!data.showDiscordPresence;
+  if (data.badgesUseCard !== undefined) updates.badgesUseCard = !!data.badgesUseCard;
+  if (data.discordPresenceUseCard !== undefined) updates.discordPresenceUseCard = !!data.discordPresenceUseCard;
+  if (data.discordPresenceWidth !== undefined) {
+    var dpw = parseInt(data.discordPresenceWidth, 10);
+    updates.discordPresenceWidth = (isFinite(dpw) && dpw >= 200 && dpw <= 600) ? dpw : null;
+  }
+  if (data.discordPresenceHeight !== undefined) {
+    var dph = parseInt(data.discordPresenceHeight, 10);
+    updates.discordPresenceHeight = (isFinite(dph) && dph >= 0 && dph <= 400) ? dph : null;
+  }
   if (data.badges && typeof data.badges === 'object') {
     if (data.badges.community !== undefined) updates['badges/community'] = !!data.badges.community;
   }

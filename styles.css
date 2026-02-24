@@ -2896,26 +2896,6 @@ body.toplander .skiptranslate { display: none !important; }
 .settings-discord-display-name { font-weight: 600; font-size: 1rem; color: var(--text-primary); margin-bottom: 0.15rem; }
 .settings-discord-username { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.15rem; }
 .settings-discord-user-id { font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono, ui-monospace, monospace); }
-.settings-discord-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.5rem;
-}
-.settings-discord-badge-pill {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  background: var(--bg-subtle, rgba(0,0,0,0.08));
-  color: var(--text-muted);
-  border: 1px solid var(--border-subtle, rgba(0,0,0,0.1));
-}
-.settings-discord-badge-pill.settings-discord-badge-verified { color: #3b82f6; border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.1); }
-.settings-discord-badge-pill.settings-discord-badge-premium { color: #eab308; border-color: rgba(234, 179, 8, 0.4); background: rgba(234, 179, 8, 0.1); }
-.settings-discord-badge-pill.settings-discord-badge-og { color: #8b5cf6; border-color: rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.1); }
-.settings-discord-badge-pill.settings-discord-badge-staff { color: #10b981; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1); }
 
 /* Status widget (dashboard tab & status page) */
 .status-widget-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
@@ -3410,18 +3390,69 @@ textarea.form-input {
   color: var(--text-muted);
 }
 
-/* ========== Checkboxes — native, reliable, modern accent ========== */
+/* ========== Checkboxes — custom modern design ========== */
 input[type="checkbox"],
 .form-checkbox,
 .badge-toggle,
 .edit-badge-cb {
+  -webkit-appearance: none;
+  appearance: none;
   width: 1.15rem;
   height: 1.15rem;
   margin: 0;
   flex-shrink: 0;
   cursor: pointer;
-  accent-color: var(--purple-accent);
   vertical-align: middle;
+  position: relative;
+  border-radius: 0.42rem;
+  border: 1px solid color-mix(in srgb, var(--purple-accent) 35%, var(--border-subtle));
+  background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), 0 1px 2px rgba(0,0,0,0.3);
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+}
+input[type="checkbox"]::after,
+.form-checkbox::after,
+.badge-toggle::after,
+.edit-badge-cb::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.44rem;
+  height: 0.44rem;
+  border-radius: 999px;
+  background: var(--purple-accent);
+  transform: translate(-50%, -50%) scale(0);
+  transform-origin: center center;
+  opacity: 0.95;
+  transition: transform 140ms ease;
+}
+input[type="checkbox"]:checked,
+.form-checkbox:checked,
+.badge-toggle:checked,
+.edit-badge-cb:checked {
+  border-color: color-mix(in srgb, var(--purple-accent) 78%, #ffffff 12%);
+  background: color-mix(in srgb, var(--purple-accent) 20%, transparent);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), 0 1px 2px rgba(0,0,0,0.3);
+}
+input[type="checkbox"]:checked::after,
+.form-checkbox:checked::after,
+.badge-toggle:checked::after,
+.edit-badge-cb:checked::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+input[type="checkbox"]:focus-visible,
+.form-checkbox:focus-visible,
+.badge-toggle:focus-visible,
+.edit-badge-cb:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--purple-accent) 32%, transparent), 0 0 0 4px color-mix(in srgb, #ffffff 14%, transparent);
+}
+input[type="checkbox"]:active,
+.form-checkbox:active,
+.badge-toggle:active,
+.edit-badge-cb:active {
+  transform: scale(0.96);
 }
 input[type="checkbox"]:disabled,
 .form-checkbox:disabled,
@@ -3429,19 +3460,38 @@ input[type="checkbox"]:disabled,
 .edit-badge-cb:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.form-checkbox {
-  width: 1.15rem;
-  height: 1.15rem;
+  filter: saturate(0.65);
 }
 .form-check label {
   margin-bottom: 0;
   cursor: pointer;
 }
+/* When the label itself is .form-check (input + span inside), keep text vertically centered */
+.panel-card label.form-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+.panel-card label.form-check > input[type="checkbox"] {
+  margin: 0;
+  align-self: center;
+}
+.panel-card label.form-check > span {
+  display: inline-block;
+  line-height: 1.35;
+}
 /* Fallback for form-check label when not in panel-card */
 .panel-card .form-group.form-check label {
   margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1.35;
 }
 /* Analytics (and other) checkbox + text alignment */
 .panel-card .checkbox-label {
@@ -3451,12 +3501,14 @@ input[type="checkbox"]:disabled,
   cursor: pointer;
   margin-bottom: 0;
   vertical-align: middle;
+  line-height: 1.35;
 }
 .panel-card .checkbox-label input[type="checkbox"] {
   width: 1.15rem;
   height: 1.15rem;
   margin: 0;
   flex-shrink: 0;
+  align-self: center;
 }
 .link-icon.form-select-sm {
   width: 100px;
@@ -3671,6 +3723,10 @@ input[type="checkbox"]:disabled,
   align-items: center;
   justify-content: center;
 }
+.preview-avatar-wrap.avatar-no-border {
+  border: 0;
+  box-shadow: none;
+}
 .preview-avatar {
   width: 100%;
   height: 100%;
@@ -3708,6 +3764,9 @@ input[type="checkbox"]:disabled,
   margin-bottom: 0.5rem;
   min-height: 0;
 }
+.preview-badges.badges-no-card {
+  margin-bottom: 0.35rem;
+}
 .preview-badges:empty { display: none; }
 .preview-badge {
   display: inline-flex;
@@ -3718,6 +3777,12 @@ input[type="checkbox"]:disabled,
   border-radius: 50%;
   background: rgba(124, 107, 184, 0.15);
   color: var(--purple-accent);
+}
+.preview-badges.badges-no-card .preview-badge {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
 }
 .preview-badge .bio-badge-icon {
   width: 12px;
@@ -3741,7 +3806,49 @@ input[type="checkbox"]:disabled,
   color: var(--text-muted);
   line-height: 1.4;
   margin-bottom: 1rem;
-  min-height: 2.8em;
+}
+.preview-discord-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+  padding: 0.5rem 0.75rem;
+  max-width: 100%;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+.preview-discord-wrap.discord-presence-no-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.preview-discord-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.preview-discord-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+.preview-discord-display-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary, #fff);
+  line-height: 1.3;
+}
+.preview-discord-username {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.3;
 }
 .preview-links {
   display: flex;
@@ -4478,6 +4585,10 @@ input[type="checkbox"]:disabled,
   justify-content: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+.dashboard-page .live-canvas-avatar-wrap.avatar-no-border {
+  border: 0;
+  box-shadow: none;
+}
 .dashboard-page .live-canvas-avatar {
   width: 100%;
   height: 100%;
@@ -4516,10 +4627,19 @@ input[type="checkbox"]:disabled,
   margin-bottom: 0.25rem;
   min-height: 0;
 }
+.dashboard-page .live-canvas-badges.badges-no-card {
+  margin-bottom: 0.1rem;
+}
 .dashboard-page .live-canvas-badges:empty { display: none; }
 .dashboard-page .live-canvas-badges .preview-badge {
   width: 20px;
   height: 20px;
+}
+.dashboard-page .live-canvas-badges.badges-no-card .preview-badge {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
 }
 .dashboard-page .live-canvas-badges .preview-badge .bio-badge-icon {
   width: 11px;
@@ -4587,6 +4707,56 @@ input[type="checkbox"]:disabled,
 }
 .dashboard-page .live-canvas-links.preview-links-icon-only .preview-link-btn {
   width: auto;
+}
+.dashboard-page .live-canvas-discord-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0.15rem auto 0;
+  padding: 0.5rem 0.75rem;
+  max-width: 280px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+.dashboard-page .live-canvas-discord-wrap.discord-presence-no-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.dashboard-page .live-canvas-discord-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.dashboard-page .live-canvas-discord-placeholder {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  opacity: 0.85;
+  text-align: center;
+}
+.dashboard-page .live-canvas-discord-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+.dashboard-page .live-canvas-discord-display-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary, #fff);
+  line-height: 1.3;
+}
+.dashboard-page .live-canvas-discord-username {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.3;
 }
 
 /* Staff panel tab (inside dashboard) — match revamp look */
@@ -5074,6 +5244,10 @@ html { scrollbar-gutter: stable; }
   background: var(--bg-elevated);
   flex-shrink: 0;
 }
+.bio-avatar.avatar-no-border {
+  border: 0 !important;
+  box-shadow: none;
+}
 
 /* Premium: 3D tilt parallax on card (card tilts toward cursor) */
 .bio-page.bio-display-card.bio-premium-parallax .page {
@@ -5098,6 +5272,10 @@ html { scrollbar-gutter: stable; }
 }
 .bio-page.bio-bg-none .bg-grid {
   opacity: 0;
+}
+/* Keep cover image visible even when bg effect is "none" */
+.bio-page.bio-has-cover-bg.bio-bg-none .bg-gradient {
+  background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 72%);
 }
 .bio-page.bio-bg-gradient .bg-gradient {
   background: radial-gradient(ellipse 80% 50% at 50% -20%, var(--purple-glow), transparent 50%),
@@ -5130,6 +5308,14 @@ html { scrollbar-gutter: stable; }
   border: 1px solid rgba(124, 107, 184, 0.3);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.3);
   max-width: min(100%, 380px);
+}
+.bio-badges.badges-no-card {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  max-width: none;
 }
 .bio-badges:empty { display: none; }
 .bio-badge {
@@ -5169,24 +5355,6 @@ html { scrollbar-gutter: stable; }
 .bio-badge-og { color: #eab308; }
 .bio-badge-icon svg { stroke: currentColor; }
 
-.bio-discord-badges {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.4rem;
-  justify-content: center;
-}
-.bio-discord-badges:empty { display: none !important; }
-.bio-discord-badge-pill {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  background: rgba(88, 101, 242, 0.15);
-  color: #8b9cf6;
-  border: 1px solid rgba(88, 101, 242, 0.35);
-}
 .bio-content-wrap.bio-badges-monochrome .bio-badges {
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 4px 20px rgba(0, 0, 0, 0.25);
@@ -5216,6 +5384,50 @@ html { scrollbar-gutter: stable; }
   display: block;
   width: 100%;
   box-sizing: border-box;
+}
+.bio-discord-presence-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1rem auto;
+  padding: 0.75rem 1rem;
+  max-width: 320px;
+  border-radius: 12px;
+  background: var(--bg-subtle, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+  box-sizing: border-box;
+}
+.bio-discord-presence-wrap.discord-presence-no-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.bio-discord-presence-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.bio-discord-presence-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+}
+.bio-discord-presence-display-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary, #fff);
+  line-height: 1.3;
+}
+.bio-discord-presence-username {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.3;
 }
 .bio-links {
   max-width: 400px;
@@ -5248,13 +5460,18 @@ html { scrollbar-gutter: stable; }
 .bio-content-wrap.bio-align-left .bio-badges { justify-content: flex-start; }
 .bio-content-wrap.bio-align-left .bio-bio-text,
 .bio-content-wrap.bio-align-left .bio-views,
+.bio-content-wrap.bio-align-left .bio-discord-presence-wrap,
 .bio-content-wrap.bio-align-left .bio-links { margin-left: 0; margin-right: auto; }
 .bio-content-wrap.bio-align-right .bio-profile { text-align: right; }
 .bio-content-wrap.bio-align-right .bio-avatar { margin-left: auto; margin-right: 0; }
 .bio-content-wrap.bio-align-right .bio-badges { justify-content: flex-end; }
 .bio-content-wrap.bio-align-right .bio-bio-text,
 .bio-content-wrap.bio-align-right .bio-views,
+.bio-content-wrap.bio-align-right .bio-discord-presence-wrap,
 .bio-content-wrap.bio-align-right .bio-links { margin-left: auto; margin-right: 0; }
+.bio-content-wrap.bio-align-right .bio-discord-presence-wrap .bio-discord-presence-info { align-items: flex-end; }
+.bio-content-wrap.bio-align-right .bio-discord-presence-wrap .bio-discord-presence-display-name,
+.bio-content-wrap.bio-align-right .bio-discord-presence-wrap .bio-discord-presence-username { text-align: right; }
 .bio-content-wrap.bio-align-left .bio-links.bio-links-icon-only { justify-content: flex-start; }
 .bio-content-wrap.bio-align-right .bio-links.bio-links-icon-only { justify-content: flex-end; }
 
@@ -5577,85 +5794,76 @@ html { scrollbar-gutter: stable; }
 .bio-particle:nth-child(3n) { animation-duration: 4.2s; }
 .bio-particle:nth-child(5n) { animation-duration: 3.4s; }
 
-/* Premium: realistic glow — multi-layer soft falloff (inner bright, outer diffuse) */
+/* Premium: steady radiance glow — bright core + soft outer bloom */
 .bio-content-wrap.bio-glow-username .bio-name {
   text-shadow:
-    0 0 var(--bio-glow-sm, 4px) var(--bio-glow-color, var(--purple-accent)),
-    0 0 var(--bio-glow-lg, 8px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 65%, transparent),
-    0 0 var(--bio-glow-2xl, 12px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 40%, transparent),
-    0 0 var(--bio-glow-5xl, 24px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 22%, transparent),
-    0 0 calc(var(--bio-glow-5xl, 24px) * 1.5) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 10%, transparent);
+    0 0 calc(var(--bio-glow-sm, 4px) * 0.5) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 92%, white 8%),
+    0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 66%, transparent),
+    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 42%, transparent),
+    0 0 var(--bio-glow-2xl, 12px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 24%, transparent);
 }
 .bio-content-wrap.bio-glow-socials .bio-link-btn {
   --glow-c: var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent)));
   box-shadow:
-    0 0 var(--bio-glow-sm, 4px) color-mix(in srgb, var(--glow-c) 50%, transparent),
-    0 0 var(--bio-glow-2xl, 12px) color-mix(in srgb, var(--glow-c) 28%, transparent),
-    0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--glow-c) 12%, transparent);
+    0 0 calc(var(--bio-glow-sm, 4px) * 0.6) color-mix(in srgb, var(--glow-c) 62%, transparent),
+    0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--glow-c) 42%, transparent),
+    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--glow-c) 24%, transparent);
 }
 .bio-content-wrap.bio-glow-socials .bio-link-btn:hover {
   box-shadow:
-    0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--glow-c) 55%, transparent),
-    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--glow-c) 35%, transparent),
-    0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--glow-c) 18%, transparent),
-    0 0 calc(var(--bio-glow-4xl, 18px) * 1.4) color-mix(in srgb, var(--glow-c) 8%, transparent);
+    0 0 calc(var(--bio-glow-sm, 4px) * 0.8) color-mix(in srgb, var(--glow-c) 72%, transparent),
+    0 0 var(--bio-glow-lg, 8px) color-mix(in srgb, var(--glow-c) 48%, transparent),
+    0 0 var(--bio-glow-2xl, 12px) color-mix(in srgb, var(--glow-c) 28%, transparent);
 }
 /* Icon-only links: glow the icon itself (box-shadow on transparent btn is invisible) */
 .bio-content-wrap.bio-glow-socials .bio-link-btn.bio-link-icon-only .bio-link-icon {
-  filter: drop-shadow(0 0 var(--bio-glow-sm, 4px) color-mix(in srgb, var(--glow-c) 70%, transparent))
-          drop-shadow(0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--glow-c) 50%, transparent))
-          drop-shadow(0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--glow-c) 30%, transparent));
+  filter: drop-shadow(0 0 var(--bio-glow-sm, 4px) color-mix(in srgb, var(--glow-c) 82%, transparent))
+          drop-shadow(0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--glow-c) 52%, transparent))
+          drop-shadow(0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--glow-c) 28%, transparent));
 }
 .bio-content-wrap.bio-glow-socials .bio-link-btn.bio-link-icon-only:hover .bio-link-icon {
-  filter: drop-shadow(0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--glow-c) 75%, transparent))
-          drop-shadow(0 0 var(--bio-glow-lg, 8px) color-mix(in srgb, var(--glow-c) 55%, transparent))
-          drop-shadow(0 0 var(--bio-glow-2xl, 12px) color-mix(in srgb, var(--glow-c) 35%, transparent));
+  filter: drop-shadow(0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--glow-c) 88%, transparent))
+          drop-shadow(0 0 var(--bio-glow-lg, 8px) color-mix(in srgb, var(--glow-c) 58%, transparent))
+          drop-shadow(0 0 var(--bio-glow-2xl, 12px) color-mix(in srgb, var(--glow-c) 34%, transparent));
 }
-/* Badge glow: glow each badge pill (not the container outline) — realistic soft emission */
+/* Badge glow: steady per-badge radiance */
 .bio-content-wrap.bio-glow-badges .bio-badges {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: none;
 }
 .bio-content-wrap.bio-glow-badges .bio-badge {
-  box-shadow:
-    0 0 var(--bio-glow-sm, 4px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 70%, transparent),
-    0 0 var(--bio-glow-md, 6px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 50%, transparent),
-    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 35%, transparent),
-    0 0 var(--bio-glow-2xl, 12px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 22%, transparent),
-    0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 12%, transparent);
+  box-shadow: none;
 }
 .bio-content-wrap.bio-glow-badges .bio-badge-icon svg {
-  filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 60%, transparent));
-}
-@supports not (color: color-mix(in srgb, red, blue)) {
-  .bio-content-wrap.bio-glow-badges .bio-badges {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  }
-  .bio-content-wrap.bio-glow-badges .bio-badge {
-    box-shadow: 0 0 6px var(--bio-glow-color, var(--purple-accent)), 0 0 14px var(--bio-glow-color, var(--purple-accent));
-  }
-  .bio-content-wrap.bio-glow-badges .bio-badge-icon svg { filter: drop-shadow(0 0 6px currentColor); }
-  .bio-content-wrap.bio-glow-socials .bio-link-btn.bio-link-icon-only .bio-link-icon {
-    filter: drop-shadow(0 0 6px var(--purple-accent)) drop-shadow(0 0 12px var(--purple-accent));
-  }
+  filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 7px color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 58%, transparent));
 }
 .bio-content-wrap.bio-glow-bio .bio-bio-text {
   text-shadow:
-    0 0 var(--bio-glow-sm, 4px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 50%, transparent),
-    0 0 var(--bio-glow-xl, 10px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 28%, transparent),
-    0 0 var(--bio-glow-4xl, 18px) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 12%, transparent);
+    0 0 calc(var(--bio-glow-sm, 4px) * 0.38) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 64%, transparent),
+    0 0 calc(var(--bio-glow-md, 6px) * 0.55) color-mix(in srgb, var(--bio-glow-color, var(--purple-accent)) 34%, transparent);
 }
 @supports not (color: color-mix(in srgb, red, blue)) {
   .bio-content-wrap.bio-glow-username .bio-name {
-    text-shadow: 0 0 var(--bio-glow-sm, 4px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-2xl, 12px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-5xl, 24px) var(--bio-glow-color, var(--purple-accent));
+    text-shadow:
+      0 0 4px var(--bio-glow-color, var(--purple-accent)),
+      0 0 10px var(--bio-glow-color, var(--purple-accent)),
+      0 0 18px var(--bio-glow-color, var(--purple-accent)),
+      0 0 30px var(--bio-glow-color, var(--purple-accent));
   }
   .bio-content-wrap.bio-glow-socials .bio-link-btn {
-    box-shadow: 0 0 var(--bio-glow-sm, 4px) var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent))), 0 0 var(--bio-glow-2xl, 12px) var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent)));
+    box-shadow: 0 0 4px var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent))), 0 0 10px var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent)));
   }
   .bio-content-wrap.bio-glow-socials .bio-link-btn:hover {
-    box-shadow: 0 0 var(--bio-glow-md, 6px) var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent))), 0 0 var(--bio-glow-4xl, 18px) var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent)));
+    box-shadow: 0 0 6px var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent))), 0 0 12px var(--bio-link-glow-color, var(--bio-glow-color, var(--purple-accent)));
+  }
+  .bio-content-wrap.bio-glow-badges .bio-badge {
+    box-shadow: none;
+  }
+  .bio-content-wrap.bio-glow-badges .bio-badge-icon svg { filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px currentColor); }
+  .bio-content-wrap.bio-glow-socials .bio-link-btn.bio-link-icon-only .bio-link-icon {
+    filter: drop-shadow(0 0 6px var(--purple-accent)) drop-shadow(0 0 12px var(--purple-accent)) drop-shadow(0 0 20px var(--purple-accent));
   }
   .bio-content-wrap.bio-glow-bio .bio-bio-text {
-    text-shadow: 0 0 var(--bio-glow-sm, 4px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-xl, 10px) var(--bio-glow-color, var(--purple-accent)), 0 0 var(--bio-glow-4xl, 18px) var(--bio-glow-color, var(--purple-accent));
+    text-shadow: 0 0 2px var(--bio-glow-color, var(--purple-accent)), 0 0 5px var(--bio-glow-color, var(--purple-accent));
   }
 }
 
