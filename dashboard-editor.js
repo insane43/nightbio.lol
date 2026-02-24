@@ -629,6 +629,27 @@
     if (unameIn && d && d.username) unameIn.value = d.username;
     if (aliasIn && d && d.alias != null) aliasIn.value = d.alias ? String(d.alias).trim() : '';
     if (displayIn && d && d.displayName != null) displayIn.value = d.displayName ? String(d.displayName).trim() : '';
+
+    var discordWrap = document.getElementById('settingsDiscordLinkedWrap');
+    var discordAvatar = document.getElementById('settingsDiscordAvatar');
+    var discordDisplayName = document.getElementById('settingsDiscordDisplayName');
+    var discordUsername = document.getElementById('settingsDiscordUsername');
+    var discordUserId = document.getElementById('settingsDiscordUserId');
+    var dp = d && d.discordProfile && d.discordProfile.id ? d.discordProfile : null;
+    if (discordWrap) discordWrap.style.display = dp ? '' : 'none';
+    if (dp) {
+      var id = String(dp.id);
+      var avatarUrl = dp.avatar
+        ? 'https://cdn.discordapp.com/avatars/' + id + '/' + dp.avatar + '.png?size=128'
+        : 'https://cdn.discordapp.com/embed/avatars/' + ((parseInt(id, 10) >> 22) % 6) + '.png';
+      if (discordAvatar) {
+        discordAvatar.src = avatarUrl;
+        discordAvatar.alt = (dp.displayName || dp.username || 'Discord') + ' avatar';
+      }
+      if (discordDisplayName) discordDisplayName.textContent = (dp.displayName && dp.displayName.trim()) ? dp.displayName.trim() : '—';
+      if (discordUsername) discordUsername.textContent = (dp.username && dp.username.trim()) ? '@' + dp.username.trim() : '—';
+      if (discordUserId) discordUserId.textContent = 'ID: ' + id;
+    }
   }
 
   function wireSettingsPanel() {
@@ -840,7 +861,7 @@
         var expiresAt = Date.now() + 600000;
         db.ref('discordLinkCodes/' + code).set({ uid: uid, expiresAt: expiresAt }).then(function() {
           if (settingsDiscordCodeOut) {
-            settingsDiscordCodeOut.textContent = 'Your code: ' + code + '. In Discord run: /sync code:' + code + ' (expires in 10 min).';
+            settingsDiscordCodeOut.textContent = 'Your code: ' + code + '. In Discord run: /link code:' + code + ' (expires in 10 min). Then run /sync to sync badges and roles.';
             settingsDiscordCodeOut.style.display = 'block';
             settingsDiscordCodeOut.style.color = 'var(--text, inherit)';
           }

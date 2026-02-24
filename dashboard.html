@@ -559,7 +559,18 @@
           </div>
           <div class="panel-card">
             <h2 class="panel-title">Connect Discord</h2>
-            <p class="panel-desc">Link your Discord account to sync badges with Discord roles. Generate a one-time code below, then in your Discord server run <code>/sync code:YOUR_CODE</code>. Code expires in 10 minutes.</p>
+            <div id="settingsDiscordLinkedWrap" class="settings-discord-linked" style="display: none;">
+              <p class="panel-desc" style="margin-bottom: 0.75rem;">Your Discord account is linked.</p>
+              <div class="settings-discord-profile">
+                <img id="settingsDiscordAvatar" class="settings-discord-avatar" src="" alt="" />
+                <div class="settings-discord-info">
+                  <div class="settings-discord-display-name" id="settingsDiscordDisplayName">—</div>
+                  <div class="settings-discord-username" id="settingsDiscordUsername">—</div>
+                  <div class="settings-discord-user-id" id="settingsDiscordUserId">—</div>
+                </div>
+              </div>
+            </div>
+            <p class="panel-desc" id="settingsDiscordDesc">Link your Discord account to sync badges with Discord roles. Generate a one-time code below, then in your Discord server run <code>/link code:YOUR_CODE</code>. After linking, run <code>/sync</code> to sync badges and roles. Code expires in 10 minutes.</p>
             <div class="settings-discord-section">
               <button type="button" class="btn btn-primary" id="settingsDiscordGenerateCode">Generate link code</button>
               <p id="settingsDiscordCodeOut" class="settings-discord-code" aria-live="polite" style="display: none;"></p>

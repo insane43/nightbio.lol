@@ -314,7 +314,9 @@ function getCurrentUserBio(uid) {
       premiumProfileAnimation: (d.premiumProfileAnimation || '').trim().slice(0, 20),
       premiumParallax: !!d.premiumParallax,
       liveEditPositions: (d.liveEditPositions && typeof d.liveEditPositions === 'object') ? d.liveEditPositions : null,
-      liveEditOrder: sanitizeLiveEditOrder(d.liveEditOrder)
+      liveEditOrder: sanitizeLiveEditOrder(d.liveEditOrder),
+      discordId: d.discordId || null,
+      discordProfile: (d.discordProfile && typeof d.discordProfile === 'object') ? d.discordProfile : null
     };
   });
 }

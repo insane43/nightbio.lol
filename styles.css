@@ -2840,6 +2840,28 @@ body.toplander .skiptranslate { display: none !important; }
 }
 .panel-desc-muted { font-size: 0.8125rem; opacity: 0.85; margin-top: 0.25rem; }
 
+.settings-discord-linked { margin-bottom: 1rem; }
+.settings-discord-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-subtle, rgba(0,0,0,0.06));
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
+}
+.settings-discord-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.settings-discord-info { min-width: 0; }
+.settings-discord-display-name { font-weight: 600; font-size: 1rem; color: var(--text-primary); margin-bottom: 0.15rem; }
+.settings-discord-username { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.15rem; }
+.settings-discord-user-id { font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono, ui-monospace, monospace); }
+
 /* Status widget (dashboard tab & status page) */
 .status-widget-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
 .status-overview-card {
