@@ -604,6 +604,254 @@
         }, 60000);
       }
     }
+    if (tabId === 'settings') {
+      refreshSettingsPanel();
+      if (!window._settingsWired) wireSettingsPanel();
+    }
+  }
+
+  function refreshSettingsPanel() {
+    var auth = typeof getAuth === 'function' ? getAuth() : null;
+    var user = auth && auth.currentUser ? auth.currentUser : null;
+    var emailEl = document.getElementById('settingsEmailDisplay');
+    var unlinkBtn = document.getElementById('settingsUnlinkEmailBtn');
+    var unlinkHint = document.getElementById('settingsUnlinkHint');
+    if (emailEl) emailEl.textContent = (user && user.email) ? user.email : (window._editorCurrentData && window._editorCurrentData.email) ? window._editorCurrentData.email : '—';
+    var providers = (user && user.providerData && user.providerData.length) ? user.providerData : [];
+    var hasPassword = providers.some(function(p) { return p && p.providerId === 'password'; });
+    var hasMultiple = providers.length > 1;
+    if (unlinkBtn) unlinkBtn.style.display = (hasPassword && hasMultiple) ? '' : 'none';
+    if (unlinkHint) unlinkHint.textContent = (hasPassword && hasMultiple) ? 'Unlinking email will let you sign in only with your other linked account (e.g. Google).' : (hasPassword ? 'Your account uses email sign-in. You can change your email above.' : '');
+    var unameIn = document.getElementById('settingsUsernameInput');
+    var aliasIn = document.getElementById('settingsAliasInput');
+    var displayIn = document.getElementById('settingsDisplayNameInput');
+    var d = window._editorCurrentData;
+    if (unameIn && d && d.username) unameIn.value = d.username;
+    if (aliasIn && d && d.alias != null) aliasIn.value = d.alias ? String(d.alias).trim() : '';
+    if (displayIn && d && d.displayName != null) displayIn.value = d.displayName ? String(d.displayName).trim() : '';
+  }
+
+  function wireSettingsPanel() {
+    if (window._settingsWired) return;
+    window._settingsWired = true;
+    var auth = typeof getAuth === 'function' ? getAuth() : null;
+    var db = typeof getDb === 'function' ? getDb() : null;
+
+    function setAccountMsg(msg, isError) {
+      var el = document.getElementById('settingsAccountMsg');
+      if (!el) return;
+      el.textContent = msg;
+      el.style.color = isError ? 'var(--text-error, #e11)' : 'var(--success, #0a0)';
+    }
+
+    var changeEmailBtn = document.getElementById('settingsChangeEmailBtn');
+    var changeEmailModal = document.getElementById('changeEmailModal');
+    var changeEmailNewEmail = document.getElementById('changeEmailNewEmail');
+    var changeEmailModalMsg = document.getElementById('changeEmailModalMsg');
+    var changeEmailModalSubmit = document.getElementById('changeEmailModalSubmit');
+    var changeEmailModalCancel = document.getElementById('changeEmailModalCancel');
+    var changeEmailModalClose = document.getElementById('changeEmailModalClose');
+    var changeEmailModalBackdrop = document.getElementById('changeEmailModalBackdrop');
+
+    function setChangeEmailModalMsg(msg, isError) {
+      if (!changeEmailModalMsg) return;
+      changeEmailModalMsg.textContent = msg;
+      changeEmailModalMsg.style.color = isError ? 'var(--text-error, #e11)' : 'var(--success, #0a0)';
+    }
+    function closeChangeEmailModal() {
+      if (changeEmailModal) changeEmailModal.style.display = 'none';
+      if (changeEmailNewEmail) changeEmailNewEmail.value = '';
+      setChangeEmailModalMsg('');
+    }
+    function openChangeEmailModal() {
+      if (changeEmailModal) changeEmailModal.style.display = 'flex';
+      setChangeEmailModalMsg('');
+      if (changeEmailNewEmail) { changeEmailNewEmail.value = ''; changeEmailNewEmail.focus(); }
+    }
+
+    if (changeEmailBtn && auth) {
+      changeEmailBtn.addEventListener('click', function() {
+        var user = auth.currentUser;
+        if (!user || !user.email) { setAccountMsg('No email account to change.', true); return; }
+        openChangeEmailModal();
+      });
+    }
+    if (changeEmailModalSubmit && changeEmailNewEmail && auth) {
+      changeEmailModalSubmit.addEventListener('click', function() {
+        var user = auth.currentUser;
+        if (!user || !user.email) return;
+        var newEmail = (changeEmailNewEmail.value || '').trim();
+        if (!newEmail) { setChangeEmailModalMsg('Enter a new email address.', true); return; }
+        setChangeEmailModalMsg('Sending…');
+        changeEmailModalSubmit.disabled = true;
+        var baseUrl = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'https://nightbio.lol';
+        var actionCodeSettings = { url: baseUrl + '/dashboard', handleCodeInApp: true };
+        if (typeof user.verifyBeforeUpdateEmail === 'function') {
+          user.verifyBeforeUpdateEmail(newEmail, actionCodeSettings).then(function() {
+            setChangeEmailModalMsg('Verification email sent to ' + newEmail + '. Check your inbox and click the link to confirm the change.');
+            setAccountMsg('Verification email sent to ' + newEmail + '. Click the link in that email to confirm.');
+            setTimeout(closeChangeEmailModal, 3000);
+          }).catch(function(err) {
+            setChangeEmailModalMsg(err && err.message ? err.message : 'Could not send verification email.', true);
+          }).then(function() {
+            if (changeEmailModalSubmit) changeEmailModalSubmit.disabled = false;
+          });
+        } else {
+          setChangeEmailModalMsg('This browser does not support email verification. Try another browser or use the login page to reset your email.', true);
+          changeEmailModalSubmit.disabled = false;
+        }
+      });
+    }
+    if (changeEmailModalCancel) changeEmailModalCancel.addEventListener('click', closeChangeEmailModal);
+    if (changeEmailModalClose) changeEmailModalClose.addEventListener('click', closeChangeEmailModal);
+    if (changeEmailModalBackdrop) changeEmailModalBackdrop.addEventListener('click', closeChangeEmailModal);
+    document.addEventListener('keydown', function changeEmailModalEscape(e) {
+      if (e.key === 'Escape' && changeEmailModal && changeEmailModal.style.display === 'flex') closeChangeEmailModal();
+    });
+
+    if (auth && db) {
+      auth.onAuthStateChanged(function(user) {
+        if (!user || !user.email) return;
+        if (window._editorCurrentData && window._editorCurrentData.email !== user.email) {
+          db.ref('users/' + user.uid + '/email').set(user.email);
+          if (window._editorCurrentData) window._editorCurrentData.email = user.email;
+          refreshSettingsPanel();
+        }
+      });
+    }
+
+    var changePasswordBtn = document.getElementById('settingsChangePasswordBtn');
+    if (changePasswordBtn && auth) {
+      changePasswordBtn.addEventListener('click', function() {
+        var user = auth.currentUser;
+        if (!user || !user.email) { setAccountMsg('Sign in with email to change password.', true); return; }
+        setAccountMsg('Sending…');
+        changePasswordBtn.disabled = true;
+        auth.sendPasswordResetEmail(user.email).then(function() {
+          setAccountMsg('We sent a link to ' + user.email + '. Click it to set a new password, then log in again with your new password.');
+        }).catch(function(err) {
+          setAccountMsg(err && err.message ? err.message : 'Could not send reset link.', true);
+        }).then(function() {
+          changePasswordBtn.disabled = false;
+        });
+      });
+    }
+
+    var unlinkBtn = document.getElementById('settingsUnlinkEmailBtn');
+    if (unlinkBtn && auth) {
+      unlinkBtn.addEventListener('click', function() {
+        var user = auth.currentUser;
+        if (!user || !user.email) return;
+        if (!window.confirm('Unlink email? You will sign in only with your other linked account (e.g. Google). Continue?')) return;
+        setAccountMsg('Unlinking…');
+        user.unlink('password').then(function() {
+          setAccountMsg('Email unlinked. You can now sign in only with your other provider.');
+          refreshSettingsPanel();
+        }).catch(function(err) {
+          setAccountMsg(err && err.message ? err.message : 'Could not unlink email.', true);
+        });
+      });
+    }
+
+    var uid = auth && auth.currentUser ? auth.currentUser.uid : null;
+    if (!uid) return;
+
+    var settingsUsernameBtn = document.getElementById('settingsUsernameBtn');
+    var settingsUsernameInput = document.getElementById('settingsUsernameInput');
+    var settingsUsernameMsg = document.getElementById('settingsUsernameMsg');
+    if (settingsUsernameBtn && settingsUsernameInput && typeof changeUsername === 'function' && typeof isValidUsername === 'function') {
+      settingsUsernameBtn.addEventListener('click', function() {
+        var raw = settingsUsernameInput.value.trim();
+        if (!raw) { if (settingsUsernameMsg) { settingsUsernameMsg.textContent = 'Enter a username.'; settingsUsernameMsg.style.color = ''; } return; }
+        if (!isValidUsername(raw)) { if (settingsUsernameMsg) { settingsUsernameMsg.textContent = 'Username must be 3–20 characters, letters, numbers and underscores only.'; settingsUsernameMsg.style.color = 'var(--text-error, #e11)'; } return; }
+        if (settingsUsernameMsg) settingsUsernameMsg.textContent = '';
+        settingsUsernameBtn.disabled = true;
+        changeUsername(uid, raw).then(function(newUsername) {
+          if (settingsUsernameMsg) { settingsUsernameMsg.textContent = 'Updated to @' + newUsername + '.'; settingsUsernameMsg.style.color = 'var(--success, #0a0)'; }
+          if (window._editorCurrentData) window._editorCurrentData.username = newUsername;
+          var currentHandleEl = document.getElementById('currentHandleDisplay');
+          if (currentHandleEl) currentHandleEl.textContent = newUsername;
+          if (typeof setBioUrl === 'function') setBioUrl(newUsername);
+          settingsUsernameBtn.disabled = false;
+        }).catch(function(err) {
+          if (settingsUsernameMsg) { settingsUsernameMsg.textContent = err && err.message ? err.message : 'Could not update.'; settingsUsernameMsg.style.color = 'var(--text-error, #e11)'; }
+          settingsUsernameBtn.disabled = false;
+        });
+      });
+    }
+
+    var settingsAliasBtn = document.getElementById('settingsAliasBtn');
+    var settingsAliasInput = document.getElementById('settingsAliasInput');
+    var settingsAliasMsg = document.getElementById('settingsAliasMsg');
+    if (settingsAliasBtn && settingsAliasInput && typeof changeAlias === 'function') {
+      settingsAliasBtn.addEventListener('click', function() {
+        var raw = settingsAliasInput.value.trim();
+        if (settingsAliasMsg) settingsAliasMsg.textContent = '';
+        settingsAliasBtn.disabled = true;
+        changeAlias(uid, raw).then(function(newAlias) {
+          if (settingsAliasMsg) { settingsAliasMsg.textContent = newAlias ? ('Updated to @' + newAlias + '.') : 'Alias removed.'; settingsAliasMsg.style.color = 'var(--success, #0a0)'; }
+          if (window._editorCurrentData) window._editorCurrentData.alias = newAlias || '';
+          var currentAliasEl = document.getElementById('currentAliasDisplay');
+          if (currentAliasEl) currentAliasEl.textContent = newAlias || '—';
+          var newAliasInput = document.getElementById('newAliasInput');
+          if (newAliasInput) newAliasInput.value = newAlias || '';
+          updatePreview();
+          settingsAliasBtn.disabled = false;
+        }).catch(function(err) {
+          if (settingsAliasMsg) { settingsAliasMsg.textContent = err && err.message ? err.message : 'Could not update.'; settingsAliasMsg.style.color = 'var(--text-error, #e11)'; }
+          settingsAliasBtn.disabled = false;
+        });
+      });
+    }
+
+    var settingsDisplayNameBtn = document.getElementById('settingsDisplayNameBtn');
+    var settingsDisplayNameInput = document.getElementById('settingsDisplayNameInput');
+    var settingsDisplayNameMsg = document.getElementById('settingsDisplayNameMsg');
+    if (settingsDisplayNameBtn && settingsDisplayNameInput && db) {
+      settingsDisplayNameBtn.addEventListener('click', function() {
+        var val = settingsDisplayNameInput.value.trim().slice(0, 80);
+        settingsDisplayNameBtn.disabled = true;
+        if (settingsDisplayNameMsg) settingsDisplayNameMsg.textContent = '';
+        db.ref('users/' + uid + '/displayName').set(val || null).then(function() {
+          if (window._editorCurrentData) window._editorCurrentData.displayName = val;
+          var displayNameEl = document.getElementById('displayName');
+          if (displayNameEl) displayNameEl.value = val;
+          if (settingsDisplayNameMsg) { settingsDisplayNameMsg.textContent = 'Display name saved.'; settingsDisplayNameMsg.style.color = 'var(--success, #0a0)'; }
+          updatePreview();
+          settingsDisplayNameBtn.disabled = false;
+        }).catch(function(err) {
+          if (settingsDisplayNameMsg) { settingsDisplayNameMsg.textContent = err && err.message ? err.message : 'Could not save.'; settingsDisplayNameMsg.style.color = 'var(--text-error, #e11)'; }
+          settingsDisplayNameBtn.disabled = false;
+        });
+      });
+    }
+
+    var settingsDiscordGenerateCode = document.getElementById('settingsDiscordGenerateCode');
+    var settingsDiscordCodeOut = document.getElementById('settingsDiscordCodeOut');
+    var settingsDiscordMsg = document.getElementById('settingsDiscordMsg');
+    if (settingsDiscordGenerateCode && db) {
+      settingsDiscordGenerateCode.addEventListener('click', function() {
+        if (settingsDiscordMsg) settingsDiscordMsg.textContent = '';
+        if (settingsDiscordCodeOut) { settingsDiscordCodeOut.style.display = 'none'; settingsDiscordCodeOut.textContent = ''; }
+        settingsDiscordGenerateCode.disabled = true;
+        var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        var code = '';
+        for (var i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+        var expiresAt = Date.now() + 600000;
+        db.ref('discordLinkCodes/' + code).set({ uid: uid, expiresAt: expiresAt }).then(function() {
+          if (settingsDiscordCodeOut) {
+            settingsDiscordCodeOut.textContent = 'Your code: ' + code + '. In Discord run: /sync code:' + code + ' (expires in 10 min).';
+            settingsDiscordCodeOut.style.display = 'block';
+            settingsDiscordCodeOut.style.color = 'var(--text, inherit)';
+          }
+          if (settingsDiscordMsg) { settingsDiscordMsg.textContent = 'Code created. Use it in Discord within 10 minutes.'; settingsDiscordMsg.style.color = 'var(--success, #0a0)'; }
+          settingsDiscordGenerateCode.disabled = false;
+        }).catch(function(err) {
+          if (settingsDiscordMsg) { settingsDiscordMsg.textContent = err && err.message ? err.message : 'Could not create code.'; settingsDiscordMsg.style.color = 'var(--text-error, #e11)'; }
+          settingsDiscordGenerateCode.disabled = false;
+        });
+      });
+    }
   }
 
   var DS_TOOLTIPS = { operational: 'Operational — All systems normal.', degraded: 'Degraded — Slow or partial issues. We\'re looking into it.', outage: 'Outage — Service unavailable. We\'re working on a fix.', checking: 'Checking…' };

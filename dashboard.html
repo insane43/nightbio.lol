@@ -95,6 +95,30 @@
     </div>
   </div>
 
+  <div id="changeEmailModal" class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="changeEmailModalTitle" style="display: none;">
+    <div class="qr-modal-backdrop" id="changeEmailModalBackdrop"></div>
+    <div class="qr-modal-box settings-modal-box">
+      <button type="button" class="qr-modal-close" id="changeEmailModalClose" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="qr-modal-header">
+        <h2 id="changeEmailModalTitle" class="qr-modal-title">Change email</h2>
+        <p class="qr-modal-subtitle">Enter your new email. A verification link will be sent there; click it to confirm the change.</p>
+      </div>
+      <div class="qr-modal-body settings-modal-body">
+        <div class="form-group">
+          <label for="changeEmailNewEmail">New email address</label>
+          <input type="email" id="changeEmailNewEmail" class="form-input" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <p id="changeEmailModalMsg" class="form-hint" aria-live="polite" style="margin-top: 0.5rem;"></p>
+        <div class="settings-modal-actions">
+          <button type="button" class="btn btn-ghost" id="changeEmailModalCancel">Cancel</button>
+          <button type="button" class="btn btn-primary" id="changeEmailModalSubmit">Send verification email</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <main class="editor-main">
     <div class="editor-side">
       <nav class="editor-tabs" role="tablist">
@@ -105,6 +129,7 @@
         <button type="button" class="editor-tab" role="tab" id="tabSeo" aria-selected="false" data-tab="seo">SEO</button>
         <button type="button" class="editor-tab" role="tab" id="tabBadges" aria-selected="false" data-tab="badges">Badges</button>
         <button type="button" class="editor-tab" role="tab" id="tabStatus" aria-selected="false" data-tab="status">Status</button>
+        <button type="button" class="editor-tab" role="tab" id="tabSettings" aria-selected="false" data-tab="settings">Settings</button>
         <button type="button" class="editor-tab editor-tab-premium" role="tab" id="tabPremium" aria-selected="false" data-tab="premium" style="display: none;">Premium</button>
         <button type="button" class="editor-tab editor-tab-premium" role="tab" id="tabLiveCanvas" aria-selected="false" data-tab="liveCanvas" style="display: none;">Live Canvas Editor</button>
         <button type="button" class="editor-tab editor-tab-staff" role="tab" id="tabAdminPanel" aria-selected="false" data-tab="adminPanel" style="display: none;">Admin panel</button>
@@ -484,6 +509,65 @@
             </div>
           </div>
         </section>
+
+        <!-- Account & profile settings -->
+        <section class="editor-panel" id="panelSettings" role="tabpanel" aria-labelledby="tabSettings" hidden>
+          <div class="panel-card">
+            <h2 class="panel-title">Account settings</h2>
+            <p class="panel-desc">Manage your sign-in email and password. Changes here affect how you log in to nightbio.</p>
+            <div class="settings-account-section">
+              <div class="form-group">
+                <label>Current email</label>
+                <p class="settings-email-display" id="settingsEmailDisplay">—</p>
+              </div>
+              <div class="settings-account-actions">
+                <button type="button" class="btn btn-primary" id="settingsChangeEmailBtn">Change email</button>
+                <button type="button" class="btn btn-ghost" id="settingsChangePasswordBtn">Change password</button>
+                <button type="button" class="btn btn-ghost" id="settingsUnlinkEmailBtn" style="display: none;">Unlink email</button>
+              </div>
+              <p id="settingsAccountMsg" class="form-hint" aria-live="polite" style="margin-top: 0.5rem;"></p>
+              <p class="panel-desc settings-unlink-hint" id="settingsUnlinkHint" style="margin-top: 0.5rem; font-size: 0.85rem;"></p>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Profile identity</h2>
+            <p class="panel-desc">Your public username (handle), alias, and display name. Handle and alias can be changed once every 7 days.</p>
+            <div class="form-group">
+              <label for="settingsUsernameInput">Username (handle)</label>
+              <div class="handle-change-row">
+                <input type="text" id="settingsUsernameInput" class="form-input" placeholder="e.g. myname" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+" autocomplete="username">
+                <button type="button" class="btn btn-primary" id="settingsUsernameBtn">Update</button>
+              </div>
+              <p id="settingsUsernameMsg" class="form-hint" aria-live="polite" style="margin-top: 0.35rem;"></p>
+            </div>
+            <div class="form-group">
+              <label for="settingsAliasInput">Alias</label>
+              <div class="handle-change-row">
+                <input type="text" id="settingsAliasInput" class="form-input" placeholder="e.g. myalias or leave empty to remove" minlength="0" maxlength="20" pattern="[a-zA-Z0-9_]*" autocomplete="off">
+                <button type="button" class="btn btn-primary" id="settingsAliasBtn">Update</button>
+              </div>
+              <p id="settingsAliasMsg" class="form-hint" aria-live="polite" style="margin-top: 0.35rem;"></p>
+            </div>
+            <div class="form-group">
+              <label for="settingsDisplayNameInput">Display name</label>
+              <div class="handle-change-row">
+                <input type="text" id="settingsDisplayNameInput" class="form-input" placeholder="How you want to be known" maxlength="80">
+                <button type="button" class="btn btn-primary" id="settingsDisplayNameBtn">Save</button>
+              </div>
+              <p id="settingsDisplayNameMsg" class="form-hint" aria-live="polite" style="margin-top: 0.35rem;"></p>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h2 class="panel-title">Connect Discord</h2>
+            <p class="panel-desc">Link your Discord account to sync badges with Discord roles. Generate a one-time code below, then in your Discord server run <code>/sync code:YOUR_CODE</code>. Code expires in 10 minutes.</p>
+            <div class="settings-discord-section">
+              <button type="button" class="btn btn-primary" id="settingsDiscordGenerateCode">Generate link code</button>
+              <p id="settingsDiscordCodeOut" class="settings-discord-code" aria-live="polite" style="display: none;"></p>
+              <p id="settingsDiscordMsg" class="form-hint" aria-live="polite" style="margin-top: 0.5rem;"></p>
+            </div>
+          </div>
+        </section>
+
         <section class="editor-panel" id="panelAdminPanel" role="tabpanel" aria-labelledby="tabAdminPanel" hidden>
           <div class="da-wrap">
             <header class="da-header">

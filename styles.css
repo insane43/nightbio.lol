@@ -2012,6 +2012,43 @@ body.toplander .skiptranslate { display: none !important; }
   font-size: 0.9rem;
 }
 
+/* Settings tab — account & profile */
+.settings-email-display {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin: 0.25rem 0 0;
+  word-break: break-all;
+}
+.settings-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.settings-modal-box {
+  max-width: 400px;
+  width: 90%;
+}
+.settings-modal-body {
+  text-align: left;
+}
+.settings-modal-body .form-group {
+  margin-bottom: 1rem;
+}
+.settings-modal-body .form-group:last-of-type {
+  margin-bottom: 0;
+}
+.settings-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+}
+
 .forgot-link {
   display: inline-block;
   font-size: 0.85rem;

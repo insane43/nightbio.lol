@@ -1,5 +1,11 @@
 {
   "rules": {
+    "discordLinkCodes": {
+      "$code": {
+        ".read": false,
+        ".write": "auth != null && newData.hasChildren(['uid','expiresAt']) && newData.child('uid').val() === auth.uid"
+      }
+    },
     "usernames": {
       ".read": true,
       "$normalized": {
