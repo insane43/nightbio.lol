@@ -892,6 +892,33 @@
         });
       });
     }
+
+    var settingsDiscordUnlinkBtn = document.getElementById('settingsDiscordUnlinkBtn');
+    if (settingsDiscordUnlinkBtn && db) {
+      settingsDiscordUnlinkBtn.addEventListener('click', function() {
+        var d = window._editorCurrentData;
+        var discordId = (d && d.discordId) ? String(d.discordId) : (d && d.discordProfile && d.discordProfile.id) ? String(d.discordProfile.id) : null;
+        if (!discordId) return;
+        if (!window.confirm('Unlink your Discord account from Nightbio? You can link again anytime with a new code.')) return;
+        settingsDiscordUnlinkBtn.disabled = true;
+        var updates = {};
+        updates['users/' + uid + '/discordId'] = null;
+        updates['users/' + uid + '/discordProfile'] = null;
+        updates['discordIds/' + discordId] = null;
+        db.ref().update(updates).then(function() {
+          if (window._editorCurrentData) {
+            window._editorCurrentData.discordId = null;
+            window._editorCurrentData.discordProfile = null;
+          }
+          refreshSettingsPanel();
+          if (settingsDiscordMsg) { settingsDiscordMsg.textContent = 'Discord unlinked.'; settingsDiscordMsg.style.color = 'var(--success, #0a0)'; }
+          settingsDiscordUnlinkBtn.disabled = false;
+        }).catch(function(err) {
+          if (settingsDiscordMsg) { settingsDiscordMsg.textContent = err && err.message ? err.message : 'Could not unlink.'; settingsDiscordMsg.style.color = 'var(--text-error, #e11)'; }
+          settingsDiscordUnlinkBtn.disabled = false;
+        });
+      });
+    }
   }
 
   var DS_TOOLTIPS = { operational: 'Operational — All systems normal.', degraded: 'Degraded — Slow or partial issues. We\'re looking into it.', outage: 'Outage — Service unavailable. We\'re working on a fix.', checking: 'Checking…' };

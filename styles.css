@@ -2850,6 +2850,29 @@ body.toplander .skiptranslate { display: none !important; }
   border-radius: 12px;
   border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
 }
+.settings-discord-unlink-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.settings-discord-unlink-btn:hover {
+  color: var(--text-error, #e11);
+  background: rgba(238, 17, 17, 0.08);
+}
+.settings-discord-unlink-btn:focus-visible {
+  outline: 2px solid var(--purple-accent);
+  outline-offset: 2px;
+}
 .settings-discord-avatar {
   width: 56px;
   height: 56px;

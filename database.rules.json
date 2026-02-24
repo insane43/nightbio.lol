@@ -6,6 +6,12 @@
         ".write": "auth != null && newData.hasChildren(['uid','expiresAt']) && newData.child('uid').val() === auth.uid"
       }
     },
+    "discordIds": {
+      "$discordId": {
+        ".read": false,
+        ".write": "auth != null && data.exists() && data.val() === auth.uid && !newData.exists()"
+      }
+    },
     "usernames": {
       ".read": true,
       "$normalized": {
